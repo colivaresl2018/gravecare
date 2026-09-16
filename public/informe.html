@@ -1,0 +1,303 @@
+<!DOCTYPE html><html lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GraveCare - Informe de Visita</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#264f3a",
+                        "surface-tint": "#3e6750",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#131e17",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#3e4a41",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#a4d1b5",
+                        "tertiary-fixed-dim": "#bdcabe",
+                        "on-tertiary-container": "#9ca99e",
+                        "on-primary-container": "#84b096",
+                        "primary-fixed": "#c0edd1",
+                        "surface-variant": "#e1e3e1",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d1e9d2",
+                        "inverse-surface": "#2e3130",
+                        "background": "#f8faf8",
+                        "primary": "#002d1a",
+                        "on-surface-variant": "#414943",
+                        "outline-variant": "#c1c8c1",
+                        "secondary-container": "#d1e9d2",
+                        "secondary": "#4e6451",
+                        "inverse-on-surface": "#eff1ef",
+                        "on-background": "#191c1b",
+                        "secondary-fixed-dim": "#b5cdb6",
+                        "surface-bright": "#f8faf8",
+                        "on-secondary-fixed-variant": "#374c3b",
+                        "on-secondary-container": "#546a57",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e6e9e7",
+                        "primary-fixed-dim": "#a4d1b5",
+                        "surface-container-low": "#f2f4f2",
+                        "surface-container": "#eceeec",
+                        "outline": "#717973",
+                        "surface-container-highest": "#e1e3e1",
+                        "surface-dim": "#d8dad9",
+                        "on-secondary-fixed": "#0c2011",
+                        "on-surface": "#191c1b",
+                        "tertiary": "#1d2821",
+                        "tertiary-fixed": "#d9e6da",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#002112",
+                        "surface": "#f8faf8",
+                        "primary-container": "#1a432f",
+                        "tertiary-container": "#333e36"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-padding-mobile": "48px",
+                        "card-gap": "32px",
+                        "container-max-width": "1200px",
+                        "section-padding-desktop": "80px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col"><button onclick="window.history.back()" class="fixed top-6 right-6 z-[60] w-10 h-10 flex items-center justify-center rounded-full bg-surface/90 backdrop-blur-md border border-outline-variant/30 text-primary hover:bg-surface-container-low/50 transition-all duration-300 shadow-sm" aria-label="Cerrar">
+  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">close</span>
+</button>
+<!-- TopNavBar -->
+<nav class="bg-surface/90 dark:bg-primary/95 backdrop-blur-md text-primary dark:text-inverse-primary docked full-width top-0 sticky z-50 border-b border-outline-variant/30 dark:border-primary-container flat no shadows flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
+<div class="text-headline-md font-headline-md font-bold tracking-tight text-primary dark:text-primary-fixed">GRAVECARE</div>
+<div class="hidden md:flex space-x-6 items-center">
+
+
+
+
+
+</div>
+<a href="suscribirme.html" class="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:bg-primary-container/90 transition-colors">Suscribirme</a>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max-width mx-auto px-gutter py-section-padding-mobile md:py-section-padding-desktop flex flex-col gap-16">
+<!-- Header Section -->
+<header class="text-center md:text-left border-b border-primary pb-8">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary mb-4">Informe de Visita y Mantenimiento</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                Registro detallado de las labores de preservación realizadas con respeto y dedicación.
+            </p>
+</header>
+<!-- Service Summary Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border border-secondary flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-2 relative z-10" data-icon="calendar_month">calendar_month</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant relative z-10">Fecha de Visita</h3>
+<p class="font-headline-md text-headline-md text-primary relative z-10">15 Nov 2024</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-secondary flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-2 relative z-10" data-icon="person">person</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant relative z-10">Ser Querido</h3>
+<p class="font-headline-md text-headline-md text-primary relative z-10">María Carmen Silva</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-secondary flex flex-col gap-2 relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+<span class="material-symbols-outlined text-secondary text-3xl mb-2 relative z-10" data-icon="location_on">location_on</span>
+<h3 class="font-label-md text-label-md text-on-surface-variant relative z-10">Ubicación</h3>
+<p class="font-body-md text-body-md text-primary relative z-10">Cementerio Parque del Recuerdo<br>Sector Los Olivos, Lote 4B</p>
+</div>
+</section>
+<!-- Checklist & Notes Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-card-gap">
+<!-- Tasks Checklist -->
+<section class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_30px_60px_-15px_rgba(0,45,26,0.05)] border border-outline-variant/30 flex flex-col gap-6">
+<h2 class="font-headline-md text-headline-md text-primary border-b border-primary/20 pb-4 inline-flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span> Tareas Realizadas
+                </h2>
+<ul class="flex flex-col gap-4">
+<li class="flex items-start gap-4">
+<div class="bg-secondary-container text-on-secondary-container p-1 rounded-full mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-background">Limpieza profunda de lápida y placa conmemorativa.</span>
+</li>
+<li class="flex items-start gap-4">
+<div class="bg-secondary-container text-on-secondary-container p-1 rounded-full mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-background">Retiro cuidadoso de maleza y hojas secas del perímetro.</span>
+</li>
+<li class="flex items-start gap-4">
+<div class="bg-secondary-container text-on-secondary-container p-1 rounded-full mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-background">Ornamentación con arreglo floral fresco (Liliums y Rosas Blancas).</span>
+</li>
+<li class="flex items-start gap-4">
+<div class="bg-secondary-container text-on-secondary-container p-1 rounded-full mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-background">Riego del terreno y limpieza final del sector adyacente.</span>
+</li>
+</ul>
+</section>
+<!-- Specialist Note -->
+<section class="bg-tertiary-fixed p-8 rounded-xl flex flex-col gap-4 border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-9xl text-tertiary" data-icon="format_quote">format_quote</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-tertiary-fixed flex items-center gap-2 relative z-10">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span> Nota del Especialista
+                </h2>
+<div class="h-px w-16 bg-primary mb-2 relative z-10"></div>
+<p class="font-body-lg text-body-lg text-on-tertiary-fixed-variant leading-relaxed relative z-10 italic">
+                    "El espacio se encuentra en excelentes condiciones. La piedra de la lápida mantiene su brillo original tras la limpieza. Las nuevas flores han aportado mucha luz al entorno, creando un ambiente de mucha paz y tranquilidad."
+                </p>
+<div class="mt-auto pt-6 flex items-center gap-3 relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold">CM</div>
+<div>
+<p class="font-label-md text-label-md text-on-tertiary-fixed">Carlos Mendoza</p>
+<p class="font-body-md text-body-md text-on-tertiary-fixed-variant text-sm">Especialista en Cuidado</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Photo Report Gallery -->
+<section class="flex flex-col gap-8 mt-4">
+<header>
+<h2 class="font-headline-md text-headline-md text-primary inline-flex items-center gap-2 border-b border-primary/20 pb-2">
+<span class="material-symbols-outlined" data-icon="photo_camera">photo_camera</span> Reporte Fotográfico
+                </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Registro visual antes y después de nuestras labores de cuidado.</p>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Photo 1: Antes -->
+<figure class="group relative overflow-hidden rounded-lg shadow-[0_20px_40px_-15px_rgba(0,45,26,0.1)]">
+<img class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A detailed view of a slightly weathered gravestone in a peaceful cemetery setting before maintenance. The stone shows some dust and a few stray fallen leaves on the base. The lighting is soft morning natural light, emphasizing a respectful, quiet, and slightly melancholic atmosphere. The surrounding grass looks a bit untidy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0gFzzFDtjk7RhTQHyv2AkJWjfPgU7VsdaxGZv3qzu4sBnmYwKIG9k31gq_2QNSBNBfpx4RIxwGOIeYRI33u03P04OO8CfS-BvgWol7PTM2aCWk7EmY7wvqXgctoTULWBt58pUseLa5-J1rMyTAVlstvSgWCBpEiOZeh4IiUapKnXMo5E9YIp9HoGbwQlvHhZdzwlW9N3heHaph11opC_0WvE3khRggHb7B5NBsz1ugjOMYYwq20kU">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80"></div>
+<figcaption class="absolute bottom-0 left-0 p-4 w-full">
+<span class="inline-block bg-surface/90 text-primary font-label-md text-xs px-2 py-1 rounded uppercase tracking-wider mb-1">Antes</span>
+<p class="text-on-primary font-body-md text-sm">Estado inicial de la lápida</p>
+</figcaption>
+</figure>
+<!-- Photo 2: Despues 1 -->
+<figure class="group relative overflow-hidden rounded-lg shadow-[0_20px_40px_-15px_rgba(0,45,26,0.1)]">
+<img class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A highly detailed close-up of a freshly cleaned gravestone in a serene cemetery. The marble or granite surface is pristine and reflective. The lighting is bright and clear, conveying a sense of renewal, respect, and meticulous care. The overall aesthetic is modern, clean, and profoundly peaceful." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkYf-VCcMgnPJTQP4h-NfQtZECjg4UaChbNHJZRYt4dr8f3jGlGHM3sf86zYgtwev7Ykbcae2eb3zokoUopc6b9P3rn_7KtbE0e-zTT1G-m2v_hIRGTu0lz3lwdyLiMphEhtRywRNWuf9D7ogoNEqVRxeShvNGR3hpHW2N_j91vRzAGFHSCo4doVQtl26LF4ujrhrdRREKasBet4QWvWULjSKHRKhEd34LhYS6HNOfUVYQzy6YrNjp">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80"></div>
+<figcaption class="absolute bottom-0 left-0 p-4 w-full">
+<span class="inline-block bg-primary text-on-primary font-label-md text-xs px-2 py-1 rounded uppercase tracking-wider mb-1">Después</span>
+<p class="text-on-primary font-body-md text-sm">Lápida limpia y restaurada</p>
+</figcaption>
+</figure>
+<!-- Photo 3: Flores -->
+<figure class="group relative overflow-hidden rounded-lg shadow-[0_20px_40px_-15px_rgba(0,45,26,0.1)]">
+<img class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A beautiful, vibrant arrangement of fresh white lilies and roses placed neatly in front of a grave marker. The flowers are in sharp focus against a softly blurred cemetery background. Bright, natural sunlight illuminates the petals, symbolizing life, respect, and ongoing remembrance in a tranquil setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtv0cqME4xnvY-caE_pz602Vc5TmFmHwgG-Is9KlojumBzLh_2VqNMcuMpTnCjdVnHopXikf3K2eCMaE-a1-dNcAbkKO5BEPx6wE7OTJa2DCMmabZkajlie2yp1r5PJz9P-r_Hn-LNsaHNuNMj0ZGzZaeRWCjXcZxK1-GK57HVCORUW4L68_UrVDhNVBgy_J6hESRAe1up-f14TDJUOdUt4xPs0Pbe2MM8nXaFM1VXyoXmoltqwB1p">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80"></div>
+<figcaption class="absolute bottom-0 left-0 p-4 w-full">
+<span class="inline-block bg-primary text-on-primary font-label-md text-xs px-2 py-1 rounded uppercase tracking-wider mb-1">Detalle</span>
+<p class="text-on-primary font-body-md text-sm">Renovación floral</p>
+</figcaption>
+</figure>
+<!-- Photo 4: General -->
+<figure class="group relative overflow-hidden rounded-lg shadow-[0_20px_40px_-15px_rgba(0,45,26,0.1)]">
+<img class="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A wide, peaceful shot showing a meticulously maintained grave site in a beautifully landscaped cemetery. The grass is neatly trimmed, the stone is clean, and the fresh flowers are perfectly placed. The scene is bathed in warm, golden hour sunlight, creating a highly comforting, orderly, and respectful aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7jrcGd2775wm5bPskplSs3HWqo5l5_u2IDCNOfctZprwaEA5iKPAbC0yJk8PjTZ1hjAr_a3VXpZuBoL1AFDcRPpGm6PVCYK_KdTg8FqPL3wMu6IgtZS_oiFVZNBS5w7P3HpcrG-Ge9F0rgb_RTS4HvFW37rDQaKa_5sPDrL6PXFZ2K3Ot4Emg5WUE7sKhxRXjFCLsIjfP47qxzcYprvQmgfVIrSoIQ6JeGxUfRY0EWLBt4-bOTmJF">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80"></div>
+<figcaption class="absolute bottom-0 left-0 p-4 w-full">
+<span class="inline-block bg-primary text-on-primary font-label-md text-xs px-2 py-1 rounded uppercase tracking-wider mb-1">General</span>
+<p class="text-on-primary font-body-md text-sm">Vista general del entorno cuidado</p>
+</figcaption>
+</figure>
+</div>
+</section>
+<!-- Primary Action -->
+<section class="flex justify-center mt-8 pb-8">
+<button class="bg-primary hover:bg-primary-container text-on-primary px-8 py-4 rounded-full font-label-md text-label-md flex items-center gap-3 transition-all shadow-[0_10px_20px_-10px_rgba(0,45,26,0.5)] hover:shadow-[0_15px_25px_-10px_rgba(0,45,26,0.6)] transform hover:-translate-y-1">
+<span class="material-symbols-outlined" data-icon="picture_as_pdf">picture_as_pdf</span>
+                Descargar Informe en PDF
+            </button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-primary dark:bg-tertiary-container text-on-primary dark:text-tertiary-fixed full-width no borders, tonal transition flat no shadows grid grid-cols-1 md:grid-cols-4 gap-card-gap px-gutter py-section-padding-desktop max-w-container-max-width mx-auto w-full mt-auto">
+<div class="md:col-span-1 flex flex-col gap-4">
+<div class="text-headline-md font-headline-md font-bold text-surface-container-lowest">GRAVECARE</div>
+<p class="font-body-md text-body-md text-on-primary/80">Preservación &amp; Memoria.</p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-headline-sm text-headline-md mb-2">Contacto y Preguntas Frecuentes</h4>
+<a class="font-label-md text-label-md text-on-tertiary-container/80 hover:text-surface-bright hover:text-primary-fixed-dim transition-colors opacity-90 hover:opacity-100" href="#">Región Metropolitana</a>
+<a class="font-label-md text-label-md text-on-tertiary-container/80 hover:text-surface-bright hover:text-primary-fixed-dim transition-colors opacity-90 hover:opacity-100" href="https://wa.me/56998280501?text=Hola%20GraveCare,%20quisiera%20consultar%20por%20los%20servicios%20de%20cuidado%20y%20preservaci%C3%B3n." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+<a class="font-label-md text-label-md text-on-tertiary-container/80 hover:text-surface-bright hover:text-primary-fixed-dim transition-colors opacity-90 hover:opacity-100" href="contacto.html">contacto@gravecare.cl</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-headline-sm text-headline-md mb-2">Legal</h4>
+<a class="font-label-md text-label-md text-on-tertiary-container/80 hover:text-surface-bright hover:text-primary-fixed-dim transition-colors opacity-90 hover:opacity-100" href="#">Términos y Condiciones</a>
+<a class="font-label-md text-label-md text-on-tertiary-container/80 hover:text-surface-bright hover:text-primary-fixed-dim transition-colors opacity-90 hover:opacity-100" href="#">Medios de Pago</a>
+</div>
+<div class="md:col-span-4 mt-8 pt-8 border-t border-on-primary/20 text-center">
+<p class="font-body-md text-body-md text-on-primary/60">GraveCare SPA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
+</div>
+</footer>
+
+
+
+
+
+
+
+<!-- Botón Flotante de WhatsApp -->
+<a href="https://wa.me/56998280501?text=Hola%20GraveCare,%20quisiera%20consultar%20por%20los%20servicios%20de%20cuidado%20y%20preservaci%C3%B3n." 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3.5 rounded-full shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_24px_rgba(37,211,102,0.6)] hover:scale-105 transition-all duration-300 group" 
+   title="Contáctanos por WhatsApp (+56 9 xxxx xxxx)"
+   aria-label="Contactar por WhatsApp">
+  <svg class="w-7 h-7 fill-white flex-shrink-0" viewBox="0 0 24 24">
+    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.63.076-1.503-.277-.991-.399-1.928-1.455-2.457-2.148-.528-.693-.974-1.637-.974-2.607 0-.969.497-1.446.673-1.642.176-.196.386-.245.516-.245.13 0 .26.002.373.007.12.006.279-.045.437.334.162.388.552 1.346.6 1.444.048.099.08.215.016.342-.064.128-.096.208-.192.319-.096.111-.202.247-.289.332-.096.095-.197.199-.085.39.112.192.497.82 1.066 1.328.734.654 1.353.857 1.545.953.192.096.305.08.417-.048.112-.128.481-.559.61-.751.128-.192.257-.16.433-.096.176.064 1.118.527 1.311.624.192.096.321.144.369.224.048.08.048.463-.096.868zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.981-1.309A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+  </svg>
+  <span class="font-semibold text-sm text-white tracking-wide whitespace-nowrap">
+    WhatsApp +56 9 xxxx xxxx
+  </span>
+</a>
+
+</body></html>

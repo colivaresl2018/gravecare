@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>GraveCare - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed-dim": "#a4d1b5",
+            "tertiary": "#1d2821",
+            "surface-tint": "#3e6750",
+            "tertiary-container": "#333e36",
+            "primary": "#002d1a",
+            "secondary": "#4e6451",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f2f4f2",
+            "surface-container": "#eceeec",
+            "secondary-container": "#d1e9d2",
+            "on-secondary-container": "#546a57",
+            "background": "#f8faf8",
+            "on-background": "#191c1b",
+            "on-surface-variant": "#414943",
+            "outline-variant": "#c1c8c1",
+            "error": "#ba1a1a"
+          },
+          fontFamily: {
+            body: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .sidebar-item { transition: all 0.2s ease; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+
+  <!-- Sidebar Navigation -->
+  <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
+    <div class="mb-10 flex items-center justify-center">
+      <a href="dashboard.html">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.jpg">
+      </a>
+    </div>
+    <nav class="flex flex-col space-y-2 flex-grow">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-sm font-semibold">Resumen</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="sepulturas.html">
+        <span class="material-symbols-outlined">account_balance</span>
+        <span class="text-sm font-semibold">Mis Sepulturas</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-sm font-semibold">Pagos & Suscripción</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
+        <span class="material-symbols-outlined">photo_library</span>
+        <span class="text-sm font-semibold">Fotos</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="perfil.html">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-sm font-semibold">Perfil</span>
+      </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/30">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left cursor-pointer">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm font-semibold">Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
+    <header class="mb-10">
+      <h1 class="text-2xl md:text-3xl font-bold text-primary" id="greeting">Hola, Bienvenido a GraveCare</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Resumen del cuidado y estado de sus sepulturas.</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Quick Stats -->
+      <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4">
+          <div class="bg-secondary-container p-3 rounded-full text-on-secondary-container">
+            <span class="material-symbols-outlined text-3xl">event_upcoming</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Próxima Visita</p>
+            <p class="text-xl font-bold text-primary mt-0.5" id="proximaVisita">--</p>
+            <p class="text-xs text-secondary" id="proximaVisitaSub">Programada</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4">
+          <div class="bg-secondary-container p-3 rounded-full text-on-secondary-container">
+            <span class="material-symbols-outlined text-3xl">spa</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Servicios Realizados</p>
+            <p class="text-xl font-bold text-primary mt-0.5" id="serviciosCount">0</p>
+            <p class="text-xs text-secondary">Total acumulado</p>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4 relative overflow-hidden">
+          <div class="absolute right-0 top-0 w-16 h-16 bg-primary-fixed-dim/20 rounded-bl-full"></div>
+          <div class="bg-primary-container p-3 rounded-full text-on-primary-container z-10">
+            <span class="material-symbols-outlined text-3xl">verified</span>
+          </div>
+          <div class="z-10">
+            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Estado de Suscripción</p>
+            <p class="text-xl font-bold text-primary mt-0.5" id="estadoSuscripcion">Activo</p>
+            <p class="text-xs text-secondary" id="tipoPlan">Plan Base</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maintenance History -->
+      <div class="lg:col-span-8 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-bold text-primary">Historial de Mantenimiento</h2>
+          <a class="text-xs font-bold text-primary hover:underline" href="fotos.html">Ver todo</a>
+        </div>
+        <div class="space-y-4" id="contenedor-mantenimientos">
+          <div class="p-6 text-center text-sm text-on-surface-variant">Cargando registros...</div>
+        </div>
+      </div>
+
+      <!-- Gallery Preview -->
+      <div class="lg:col-span-4 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm flex flex-col">
+        <h2 class="text-lg font-bold text-primary mb-1">Últimas Fotografías</h2>
+        <p class="text-xs text-on-surface-variant mb-4">Registro en terreno</p>
+        
+        <div class="grid grid-cols-2 gap-3 mb-4 flex-grow" id="contenedor-fotos-dashboard">
+          <div class="w-full h-32 bg-surface-container-low rounded-lg flex items-center justify-center text-xs text-on-surface-variant">Sin fotos aún</div>
+          <div class="w-full h-32 bg-surface-container-low rounded-lg flex items-center justify-center text-xs text-on-surface-variant">Sin fotos aún</div>
+        </div>
+
+        <a href="fotos.html" class="w-full py-2.5 bg-surface-container-low text-primary text-xs font-bold rounded-full hover:bg-secondary-container transition-colors border border-primary/10 text-center block">
+          Ver Galería Completa
+        </a>
+      </div>
+
+      <!-- Billing Preview -->
+      <div class="lg:col-span-12 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-primary">Facturación Reciente</h2>
+          <a href="pagos.html" class="text-xs font-bold text-primary hover:underline">Ver detalle de pagos</a>
+        </div>
+        <ul class="divide-y divide-outline-variant/20" id="contenedor-facturas">
+          <li class="py-4 text-center text-sm text-on-surface-variant">Cargando pagos...</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Navigation -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] mt-1">Resumen</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span class="text-[10px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] mt-1">Pagos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
+      <span class="material-symbols-outlined">photo_library</span>
+      <span class="text-[10px] mt-1">Fotos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] mt-1">Perfil</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+      authDomain: "gravecare-2e8d2.firebaseapp.com",
+      projectId: "gravecare-2e8d2",
+      storageBucket: "gravecare-2e8d2.appspot.com",
+      messagingSenderId: "160012946248",
+      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    async function cerrarSesion() {
+      await signOut(auth);
+      sessionStorage.removeItem("gravecare_user");
+      window.location.href = "login.html";
+    }
+
+    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
+    if (btnLogoutSidebar) btnLogoutSidebar.addEventListener("click", cerrarSesion);
+
+    function formatearFechaChile(f) {
+      if (!f) return "Por coordinar";
+      const d = f?.toDate ? f.toDate() : new Date(f);
+      if (isNaN(d.getTime())) return f;
+      return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        // 1. Perfil
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        if (userDoc.exists()) {
+          const profile = userDoc.data();
+          const nombre = profile.nombres || profile.nombreCompleto || profile.displayName || user.email.split("@")[0];
+          document.getElementById("greeting").textContent = `Hola, Bienvenido(a) ${nombre}`;
+          document.getElementById("estadoSuscripcion").textContent = (profile.estadoSuscripcion || "Activo").toUpperCase();
+          document.getElementById("tipoPlan").textContent = profile.planNombre || "Plan Base";
+        }
+
+        // 2. Sepulturas / Próxima Visita
+        let fechaProxima = null;
+        let countServicios = 0;
+        let fotosList = [];
+
+        const qOrdenes = query(collection(db, "ordenes"), where("usuarioId", "==", user.uid));
+        const snapOrdenes = await getDocs(qOrdenes);
+        
+        snapOrdenes.forEach(docSnap => {
+          const o = docSnap.data();
+          if (o.proximaVisita) fechaProxima = o.proximaVisita;
+          if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
+          if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
+        });
+
+        document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
+        document.getElementById("serviciosCount").textContent = countServicios;
+
+        // 3. Mantenimientos
+        const contenedorMant = document.getElementById("contenedor-mantenimientos");
+        const snapMant = await getDocs(query(collection(db, "usuarios", user.uid, "mantenimientos"), orderBy("fecha", "desc"), limit(2)));
+        if (snapMant.empty) {
+          contenedorMant.innerHTML = `
+            <div class="text-center py-6 text-on-surface-variant">
+              <span class="material-symbols-outlined text-4xl text-outline-variant block mb-1">cleaning_services</span>
+              <p class="text-sm">Aún no registras mantenimientos ejecutados.</p>
+            </div>`;
+        } else {
+          contenedorMant.innerHTML = snapMant.docs.map(d => {
+            const m = d.data();
+            return `
+              <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                  <span class="material-symbols-outlined">cleaning_services</span>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-sm font-bold text-on-surface">${m.tipo || "Mantenimiento General"}</h3>
+                  <p class="text-xs text-on-surface-variant">${formatearFechaChile(m.fecha)}</p>
+                </div>
+              </div>`;
+          }).join("");
+        }
+
+        // 4. Fotos
+        const contenedorFotos = document.getElementById("contenedor-fotos-dashboard");
+        if (fotosList.length > 0) {
+          contenedorFotos.innerHTML = fotosList.slice(0, 2).map(url => `
+            <img class="w-full h-32 object-cover rounded-lg" src="${url}" alt="Reporte">
+          `).join("");
+        }
+
+        // 5. Facturación
+        const contenedorFact = document.getElementById("contenedor-facturas");
+        const snapPagos = await getDocs(query(collection(db, "pagos"), where("usuarioId", "==", user.uid), orderBy("fecha", "desc"), limit(2)));
+        if (snapPagos.empty) {
+          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
+        } else {
+          contenedorFact.innerHTML = snapPagos.docs.map(d => {
+            const p = d.data();
+            const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 0);
+            return `
+              <li class="flex items-center justify-between py-3">
+                <div>
+                  <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
+                  <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — ${monto}</p>
+                </div>
+                <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                </a>
+              </li>`;
+          }).join("");
+        }
+
+      } catch (err) {
+        console.error("Error al cargar dashboard:", err);
+      }
+    });
+  </script>
+</body>
+</html>

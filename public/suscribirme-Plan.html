@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraveCare - Suscripción</title>
+    <style>
+        :root {
+          --primary-color: #1a3636;
+          --primary-hover: #122525;
+          --secondary-color: #40534c;
+          --accent-gold: #c19a5b;
+          --accent-gold-hover: #a88448;
+          --bg-light: #f7f9f8;
+          --surface-color: #ffffff;
+          --text-main: #222222;
+          --text-muted: #666666;
+          --border-color: #dcdfdc;
+          --success-color: #276749;
+          --radius-sm: 6px;
+          --radius-md: 10px;
+          --radius-lg: 16px;
+          --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+          --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+          --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          font-family: var(--font-family);
+          background-color: var(--bg-light);
+          color: var(--text-main);
+          line-height: 1.6;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Header */
+        .page-header {
+          background-color: var(--surface-color);
+          border-bottom: 1px solid var(--border-color);
+          padding: 2rem;
+          text-align: center;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .page-header h1 {
+          font-size: 1.85rem;
+          color: var(--primary-color);
+          margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+          color: var(--text-muted);
+          font-size: 0.95rem;
+        }
+
+        .service-badge {
+          display: inline-block;
+          background-color: var(--primary-color);
+          color: white;
+          padding: 0.7rem 1.5rem;
+          border-radius: 50px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+          letter-spacing: 0.5px;
+        }
+
+        /* Main */
+        .main-container {
+          flex: 1;
+          padding: 2rem;
+        }
+
+        .page-section {
+          max-width: 1100px;
+          margin: 0 auto;
+        }
+
+        .section-header {
+          text-align: center;
+          margin-bottom: 2.5rem;
+        }
+
+        .section-header h2 {
+          font-size: 1.5rem;
+          color: var(--primary-color);
+          margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+          color: var(--text-muted);
+          font-size: 0.95rem;
+        }
+
+        /* Grid de Opciones */
+        .options-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+          margin-bottom: 3rem;
+        }
+
+        /* Card de Nivel */
+        .level-card {
+          background-color: var(--surface-color);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: var(--shadow-md);
+          border: 2px solid var(--border-color);
+          transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .level-card:hover {
+          transform: translateY(-5px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .level-card.selected {
+          border-color: var(--accent-gold);
+          box-shadow: 0 0 0 3px rgba(193, 154, 91, 0.2);
+        }
+
+        /* Imagen del Ramo */
+        .level-image {
+          width: 100%;
+          height: 340px;
+          background-color: #f1f3f2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .level-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          padding: 12px;
+          transition: transform 0.3s ease;
+        }
+
+        /* Contenido de la Card */
+        .level-content {
+          padding: 0.8rem 1rem;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .level-name {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--primary-color);
+          margin-bottom: 0.2rem;
+        }
+
+        .level-description {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          margin-bottom: 0.6rem;
+          line-height: 1.3;
+          flex-grow: 1;
+        }
+
+        .level-price {
+          font-size: 1.3rem;
+          font-weight: 700;
+          color: var(--accent-gold);
+          text-align: center;
+          margin-bottom: 0.15rem;
+        }
+
+        .level-extra {
+          font-size: 0.7rem;
+          color: var(--text-muted);
+          text-align: center;
+        }
+
+        /* Formulario */
+        .form-section {
+          background-color: var(--surface-color);
+          border-radius: var(--radius-lg);
+          padding: 2.5rem;
+          box-shadow: var(--shadow-md);
+          border: 1px solid var(--border-color);
+          max-width: 100%;
+          width: 100%;
+          margin: 0 auto;
+        }
+
+        .form-section h3 {
+          font-size: 1.25rem;
+          color: var(--primary-color);
+          margin-bottom: 0.3rem;
+          text-align: center;
+        }
+
+        .form-section .subtitle {
+          text-align: center;
+          color: var(--text-muted);
+          font-size: 0.9rem;
+          margin-bottom: 2rem;
+        }
+
+        /* Bloque Centrado de Cementerio */
+        .form-group-center {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          margin-bottom: 2rem;
+          width: 100%;
+        }
+
+        .form-label {
+          display: block;
+          font-weight: 600;
+          color: var(--primary-color);
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+
+        .form-select {
+          width: 100%;
+          max-width: 480px;
+          padding: 0.8rem 1rem;
+          font-size: 0.95rem;
+          font-family: inherit;
+          color: var(--text-main);
+          background-color: var(--surface-color);
+          border: 2px solid var(--border-color);
+          border-radius: var(--radius-sm);
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          cursor: pointer;
+        }
+
+        .form-select:focus {
+          border-color: var(--accent-gold);
+          box-shadow: 0 0 0 3px rgba(193, 154, 91, 0.2);
+        }
+
+        /* Resumen */
+        .summary-box {
+          background-color: var(--bg-light);
+          border-radius: var(--radius-md);
+          padding: 1.5rem;
+          margin-top: 1rem;
+          border: 1px solid var(--border-color);
+        }
+
+        .summary-box h3 {
+          font-size: 1rem;
+          color: var(--primary-color);
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.6rem 0;
+          border-bottom: 1px solid var(--border-color);
+          font-size: 0.95rem;
+        }
+
+        .summary-row:last-child {
+          border-bottom: none;
+          font-weight: 700;
+          color: var(--primary-color);
+          margin-top: 0.5rem;
+          padding-top: 1rem;
+          font-size: 1.15rem;
+        }
+
+        .summary-label {
+          color: var(--text-muted);
+        }
+
+        .summary-value {
+          color: var(--primary-color);
+          font-weight: 600;
+        }
+
+        /* Botón */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 0.95rem 1.5rem;
+          font-size: 1rem;
+          font-weight: 600;
+          border: none;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          transition: background-color 0.2s, transform 0.1s;
+          font-family: inherit;
+          margin-top: 2rem;
+        }
+
+        .btn:active {
+          transform: translateY(1px);
+        }
+
+        .btn-gold {
+          background-color: var(--primary-color);
+          color: #fff;
+        }
+
+        .btn-gold:hover {
+          background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        /* Footer */
+        .footer {
+          background-color: var(--primary-color);
+          color: #e2e8f0;
+          padding: 2rem;
+          text-align: center;
+          margin-top: auto;
+        }
+
+        .footer h4 {
+          font-size: 0.95rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .footer p {
+          font-size: 0.85rem;
+          margin-bottom: 0.3rem;
+        }
+
+        .footer a {
+          color: var(--accent-gold);
+          text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+          .options-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .options-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .level-card {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            height: auto;
+          }
+
+          .level-image {
+            height: 140px;
+          }
+
+          .level-content {
+            padding: 0.7rem;
+          }
+
+          .level-name {
+            font-size: 0.95rem;
+          }
+
+          .level-price {
+            font-size: 1.2rem;
+          }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <span class="service-badge" id="serviceBadge">Plan Mensual</span>
+        <h1 id="pageTitle">Suscripción Plan Mensual</h1>
+        <p id="pageSubtitle">Selecciona el nivel de servicio que deseas contratar.</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="page-section">
+            <!-- Opciones de Nivel -->
+            <div class="section-header">
+                <h2>Elige tu Nivel de Servicio</h2>
+                <p>Selecciona la opción que mejor se adapte a tus necesidades</p>
+            </div>
+
+            <div class="options-grid">
+                <!-- Standard -->
+                <div class="level-card" onclick="selectLevel('Standard', this)">
+                    <div class="level-image">
+                        <img src="assets/Standar.jpg" alt="Nivel Standard" loading="lazy">
+                    </div>
+                    <div class="level-content">
+                        <div class="level-name">Standard</div>
+                        <div class="level-description">
+                            <p>Ramo compuesto por:</p>
+                            <ul style="padding-left: 30px;">
+                                <li>5 varas de Maulen amarillos (Crisantemo)</li>
+                                <li>3 varas de Gypsophila</li>
+                            </ul>
+                        </div>
+                        <div class="level-price" id="priceStandard">$38.990</div>
+                        <div class="level-extra">*El tipo de flores podría variar según disponibilidad</div>
+                    </div>
+                </div>
+
+                <!-- Premium -->
+                <div class="level-card" onclick="selectLevel('Premium', this)">
+                    <div class="level-image">
+                        <img src="assets/Premium.jpg" alt="Nivel Premium" loading="lazy">
+                    </div>
+                    <div class="level-content">
+                        <div class="level-name">Premium</div>
+                        <div class="level-description">
+                            <p>Ramo compuesto por:</p>
+                            <ul style="padding-left: 30px;">
+                                <li>5 varas de Maulen amarillos (Crisantemo)</li>
+                                <li>3 varas de Solidago</li>
+                                <li>3 varas de Gypsophila</li>
+                            </ul>
+                        </div>
+                        <div class="level-price" id="pricePremium">$44.990</div>
+                        <div class="level-extra">*El tipo de flores podría variar según disponibilidad</div>
+                    </div>
+                </div>
+
+                <!-- Deluxe -->
+                <div class="level-card" onclick="selectLevel('Deluxe', this)">
+                    <div class="level-image">
+                        <img src="assets/Deluxe.jpg" alt="Nivel Deluxe" loading="lazy">
+                    </div>
+                    <div class="level-content">
+                        <div class="level-name">Deluxe</div>
+                        <div class="level-description">
+                            <p>Ramo compuesto por:</p>
+                            <ul style="padding-left: 30px;">
+                                <li>2 varas de Lirio blanco</li>
+                                <li>3 varas de rosas rojas</li>
+                                <li>4 varas de Maulen blancos (Crisantemo)</li>
+                                <li>3 varas de Gypsophila</li>
+                                <li>Follaje verde ornamental (Estilo Ruscus o similar)</li>
+                            </ul>
+                        </div>
+                        <div class="level-price" id="priceDeluxe">$54.990</div>
+                        <div class="level-extra">*El tipo de flores podría variar según disponibilidad</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Confirmación -->
+            <form id="suscribirme-form" class="form-section">
+                <h3>Paso 1: Confirmación</h3>
+                <p class="subtitle">Selecciona el cementerio, revisa tu pedido y procede al pago</p>
+
+                <!-- Menú Desplegable Centrado -->
+                <div class="form-group-center">
+                    <label class="form-label" for="cementerio">Ubicación del Cementerio *</label>
+                    <select id="cementerio" name="cementerio" class="form-select" required>
+                        <option disabled selected value="">Selecciona cementerio</option>
+                        <option>Parque del Recuerdo Américo Vespucio</option>
+                        <option>Cementerio General de Santiago</option>
+                        <option>Cementerio Católico de Recoleta</option>
+                        <option>Cementerio Parque del Santiago</option>
+                        <option>Parque Canaán</option>
+                        <option>Cementerio Metropolitano</option>
+                        <option>Parque del Recuerdo Cordillera</option>
+                        <option>Parque del Prado</option>
+                        <option>Parque Sendero San Bernardo</option>
+                        <option>Parque Sendero Maipú</option>
+                        <option>Parque El Manantial</option>
+                        <option>Cementerio Católico de Maipú</option>
+                        <option>Parque del Recuerdo Padre Hurtado</option>
+                        <option>Parque del Recuerdo Rancagua</option>
+                        <option>Parque Sendero Rancagua</option>
+                        <option>Cementerio Municipal N° 1 de Rancagua</option>
+                        <option>Cementerio Municipal N° 2 (Baquedano)</option>
+                        <option>Parque Jardín Rancagua</option>
+                        <option>Parque Jardín Las Flores</option>
+                    </select>
+                </div>
+
+                <!-- Resumen -->
+                <div class="summary-box">
+                    <h3>Resumen de tu Pedido</h3>
+                    
+                    <div class="summary-row">
+                        <span class="summary-label">Plan</span>
+                        <span class="summary-value" id="summaryPlan">—</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span class="summary-label">Frecuencia</span>
+                        <span class="summary-value" id="summaryFrecuencia">—</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span class="summary-label">Nivel</span>
+                        <span class="summary-value" id="summaryNivel">—</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="summary-label">TOTAL A PAGAR</span>
+                        <span class="summary-value" id="summaryTotal">—</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-gold" id="submitBtn" disabled>
+                    Proceder al Pago →
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <h4>GraveCare - Preservación & Memoria</h4>
+        <p>contacto@gravecare.cl | +56 9 XXXX XXXX</p>
+        <p style="margin-top: 1rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
+    </footer>
+
+    <script>
+        // ===== TARIFARIO EXACTO POR PLAN Y NIVEL DE RAMO =====
+        const planesData = {
+            'mensual': {
+                nombre: 'Plan Mensual',
+                frecuencia: '1 visita al mes',
+                precios: {
+                    'Standard': 34990,
+                    'Premium': 44990,
+                    'Deluxe': 54990
+                }
+            },
+            'bimestral': {
+                nombre: 'Plan Bimestral',
+                frecuencia: '1 visita cada 2 meses',
+                precios: {
+                    'Standard': 44990,
+                    'Premium': 51990,
+                    'Deluxe': 62990
+                }
+            },
+            'trimestral': {
+                nombre: 'Plan Trimestral',
+                frecuencia: '1 visita cada 3 meses',
+                precios: {
+                    'Standard': 46990,
+                    'Premium': 53990,
+                    'Deluxe': 65990
+                }
+            },
+            'spot': {
+                nombre: 'Servicio Spot',
+                frecuencia: 'Visita Única',
+                precios: {
+                    'Standard': 59990,
+                    'Premium': 67990,
+                    'Deluxe': 82990
+                }
+            }
+        };
+
+        let planSeleccionado = 'mensual';
+        let nivelSeleccionado = null;
+
+        function inicializar() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const planParam = urlParams.get('plan');
+
+            if (planParam && planesData[planParam.toLowerCase()]) {
+                planSeleccionado = planParam.toLowerCase();
+            }
+
+            actualizarHeader();
+            actualizarPreciosCards();
+            actualizarResumenInicial();
+
+            console.log(`✓ Plan activo: ${planSeleccionado}`);
+        }
+
+        function actualizarHeader() {
+            const planInfo = planesData[planSeleccionado];
+            document.getElementById('serviceBadge').textContent = planInfo.nombre;
+            document.getElementById('pageTitle').textContent = 'Suscripción ' + planInfo.nombre;
+            document.getElementById('pageSubtitle').textContent = planInfo.frecuencia;
+        }
+
+        function actualizarPreciosCards() {
+            const planInfo = planesData[planSeleccionado];
+            document.getElementById('priceStandard').textContent = '$' + planInfo.precios['Standard'].toLocaleString('es-CL');
+            document.getElementById('pricePremium').textContent = '$' + planInfo.precios['Premium'].toLocaleString('es-CL');
+            document.getElementById('priceDeluxe').textContent = '$' + planInfo.precios['Deluxe'].toLocaleString('es-CL');
+        }
+
+        function actualizarResumenInicial() {
+            const planInfo = planesData[planSeleccionado];
+            document.getElementById('summaryPlan').textContent = planInfo.nombre;
+            document.getElementById('summaryFrecuencia').textContent = planInfo.frecuencia;
+            document.getElementById('summaryNivel').textContent = 'Selecciona un ramo';
+            document.getElementById('summaryTotal').textContent = '—';
+        }
+
+        function selectLevel(nivel, element) {
+            nivelSeleccionado = nivel;
+            
+            document.querySelectorAll('.level-card').forEach(card => card.classList.remove('selected'));
+            if (element) {
+                element.classList.add('selected');
+            }
+
+            const planInfo = planesData[planSeleccionado];
+            const total = planInfo.precios[nivel];
+
+            document.getElementById('summaryNivel').textContent = nivel;
+            document.getElementById('summaryTotal').textContent = '$' + total.toLocaleString('es-CL');
+            
+            document.getElementById('submitBtn').disabled = false;
+
+            console.log(`✓ Selección -> Plan: ${planSeleccionado}, Nivel: ${nivel}, Total: $${total}`);
+        }
+
+        document.getElementById('suscribirme-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const cementerioSelect = document.getElementById('cementerio');
+            if (!cementerioSelect.value) {
+                alert('Por favor, selecciona un cementerio');
+                cementerioSelect.focus();
+                return;
+            }
+
+            if (!nivelSeleccionado) {
+                alert('Por favor, selecciona un nivel de servicio');
+                return;
+            }
+
+            const planInfo = planesData[planSeleccionado];
+            const precioTotal = planInfo.precios[nivelSeleccionado];
+
+            let nextPage = planSeleccionado === 'spot' ? 'contratacion-Spot.html' : 'contratacion-plan.html';
+
+            const datos = {
+                numeroOrden: 'ORD-' + Date.now(),
+                tipoSuscripcion: planSeleccionado === 'spot' ? 'SPOT' : 'PLAN',
+                plan: planSeleccionado,
+                planNombre: planInfo.nombre,
+                frecuencia: planInfo.frecuencia,
+                nivel: nivelSeleccionado,
+                cementerio: cementerioSelect.value,
+                precio: '$' + precioTotal.toLocaleString('es-CL'),
+                precioNumerico: precioTotal,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('gravecare_last_order', JSON.stringify(datos));
+            console.log('✓ Orden guardada en localStorage:', datos);
+
+            window.location.href = nextPage;
+        });
+
+        window.addEventListener('DOMContentLoaded', inicializar);
+    </script>
+</body>
+</html>

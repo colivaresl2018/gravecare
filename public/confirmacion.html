@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Confirmación | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#1a3636",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            "secondary": "#40534c",
+            "secondary-fixed": "#d1e9d2",
+            "secondary-container": "#d1e9d2",
+            "on-secondary-container": "#546a57",
+            "surface": "#f7f9f8",
+            "surface-container": "#eceeec",
+            "surface-container-low": "#f2f4f2",
+            "surface-container-high": "#e6e9e7",
+            "surface-container-lowest": "#ffffff",
+            "background": "#f8faf8",
+            "on-surface": "#222222",
+            "on-surface-variant": "#414943",
+            "outline": "#dcdfdc",
+            "outline-variant": "#c1c8c1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "24px",
+            "card-gap": "32px",
+            "container-max-width": "1200px",
+            "section-padding-desktop": "80px",
+            "section-padding-mobile": "48px"
+          },
+          "fontFamily": {
+            "body": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body">
+
+  <!-- TopNavBar -->
+  <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30">
+    <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
+      <a href="index.html" class="flex items-center gap-2">
+        <img alt="GraveCare Logo" src="Logo.jpg" style="height: 80px; width: auto; object-fit: contain;"/>
+      </a>
+      <a href="index.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">
+        Volver al Inicio
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-grow flex flex-col items-center justify-center py-12 md:py-16 px-gutter">
+    
+    <div class="max-w-3xl w-full flex flex-col items-center text-center mb-10">
+      <div class="w-20 h-20 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mb-4 shadow-sm">
+        <span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">
+          check_circle
+        </span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">¡Solicitud Registrada con Éxito!</h1>
+      <p class="text-on-surface-variant text-base max-w-xl">
+        Hemos registrado tu contratación correctamente. Para acceder a tu panel y hacer seguimiento a tus fotos y reportes, crea tu cuenta o ingresa a tu perfil.
+      </p>
+      <div id="conf-order-badge" class="mt-4 inline-block bg-secondary-container px-4 py-1.5 rounded-full text-xs font-bold text-primary tracking-wider">
+        Nº DE ORDEN: CARGANDO...
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap w-full max-w-container-max-width mb-10">
+      
+      <!-- Summary Card -->
+      <div class="bg-surface-container-lowest border border-secondary/30 rounded-2xl p-8 flex flex-col gap-6 shadow-sm">
+        <div class="border-b border-primary/20 pb-4 mb-2">
+          <h2 class="text-xl font-bold text-primary">Resumen del Servicio</h2>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary">spa</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface font-bold uppercase tracking-wider">Servicio Contratado</p>
+            <p id="conf-plan-name" class="text-base font-bold text-on-surface">Cargando servicio...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary">person</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface font-bold uppercase tracking-wider">Ser Querido / Difunto</p>
+            <p id="conf-deceased-name" class="text-base font-bold text-on-surface">Cargando ser querido...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary">location_on</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface font-bold uppercase tracking-wider">Cementerio / Parque</p>
+            <p id="conf-cemetery-name" class="text-base font-bold text-on-surface">Cargando cementerio...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary">place</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface font-bold uppercase tracking-wider">Ubicación de la Sepultura</p>
+            <p id="conf-sepultura-location" class="text-base font-bold text-on-surface">Cargando ubicación...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary">payments</span>
+          </div>
+          <div>
+            <p class="text-xs text-on-surface font-bold uppercase tracking-wider">Monto Total a Pagar</p>
+            <p id="conf-price" class="text-lg font-bold text-primary">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div class="bg-surface-container-lowest border border-secondary/30 rounded-2xl p-8 flex flex-col gap-6 shadow-sm">
+        <div class="border-b border-primary/20 pb-4 mb-2">
+          <h2 class="text-xl font-bold text-primary">¿Qué sigue ahora?</h2>
+        </div>
+
+        <div class="flex flex-col gap-6 relative">
+          <div class="absolute left-5 top-8 bottom-8 w-px bg-outline-variant/50"></div>
+
+          <div class="flex items-start gap-4 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold">1</div>
+            <div>
+              <h3 class="text-sm font-bold text-on-surface mb-1">Completa tu registro para crear tu cuenta de Usuario</h3>
+              <p class="text-xs text-on-surface-variant">Con tus datos podrás revisar reportes fotográficos de cada visita.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline flex items-center justify-center shrink-0 text-on-surface font-bold">2</div>
+            <div>
+              <h3 class="text-sm font-bold text-on-surface mb-1">Coordinación de la primera visita</h3>
+              <p class="text-xs text-on-surface-variant">Nos contactaremos contigo para validar los datos en terreno.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 relative z-10">
+            <div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline flex items-center justify-center shrink-0 text-on-surface font-bold">3</div>
+            <div>
+              <h3 class="text-sm font-bold text-on-surface mb-1">Accede a tu panel en Mis Sepulturas</h3>
+              <p class="text-xs text-on-surface-variant">Monitorea el estado y fotos de tu ser querido en tiempo real.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 items-center mt-2">
+      <a id="btn-ir-registro" href="registro.html" class="bg-primary text-white hover:bg-primary-container transition-colors py-3.5 px-8 rounded-full text-sm font-bold w-full sm:w-auto text-center shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+        <span>Completar Registro</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+
+      <a href="https://wa.me/56998280501?text=Hola%20GraveCare,%20acabo%20de%20realizar%20una%20solicitud%20de%20servicio%20y%20quisiera%20confirmar%20detalles." target="_blank" rel="noopener noreferrer" class="bg-transparent border border-secondary text-secondary hover:bg-surface-container-low transition-colors py-3.5 px-8 rounded-full flex items-center justify-center gap-2 text-sm font-semibold w-full sm:w-auto text-center">
+        <span class="material-symbols-outlined text-sm">chat</span>
+        Contactar por WhatsApp
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-primary text-on-primary py-6 text-center text-xs mt-auto">
+    <p>© 2026 GraveCare Chile SpA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Script Unificado de Confirmación -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('=== CARGANDO CONFIRMACIÓN GRAVECARE ===');
+      
+      // Buscar la orden en cualquier clave guardada
+      const ordenStr = localStorage.getItem('gravecare_datos_completos') ||
+                       sessionStorage.getItem('gravecare_registro_datos') ||
+                       localStorage.getItem('gravecare_last_order') ||
+                       sessionStorage.getItem('gravecare_order_for_registro');
+
+      if (!ordenStr) {
+        console.warn('⚠️ No se encontraron datos de la orden en el navegador.');
+        document.getElementById('conf-plan-name').textContent = 'Plan Estándar';
+        document.getElementById('conf-deceased-name').textContent = 'Ser Querido';
+        document.getElementById('conf-cemetery-name').textContent = 'Cementerio por confirmar';
+        document.getElementById('conf-sepultura-location').textContent = 'Por coordinar';
+        document.getElementById('conf-price').textContent = '$34.990 (IVA incluido)';
+        return;
+      }
+
+      try {
+        const orderData = JSON.parse(ordenStr);
+        console.log('✅ Datos de la orden recuperados:', orderData);
+
+        // 1. Número de Orden
+        const numOrden = orderData.numeroOrden || ('GC-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+        const orderBadge = document.getElementById('conf-order-badge');
+        if (orderBadge) {
+          orderBadge.textContent = `Nº DE ORDEN: ${numOrden}`;
+        }
+
+        // 2. Nombre del Plan y Nivel
+        let planTexto = 'Plan Mensual (Standard)';
+        if (orderData.servicio?.planNombre) {
+          planTexto = `${orderData.servicio.planNombre} (${orderData.servicio.nivel || 'Standard'})`;
+        } else if (orderData.planNombre) {
+          planTexto = `${orderData.planNombre} (${orderData.nivel || 'Standard'})`;
+        } else if (orderData.plan) {
+          planTexto = `Plan ${orderData.plan} (${orderData.nivel || 'Standard'})`;
+        }
+        document.getElementById('conf-plan-name').textContent = planTexto;
+
+        // 3. Ser Querido / Difunto
+        let difuntoPartes = [];
+        if (orderData.difunto) {
+          if (orderData.difunto.nombres) difuntoPartes.push(orderData.difunto.nombres);
+          if (orderData.difunto.apellidoPaterno) difuntoPartes.push(orderData.difunto.apellidoPaterno);
+          if (orderData.difunto.apellidoMaterno) difuntoPartes.push(orderData.difunto.apellidoMaterno);
+        } else if (orderData.nombreFallecido) {
+          difuntoPartes.push(orderData.nombreFallecido);
+        }
+        const nombreDifunto = difuntoPartes.length > 0 ? difuntoPartes.join(' ') : 'Ser Querido';
+        document.getElementById('conf-deceased-name').textContent = nombreDifunto;
+
+        // 4. Cementerio
+        const cementerio = orderData.ubicacionSepultura?.cementerio || orderData.cementerio || 'Cementerio no especificado';
+        const sector = orderData.ubicacionSepultura?.sector || orderData.sector || '';
+        let txtCementerio = cementerio;
+        if (sector && sector !== 'General') {
+          txtCementerio += ` (Sector: ${sector})`;
+        }
+        document.getElementById('conf-cemetery-name').textContent = txtCementerio;
+
+        // 5. Ubicación
+        const patio = orderData.ubicacionSepultura?.patio || orderData.patio || '';
+        const numero = orderData.ubicacionSepultura?.numeroSepultura || orderData.numeroSepultura || '';
+        let partesUbicacion = [];
+        if (sector) partesUbicacion.push(`Sector: ${sector}`);
+        if (patio) partesUbicacion.push(`Patio: ${patio}`);
+        if (numero) partesUbicacion.push(`N°: ${numero}`);
+
+        document.getElementById('conf-sepultura-location').textContent = 
+          partesUbicacion.length > 0 ? partesUbicacion.join(' | ') : (orderData.ubicacion || 'Por coordinar');
+
+        // 6. Monto Total (Conversión garantizada a número)
+        let total = 0;
+        if (orderData.valores?.total) {
+          total = Number(orderData.valores.total);
+        } else if (orderData.precioNumerico) {
+          total = Number(orderData.precioNumerico);
+        } else if (orderData.precio && typeof orderData.precio === 'string') {
+          const limpio = orderData.precio.replace(/\D/g, '');
+          total = Number(limpio) || 34990;
+        } else if (orderData.precioBase) {
+          total = Number(orderData.precioBase);
+        }
+
+        if (!total || total === 0) {
+          total = 34990; // Respaldo del plan inicial
+        }
+
+        document.getElementById('conf-price').textContent = `$${total.toLocaleString('es-CL')} (IVA incluido)`;
+
+        // 7. Configurar enlace a registro con el correo
+        const emailTitular = orderData.titular?.email || orderData.email || orderData.emailCliente || '';
+        const btnRegistro = document.getElementById('btn-ir-registro');
+        if (btnRegistro && emailTitular) {
+          btnRegistro.href = `registro.html?email=${encodeURIComponent(emailTitular)}`;
+        }
+
+        // Mantener la sesión activa para la pantalla de registro
+        sessionStorage.setItem('gravecare_registro_datos', JSON.stringify(orderData));
+
+      } catch (err) {
+        console.error('❌ Error al renderizar confirmación:', err);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mi Perfil | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#002d1a",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            "secondary": "#4e6451",
+            "secondary-fixed": "#d1e9d2",
+            "secondary-container": "#d1e9d2",
+            "on-secondary-container": "#546a57",
+            "tertiary": "#1d2821",
+            "tertiary-fixed": "#d9e6da",
+            "tertiary-container": "#333e36",
+            "surface": "#f8faf8",
+            "surface-container": "#eceeec",
+            "surface-container-low": "#f2f4f2",
+            "surface-container-high": "#e6e9e7",
+            "surface-container-lowest": "#ffffff",
+            "background": "#f8faf8",
+            "on-surface": "#191c1b",
+            "on-surface-variant": "#414943",
+            "outline": "#717973",
+            "outline-variant": "#c1c8c1",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6"
+          },
+          "fontFamily": {
+            "body": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .sidebar-item { transition: all 0.2s ease; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+
+  <!-- Sidebar Navigation -->
+  <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
+    <div class="mb-10 flex items-center justify-center">
+      <a href="dashboard.html">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="Logo.jpg">
+      </a>
+    </div>
+    <nav class="flex flex-col space-y-2 flex-grow">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-sm font-semibold">Resumen</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="sepulturas.html">
+        <span class="material-symbols-outlined">account_balance</span>
+        <span class="text-sm font-semibold">Mis Sepulturas</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-sm font-semibold">Pagos & Suscripción</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
+        <span class="material-symbols-outlined">photo_library</span>
+        <span class="text-sm font-semibold">Fotos</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="perfil.html">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-sm font-semibold">Perfil</span>
+      </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/30">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm font-semibold">Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10">
+    <header class="mb-8 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-primary">Mi Perfil</h1>
+        <p class="text-on-surface-variant text-sm mt-1">Gestiona y actualiza tu información personal de contacto y titularidad.</p>
+      </div>
+      <a href="dashboard.html" class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">
+        <span class="material-symbols-outlined text-sm">arrow_back</span>
+        Volver al Dashboard
+      </a>
+    </header>
+
+    <!-- Alertas de Estado -->
+    <div id="alert-success" class="hidden mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 flex items-center gap-3">
+      <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+      <span id="alert-success-text" class="text-sm font-medium">¡Cambios guardados correctamente en tu perfil!</span>
+    </div>
+
+    <div id="alert-error" class="hidden mb-6 p-4 rounded-xl bg-red-50 border border-red-300 text-red-800 flex items-center gap-3">
+      <span class="material-symbols-outlined text-red-600">error</span>
+      <span id="alert-error-text" class="text-sm font-medium">Ocurrió un error al guardar los cambios.</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Card Resumen Usuario -->
+      <div class="lg:col-span-1">
+        <div class="bg-surface-container-lowest rounded-2xl p-6 border border-secondary/20 shadow-sm text-center">
+          <div class="w-20 h-20 mx-auto rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-2xl font-bold mb-4" id="avatar-initials">
+            GC
+          </div>
+          <h2 class="text-lg font-bold text-primary" id="card-user-name">Cargando...</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5" id="card-user-rut">RUT: -</p>
+          <div class="mt-4 inline-block px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-container text-xs font-bold uppercase tracking-wider" id="card-user-status">
+            Suscripción Activa
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Edición de Datos -->
+      <div class="lg:col-span-2">
+        <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-8 border border-secondary/20 shadow-sm">
+          <h3 class="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">manage_accounts</span>
+            Información del Titular
+          </h3>
+
+          <form id="form-perfil" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- Nombre Completo (Inmutable) -->
+              <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="input-nombre">Nombre Completo</label>
+                <input id="input-nombre" type="text" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface-variant cursor-not-allowed" readonly disabled>
+              </div>
+
+              <!-- RUT (Inmutable) -->
+              <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="input-rut">RUT / DNI / Pasaporte</label>
+                <input id="input-rut" type="text" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface-variant cursor-not-allowed" readonly disabled>
+              </div>
+
+              <!-- Teléfono Móvil -->
+              <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="input-telefono">Teléfono Móvil (+56 9)</label>
+                <input id="input-telefono" type="tel" class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required placeholder="+56 9 1234 5678">
+              </div>
+
+              <!-- Comuna -->
+              <div>
+                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="input-comuna">Comuna</label>
+                <input id="input-comuna" type="text" class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required placeholder="Ej: Las Condes, Santiago, Providencia">
+              </div>
+
+              <!-- Dirección -->
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="input-direccion">Dirección de Residencia</label>
+                <input id="input-direccion" type="text" class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" required placeholder="Ej: Av. Apoquindo 4500, Depto 301">
+              </div>
+
+            </div>
+
+            <!-- Botón Guardar Cambios -->
+            <div class="pt-4 border-t border-outline-variant/30 flex justify-end">
+              <button type="submit" id="btn-guardar" class="bg-primary hover:bg-primary-container text-white px-8 py-3 rounded-full text-sm font-semibold tracking-wide transition-all duration-200 shadow-sm flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">save</span>
+                <span>Guardar Cambios</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] mt-1">Resumen</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span class="text-[10px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] mt-1">Pagos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
+      <span class="material-symbols-outlined">photo_library</span>
+      <span class="text-[10px] mt-1">Fotos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="perfil.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] mt-1">Perfil</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script Integration -->
+  <script type="module">
+    import { auth, db } from "./js/firebaseConfig.js";
+    import { observeAuthState, getUserProfile, logoutUser } from "./js/auth.js";
+    import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Definida localmente (en vez de importarla de auth.js) para que esta
+    // página no dependa de que auth.js tenga exactamente esa función —
+    // evita romperse si en el servidor hay una versión distinta de auth.js.
+    function normalizeChileanPhone(numero) {
+      if (!numero) return "";
+      let digitos = numero.replace(/\D/g, "");
+      if (digitos.startsWith("56")) digitos = digitos.slice(2);
+      if (digitos.length === 8) digitos = "9" + digitos;
+      return "+56" + digitos;
+    }
+
+    const form = document.getElementById("form-perfil");
+    const inputNombre = document.getElementById("input-nombre");
+    const inputRut = document.getElementById("input-rut");
+    const inputTelefono = document.getElementById("input-telefono");
+    const inputDireccion = document.getElementById("input-direccion");
+    const inputComuna = document.getElementById("input-comuna");
+    const btnGuardar = document.getElementById("btn-guardar");
+    const alertSuccess = document.getElementById("alert-success");
+    const alertError = document.getElementById("alert-error");
+    const avatarInitials = document.getElementById("avatar-initials");
+    const cardUserName = document.getElementById("card-user-name");
+    const cardUserRut = document.getElementById("card-user-rut");
+    const cardUserStatus = document.getElementById("card-user-status");
+
+    let currentUid = null;
+
+    observeAuthState(async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUid = user.uid;
+
+      try {
+        const profile = await getUserProfile(user.uid);
+        if (profile) {
+          inputNombre.value = profile.nombreCompleto || "";
+          inputRut.value = profile.rutFormateado || profile.rut || "";
+          inputTelefono.value = profile.telefono || "";
+          inputDireccion.value = profile.direccion || "";
+          inputComuna.value = profile.comuna || "";
+
+          cardUserName.textContent = profile.nombreCompleto || "Titular";
+          cardUserRut.textContent = "RUT: " + (profile.rutFormateado || profile.rut || "-");
+          if (profile.estadoSuscripcion) {
+            cardUserStatus.textContent = "Suscripción " + profile.estadoSuscripcion.toUpperCase();
+          }
+
+          if (profile.nombreCompleto) {
+            const parts = profile.nombreCompleto.trim().split(" ");
+            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+            avatarInitials.textContent = initials;
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar perfil:", err);
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertSuccess.classList.add("hidden");
+      alertError.classList.add("hidden");
+
+      if (!currentUid) return;
+
+      const telefono = normalizeChileanPhone(inputTelefono.value.trim());
+      const direccion = inputDireccion.value.trim();
+      const comuna = inputComuna.value.trim();
+
+      if (!telefono || !direccion || !comuna) {
+        document.getElementById("alert-error-text").textContent = "Por favor completa todos los campos requeridos.";
+        alertError.classList.remove("hidden");
+        return;
+      }
+
+      btnGuardar.disabled = true;
+      btnGuardar.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">autorenew</span> Guardando...`;
+
+      try {
+        const userDocRef = doc(db, "usuarios", currentUid);
+        await updateDoc(userDocRef, {
+          telefono: telefono,
+          direccion: direccion,
+          comuna: comuna,
+          actualizadoEn: serverTimestamp()
+        });
+
+        alertSuccess.classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+      } catch (err) {
+        console.error("Error al actualizar perfil:", err);
+        document.getElementById("alert-error-text").textContent = "Error al actualizar: " + (err.message || "Intenta nuevamente.");
+        alertError.classList.remove("hidden");
+      } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = `<span class="material-symbols-outlined text-sm">save</span> <span>Guardar Cambios</span>`;
+      }
+    });
+
+    // Logout
+    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
+    if (btnLogoutSidebar) {
+      btnLogoutSidebar.addEventListener("click", async () => {
+        await logoutUser();
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Contacto y Preguntas Frecuentes - GraveCare Chile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .faq-item.active .faq-answer {
+      max-height: 250px;
+      opacity: 1;
+      padding-top: 0.75rem;
+    }
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg);
+    }
+    .faq-icon {
+      transition: transform 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-[#f7f9f8] text-[#191c1b] min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
+    <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+      <a href="index.html" class="flex items-center gap-2">
+        <img alt="GraveCare Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTE8Z1Z2khdSHbMToMYBd298ZFpMG04CY90ewx5ziCZI0L66W4p2gqHoFeNj1A1wOD4qg0zwcgVF5j6jvG98FZfQbsdQZB0nFyiWmJ-c3fVVttJkFhoHSF2gJp5w3JSv3zlgXSOYjcU8fgv79oSBoPeRx_AUq7FSSiVoWiCkvfplQka95sDIUGyVvViPabFVN2c_t5B9954ycXZaeGyGoDDToqrMQGKlfsE7viF14MqTHBylI7bMGqD8SshB14n2IVAQ"/>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="index.html">Inicio</a>
+        <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="quienes-somos.html">Quiénes Somos</a>
+        <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="servicios.html">Servicios</a>
+        <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="planes.html">Planes y Precios</a>
+        <a class="text-[#002d1a] font-bold border-b-2 border-[#002d1a] pb-1 text-sm" href="contacto.html">Contacto y Preguntas Frecuentes</a>
+      </div>
+      <div class="hidden md:flex items-center gap-3">
+        <a href="login.html" class="border border-[#002d1a] text-[#002d1a] hover:bg-gray-50 transition-all rounded-full px-5 py-2 font-semibold text-sm">
+          Ingreso Sesión
+        </a>
+        <a href="suscribirme.html" class="bg-[#002d1a] text-white hover:bg-[#1a432f] transition-all rounded-full px-6 py-2 font-semibold text-sm">
+          Suscribirme
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <main class="flex-grow w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+    <div class="mb-12 text-center">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-[#002d1a] mb-4">CONTACTO Y PREGUNTAS FRECUENTES</h1>
+      <p class="text-lg text-gray-600">Estamos aquí para resolver tus dudas y acompañarte en cada paso.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Formulario -->
+      <div class="lg:col-span-5 w-full">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
+          <h2 class="text-2xl font-bold text-[#002d1a] mb-6">Envíanos un Mensaje</h2>
+          
+          <form id="contact-form" class="space-y-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1" for="contact-nombre">Tu Nombre Completo *</label>
+              <input id="contact-nombre" required class="w-full bg-[#f2f4f2] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#002d1a] text-gray-800" placeholder="Ej. Juan Pérez" type="text"/>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1" for="contact-email">Tu Correo Electrónico *</label>
+              <input id="contact-email" required class="w-full bg-[#f2f4f2] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#002d1a] text-gray-800" placeholder="ejemplo@correo.cl" type="email"/>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1" for="contact-telefono">Teléfono / WhatsApp *</label>
+              <input id="contact-telefono" required class="w-full bg-[#f2f4f2] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#002d1a] text-gray-800" placeholder="+56 9 xxxx xxxx" type="tel"/>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1" for="contact-mensaje">Mensaje o Consulta *</label>
+              <textarea id="contact-mensaje" required class="w-full bg-[#f2f4f2] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#002d1a] text-gray-800 resize-none" placeholder="Escribe tu mensaje aquí..." rows="4"></textarea>
+            </div>
+
+            <button id="btn-enviar-contacto" class="w-full bg-[#002d1a] text-white rounded-lg py-4 font-bold hover:bg-[#1a432f] transition-all shadow-sm cursor-pointer" type="submit">
+              Enviar Consulta
+            </button>
+
+            <div id="contact-feedback" class="hidden p-4 rounded-lg bg-green-50 border border-green-200 text-green-900 font-semibold text-sm text-center">
+              ✓ ¡Gracias! Tu mensaje ha sido recibido. Nos pondremos en contacto contigo a la brevedad.
+            </div>
+
+            <div id="contact-error" class="hidden p-4 rounded-lg bg-red-50 border border-red-200 text-red-900 font-semibold text-sm text-center">
+              ❌ Hubo un inconveniente al enviar tu mensaje. Por favor contáctanos vía WhatsApp.
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Canales y FAQs -->
+      <div class="lg:col-span-7 w-full space-y-8">
+        <!-- Canales de Atención -->
+        <div class="bg-[#d1e9d2]/30 rounded-2xl p-6 sm:p-8 border border-gray-200">
+          <h2 class="text-2xl font-bold text-[#002d1a] mb-6">Canales de Atención</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <a href="https://wa.me/56998280501" target="_blank" class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 hover:border-[#002d1a] transition-all shadow-sm">
+              <div class="bg-green-100 p-2.5 rounded-full text-[#002d1a] flex-shrink-0">
+                <span class="material-symbols-outlined">forum</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-[#002d1a] mb-0.5">WhatsApp Directo</h3>
+                <p class="text-sm text-gray-600">+56 9 9828 0501</p>
+              </div>
+            </a>
+            <a href="mailto:contacto@gravecare.cl" class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 hover:border-[#002d1a] transition-all shadow-sm">
+              <div class="bg-green-100 p-2.5 rounded-full text-[#002d1a] flex-shrink-0">
+                <span class="material-symbols-outlined">mail</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-[#002d1a] mb-0.5">Correo Soporte</h3>
+                <p class="text-sm text-gray-600">contacto@gravecare.cl</p>
+              </div>
+            </a>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 shadow-sm">
+            <div class="bg-green-100 p-2.5 rounded-full text-[#002d1a] flex-shrink-0">
+              <span class="material-symbols-outlined">schedule</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-[#002d1a] mb-0.5">Horario de Atención</h3>
+              <p class="text-sm text-gray-600">Lunes a Viernes: 08:30 a 18:00 hrs</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQs -->
+        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
+          <h2 class="text-2xl font-bold text-[#002d1a] mb-6">Preguntas Frecuentes</h2>
+          <div class="space-y-4" id="faq-accordion">
+            <div class="faq-item bg-gray-50 border border-gray-200 rounded-xl p-5 cursor-pointer hover:bg-gray-100 transition-colors">
+              <div class="flex justify-between items-center select-none">
+                <span class="font-semibold text-gray-800">¿No recuerdas el número de tumba o sepultura?</span>
+                <span class="material-symbols-outlined text-[#002d1a] faq-icon">add</span>
+              </div>
+              <div class="faq-answer text-gray-600 text-sm leading-relaxed">
+                No te preocupes. Nuestro equipo te ayuda a buscarlo directamente en el catastro oficial del cementerio en la Región Metropolitana con el nombre completo y fecha aproximada de defunción de tu ser querido.
+              </div>
+            </div>
+
+            <div class="faq-item bg-gray-50 border border-gray-200 rounded-xl p-5 cursor-pointer hover:bg-gray-100 transition-colors">
+              <div class="flex justify-between items-center select-none">
+                <span class="font-semibold text-gray-800">¿Cómo recibo el reporte de la visita?</span>
+                <span class="material-symbols-outlined text-[#002d1a] faq-icon">add</span>
+              </div>
+              <div class="faq-answer text-gray-600 text-sm leading-relaxed">
+                Tras cada visita en terreno, enviamos un reporte fotográfico de alta resolución 'Antes y Después' directamente a tu WhatsApp y a tu correo electrónico, el cual también queda archivado en tu panel de cliente.
+              </div>
+            </div>
+
+            <div class="faq-item bg-gray-50 border border-gray-200 rounded-xl p-5 cursor-pointer hover:bg-gray-100 transition-colors">
+              <div class="flex justify-between items-center select-none">
+                <span class="font-semibold text-gray-800">¿Puedo cambiar o pausar mi plan?</span>
+                <span class="material-symbols-outlined text-[#002d1a] faq-icon">add</span>
+              </div>
+              <div class="faq-answer text-gray-600 text-sm leading-relaxed">
+                Sí, tienes total flexibilidad. Puedes cambiar de plan, pausar temporalmente el servicio o cancelar tu suscripción mensual en cualquier momento desde tu panel de usuario sin permanencias obligatorias.
+              </div>
+            </div>
+
+            <div class="faq-item bg-gray-50 border border-gray-200 rounded-xl p-5 cursor-pointer hover:bg-gray-100 transition-colors">
+              <div class="flex justify-between items-center select-none">
+                <span class="font-semibold text-gray-800">¿Qué formas de pago aceptan?</span>
+                <span class="material-symbols-outlined text-[#002d1a] faq-icon">add</span>
+              </div>
+              <div class="faq-answer text-gray-600 text-sm leading-relaxed">
+                Aceptamos tarjetas de débito y crédito a través de Webpay Plus (Transbank), Mercado Pago, y para familiares que residen en el extranjero aceptamos pagos en USD mediante PayPal y Stripe.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#002d1a] text-white mt-auto py-12">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="md:col-span-2">
+        <h3 class="text-2xl font-bold mb-3">GRAVECARE</h3>
+        <p class="text-sm text-gray-300">GraveCare SpA · Preservación & Memoria.<br/>Todos los derechos reservados © 2026.</p>
+      </div>
+      <div>
+        <h4 class="font-bold mb-3">Información</h4>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li><a href="servicios.html" class="hover:text-white transition">Servicios</a></li>
+          <li><a href="planes.html" class="hover:text-white transition">Planes y Precios</a></li>
+          <li><a href="quienes-somos.html" class="hover:text-white transition">Quiénes Somos</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-3">Contacto</h4>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li>WhatsApp: +56 9 9828 0501</li>
+          <li>Email: contacto@gravecare.cl</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script Firebase Modular v10 importando directamente de firebaseConfig.js -->
+  <script type="module">
+    import { db } from "./js/firebaseConfig.js";
+    import {
+      collection, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Acordeón FAQs
+    document.querySelectorAll('#faq-accordion .faq-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        document.querySelectorAll('#faq-accordion .faq-item').forEach(other => other.classList.remove('active'));
+        if (!isActive) item.classList.add('active');
+      });
+    });
+
+    // Formulario
+    const form = document.getElementById('contact-form');
+    const feedback = document.getElementById('contact-feedback');
+    const errorEl = document.getElementById('contact-error');
+    const btnSubmit = document.getElementById('btn-enviar-contacto');
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        feedback.classList.add('hidden');
+        errorEl.classList.add('hidden');
+
+        if (!db) {
+          console.error("Variable db no disponible desde firebaseConfig.js");
+          errorEl.textContent = "❌ Error interno: No se pudo conectar a la base de datos.";
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        const nombre = document.getElementById('contact-nombre').value.trim();
+        const email = document.getElementById('contact-email').value.trim();
+        const telefono = document.getElementById('contact-telefono').value.trim();
+        const mensaje = document.getElementById('contact-mensaje').value.trim();
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando...';
+
+        try {
+          // 1. Guardar en Firestore
+          await addDoc(collection(db, "contacto_mensajes"), {
+            nombre,
+            email,
+            telefono,
+            mensaje,
+            estado: "nuevo",
+            createdAt: serverTimestamp()
+          });
+
+          // 2. Notificación correo a contacto@gravecare.cl
+          await addDoc(collection(db, "mail"), {
+            to: "contacto@gravecare.cl",
+            replyTo: email,
+            message: {
+              subject: `[GraveCare Web] Consulta de ${nombre}`,
+              html: `
+                <h2>Nueva consulta desde el formulario web</h2>
+                <p><strong>Nombre:</strong> ${nombre}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Teléfono:</strong> ${telefono}</p>
+                <hr/>
+                <p><strong>Mensaje:</strong></p>
+                <p style="white-space: pre-line;">${mensaje}</p>
+              `
+            }
+          });
+
+          form.reset();
+          feedback.classList.remove('hidden');
+        } catch (err) {
+          console.error("Error al enviar formulario:", err);
+          errorEl.textContent = "❌ Error: " + (err.message || "No se pudo enviar el mensaje");
+          errorEl.classList.remove('hidden');
+        } finally {
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Enviar Consulta';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

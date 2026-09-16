@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Pagos & Suscripción | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#002d1a",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            "secondary": "#4e6451",
+            "secondary-container": "#d1e9d2",
+            "on-secondary-container": "#546a57",
+            "surface": "#f8faf8",
+            "surface-container-low": "#f2f4f2",
+            "surface-container-lowest": "#ffffff",
+            "background": "#f8faf8",
+            "on-surface": "#191c1b",
+            "on-surface-variant": "#414943",
+            "outline-variant": "#c1c8c1",
+            "error": "#ba1a1a"
+          },
+          fontFamily: {
+            body: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .sidebar-item { transition: all 0.2s ease; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+
+  <!-- Sidebar Navigation -->
+  <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
+    <div class="mb-10 flex items-center justify-center">
+      <a href="dashboard.html">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.jpg">
+      </a>
+    </div>
+    <nav class="flex flex-col space-y-2 flex-grow">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-sm font-semibold">Resumen</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="sepulturas.html">
+        <span class="material-symbols-outlined">account_balance</span>
+        <span class="text-sm font-semibold">Mis Sepulturas</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="pagos.html">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-sm font-semibold">Pagos & Suscripción</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
+        <span class="material-symbols-outlined">photo_library</span>
+        <span class="text-sm font-semibold">Fotos</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="perfil.html">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-sm font-semibold">Perfil</span>
+      </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/30">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left cursor-pointer">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm font-semibold">Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
+    <header class="mb-8 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-primary">Pagos &amp; Suscripción</h1>
+        <p class="text-on-surface-variant text-sm mt-1">Revisa el estado de tu servicio contratado y comprobantes de facturación.</p>
+      </div>
+      <a href="dashboard.html" class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">
+        <span class="material-symbols-outlined text-sm">arrow_back</span>
+        Volver al Dashboard
+      </a>
+    </header>
+
+    <div class="space-y-8">
+      
+      <!-- Card del Plan Contratado Actual -->
+      <div id="plan-card" class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
+        <div class="text-center py-8 text-on-surface-variant text-sm">Cargando estado de la suscripción...</div>
+      </div>
+
+      <!-- Tabla de Historial de Pagos -->
+      <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
+        <h3 class="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">history</span>
+          Historial de Pagos Realizados
+        </h3>
+
+        <div class="overflow-x-auto" id="contenedor-tabla-pagos">
+          <div class="text-center py-8 text-sm text-on-surface-variant">Cargando historial de transacciones...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] mt-1">Resumen</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span class="text-[10px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="pagos.html">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] mt-1">Pagos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
+      <span class="material-symbols-outlined">photo_library</span>
+      <span class="text-[10px] mt-1">Fotos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] mt-1">Perfil</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+      authDomain: "gravecare-2e8d2.firebaseapp.com",
+      projectId: "gravecare-2e8d2",
+      storageBucket: "gravecare-2e8d2.appspot.com",
+      messagingSenderId: "160012946248",
+      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    async function cerrarSesion() {
+      await signOut(auth);
+      sessionStorage.removeItem("gravecare_user");
+      window.location.href = "login.html";
+    }
+
+    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
+    if (btnLogoutSidebar) btnLogoutSidebar.addEventListener("click", cerrarSesion);
+
+    function formatearMonto(m) {
+      return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(m || 0);
+    }
+
+    function formatearFecha(f) {
+      if (!f) return "Por coordinar";
+      const d = f?.toDate ? f.toDate() : new Date(f);
+      if (isNaN(d.getTime())) return f;
+      return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        // 1. Datos de Suscripción del Usuario y Orden vinculada
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        const userData = userDoc.exists() ? userDoc.data() : {};
+
+        let ordenData = {};
+        const qOrden = query(collection(db, "ordenes"), where("usuarioId", "==", user.uid), limit(1));
+        const snapOrden = await getDocs(qOrden);
+        if (!snapOrden.empty) {
+          ordenData = snapOrden.docs[0].data();
+        }
+
+        const planNombre = userData.planNombre || ordenData.planNombre || "Servicio Spot";
+        const estadoSub = userData.estadoSuscripcion || ordenData.estado || "Activo";
+        const precio = userData.precioNumerico || ordenData.precioNumerico || 64990;
+        const cementerio = ordenData.ubicacionSepultura?.cementerio || ordenData.cementerio || "Parque del Recuerdo";
+
+        const planCard = document.getElementById("plan-card");
+        planCard.innerHTML = `
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-outline-variant/30 pb-6 mb-6">
+            <div>
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-bold text-primary">${planNombre}</h2>
+                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+                  ${estadoSub.toUpperCase()} / AL DÍA
+                </span>
+              </div>
+              <p class="text-sm text-on-surface-variant mt-1">Cuidado minucioso, preservación y reporte fotográfico garantizado.</p>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold text-primary">${formatearMonto(precio)}</span>
+              <span class="text-xs text-on-surface-variant block">CLP (IVA incl.)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-surface-container-low p-4 rounded-xl">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Próximo Cobro / Estado</span>
+              <span class="text-sm font-bold text-primary">${formatearFecha(ordenData.proximaVisita)}</span>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Medio de Pago</span>
+              <div class="flex items-center gap-2 text-sm font-bold text-primary">
+                <span class="material-symbols-outlined text-base">credit_card</span>
+                <span>Webpay Plus / Débito</span>
+              </div>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Sepultura Vinculada</span>
+              <span class="text-sm font-bold text-primary">${cementerio}</span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-4 pt-4 border-t border-outline-variant/20">
+            <a href="suscribirme-Plan.html" class="px-5 py-2.5 rounded-full border border-primary text-primary text-xs font-bold hover:bg-surface-container-low transition-colors">
+              Modificar Servicio
+            </a>
+            <a href="https://wa.me/56998280501?text=Hola%20GraveCare,%20quisiera%20consultar%20sobre%20mi%20pago." target="_blank" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary text-xs font-bold transition-colors">
+              Soporte de Facturación
+            </a>
+          </div>
+        `;
+
+        // 2. Historial de Pagos Realizados desde colección /pagos
+        const contenedorTabla = document.getElementById("contenedor-tabla-pagos");
+        const qPagos = query(collection(db, "pagos"), where("usuarioId", "==", user.uid), orderBy("fecha", "desc"));
+        const snapPagos = await getDocs(qPagos);
+
+        if (snapPagos.empty) {
+          contenedorTabla.innerHTML = `
+            <div class="text-center py-12">
+              <span class="material-symbols-outlined text-5xl text-outline-variant block mb-2">inbox</span>
+              <p class="text-on-surface-variant text-sm font-medium">No hay comprobantes de pago registrados aún.</p>
+              <p class="text-xs text-on-surface-variant/70 mt-1">Aparecerán aquí automáticamente una vez procesada tu transacción.</p>
+            </div>`;
+        } else {
+          let html = `
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant/40 text-on-surface-variant font-bold text-xs uppercase tracking-wider">
+                  <th class="py-3.5 px-4 rounded-l-lg">Fecha</th>
+                  <th class="py-3.5 px-4">Concepto / Plan</th>
+                  <th class="py-3.5 px-4">N° Transacción</th>
+                  <th class="py-3.5 px-4">Monto</th>
+                  <th class="py-3.5 px-4">Estado</th>
+                  <th class="py-3.5 px-4 rounded-r-lg text-right">Comprobante</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/20">
+          `;
+
+          snapPagos.forEach(docSnap => {
+            const p = docSnap.data();
+            html += `
+              <tr class="hover:bg-surface-container-low/50 transition-colors">
+                <td class="py-4 px-4 font-medium text-primary">${formatearFecha(p.fecha)}</td>
+                <td class="py-4 px-4">${p.concepto || planNombre}</td>
+                <td class="py-4 px-4 font-mono text-xs text-on-surface-variant">${p.transactionId || docSnap.id.substring(0, 10).toUpperCase()}</td>
+                <td class="py-4 px-4 font-bold text-primary">${formatearMonto(p.monto || precio)}</td>
+                <td class="py-4 px-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                    <span class="material-symbols-outlined text-xs">check_circle</span>
+                    Pagado
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-right">
+                  <a href="informe.html?id=${docSnap.id}" class="p-2 inline-block text-primary hover:bg-secondary-container rounded-full transition-colors" title="Descargar">
+                    <span class="material-symbols-outlined text-base">download</span>
+                  </a>
+                </td>
+              </tr>
+            `;
+          });
+
+          html += `</tbody></table>`;
+          contenedorTabla.innerHTML = html;
+        }
+
+      } catch (err) {
+        console.error("Error al cargar pagos:", err);
+      }
+    });
+  </script>
+</body>
+</html>

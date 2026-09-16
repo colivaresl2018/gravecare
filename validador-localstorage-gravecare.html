@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador de localStorage | GraveCare</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #1a365d;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-check {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-check:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-clear {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #e53e3e;
+        }
+        
+        .btn-copy {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            background: #38a169;
+        }
+        
+        .content-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .panel h2 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-found {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-missing {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .field-item {
+            padding: 10px;
+            border-left: 4px solid #cbd5e0;
+            background: #f7fafc;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .field-item.present {
+            border-left-color: #48bb78;
+            background: #f0fdf4;
+        }
+        
+        .field-item.missing {
+            border-left-color: #f56565;
+            background: #fef2f2;
+        }
+        
+        .field-label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .field-value {
+            color: #4a5568;
+            word-break: break-all;
+            margin-top: 4px;
+        }
+        
+        .field-status {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .status-ok {
+            color: #22543d;
+        }
+        
+        .status-error {
+            color: #742a2a;
+        }
+        
+        #jsonOutput {
+            background: #1a202c;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .alert-info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+        
+        .alert-warning {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        
+        .summary {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #cbd5e0;
+            font-size: 14px;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .summary-value {
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Validador de localStorage</h1>
+        <p class="subtitle">Verifica qué datos se están guardando en localStorage desde confirmacion-pago-firebase.html y contratacion-Spot.html</p>
+        
+        <div class="button-group">
+            <button class="btn-check" onclick="validarDatos()">✓ Validar Datos</button>
+            <button class="btn-copy" onclick="copiarJSON()">📋 Copiar JSON</button>
+            <button class="btn-clear" onclick="limpiarStorage()">🗑️ Limpiar localStorage</button>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="content-area">
+            <!-- Panel de validación -->
+            <div class="panel">
+                <h2>
+                    Estado de Datos
+                    <span id="statusBadge" class="status-badge status-missing">No detectado</span>
+                </h2>
+                <div id="validationSummary" style="display:none;">
+                    <div class="summary" id="summaryContent"></div>
+                    <div id="fieldChecklist"></div>
+                </div>
+                <div id="noDataMessage" style="text-align: center; color: #a0aec0; padding: 20px;">
+                    Presiona "Validar Datos" para verificar localStorage
+                </div>
+            </div>
+            
+            <!-- Panel JSON -->
+            <div class="panel">
+                <h2>📄 JSON en localStorage</h2>
+                <div id="jsonOutput">{ Datos irán aquí }</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const CAMPOS_REQUERIDOS = [
+            'numeroOrden',
+            'tipoSuscripcion',
+            'planNombre',
+            'precioNumerico',
+            'nombresTitular',
+            'apellidoPaternoTitular',
+            'email',
+            'rut',
+            'telefono',
+            'direccion',
+            'numero',           // ← NUEVO
+            'departamento',     // ← NUEVO
+            'nombreDifunto',
+            'apellidoPaternoDifunto',
+            'cementerio',
+            'sector',
+            'patio',
+            'numeroSepultura'
+        ];
+        
+        const CAMPOS_OPCIONALES = [
+            'apellidoMaternoTitular',
+            'apellidoMaternoDifunto',
+            'nivel',
+            'frecuencia',
+            'precioBase',
+            'adicional',
+            'timestamp'
+        ];
+        
+        function validarDatos() {
+            const datos = localStorage.getItem('gravecare_last_order');
+            const alertContainer = document.getElementById('alertContainer');
+            const noDataMsg = document.getElementById('noDataMessage');
+            const validationSummary = document.getElementById('validationSummary');
+            const statusBadge = document.getElementById('statusBadge');
+            const jsonOutput = document.getElementById('jsonOutput');
+            
+            alertContainer.innerHTML = '';
+            
+            if (!datos) {
+                statusBadge.textContent = 'No detectado';
+                statusBadge.className = 'status-badge status-missing';
+                noDataMsg.style.display = 'block';
+                validationSummary.style.display = 'none';
+                jsonOutput.textContent = '❌ No hay datos en localStorage';
+                
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-warning';
+                alert.innerHTML = `
+                    <strong>⚠️ No se detectó orden previa</strong><br>
+                    <code>localStorage.getItem('gravecare_last_order')</code> retornó vacío.
+                    <br><br>
+                    Esto puede significar:
+                    <ul style="margin-top: 8px; margin-left: 20px;">
+                        <li>No completaste el pago en confirmacion-pago-firebase.html</li>
+                        <li>No guardaste los datos en localStorage correctamente</li>
+                        <li>El navegador está en modo incógnito (localStorage vacío)</li>
+                    </ul>
+                `;
+                alertContainer.appendChild(alert);
+                return;
+            }
+            
+            try {
+                const order = JSON.parse(datos);
+                
+                // Validar campos
+                const camposPresentes = [];
+                const camposFaltantes = [];
+                
+                // Campos requeridos
+                CAMPOS_REQUERIDOS.forEach(campo => {
+                    if (order.hasOwnProperty(campo) && order[campo]) {
+                        camposPresentes.push(campo);
+                    } else {
+                        camposFaltantes.push(campo);
+                    }
+                });
+                
+                // Actualizar estado
+                const porcientoPresente = Math.round((camposPresentes.length / CAMPOS_REQUERIDOS.length) * 100);
+                const todoOk = camposFaltantes.length === 0;
+                
+                statusBadge.textContent = `${porcientoPresente}% Completo`;
+                statusBadge.className = todoOk ? 'status-badge status-found' : 'status-badge status-missing';
+                
+                // Mostrar resumen
+                const summaryContent = document.getElementById('summaryContent');
+                summaryContent.innerHTML = `
+                    <div class="summary-item">
+                        <span class="summary-label">Campos presentes:</span>
+                        <span class="summary-value">${camposPresentes.length} / ${CAMPOS_REQUERIDOS.length}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Campos faltantes:</span>
+                        <span class="summary-value" style="color: ${camposFaltantes.length > 0 ? '#c53030' : '#22543d'}">
+                            ${camposFaltantes.length}
+                        </span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Orden Nº:</span>
+                        <span class="summary-value">${order.numeroOrden || 'SIN ASIGNAR'}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Titular:</span>
+                        <span class="summary-value">${order.nombreTitular || 'SIN NOMBRE'}</span>
+                    </div>
+                `;
+                
+                // Mostrar checklist de campos
+                const fieldChecklist = document.getElementById('fieldChecklist');
+                let checklistHTML = '<div class="field-list">';
+                
+                // Campos requeridos
+                checklistHTML += '<h3 style="font-size: 13px; color: #2d3748; margin-top: 10px; margin-bottom: 8px; font-weight: 600;">Campos Requeridos:</h3>';
+                CAMPOS_REQUERIDOS.forEach(campo => {
+                    const presente = order.hasOwnProperty(campo) && order[campo];
+                    checklistHTML += `
+                        <div class="field-item ${presente ? 'present' : 'missing'}">
+                            <span class="field-label">${campo}</span>
+                            <div class="field-value">${order[campo] ? order[campo] : '(vacío o no definido)'}</div>
+                            <div class="field-status ${presente ? 'status-ok' : 'status-error'}">
+                                ${presente ? '✓ OK' : '✗ FALTA'}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Campos opcionales
+                checklistHTML += '<h3 style="font-size: 13px; color: #2d3748; margin-top: 15px; margin-bottom: 8px; font-weight: 600;">Campos Opcionales:</h3>';
+                CAMPOS_OPCIONALES.forEach(campo => {
+                    const presente = order.hasOwnProperty(campo) && order[campo];
+                    checklistHTML += `
+                        <div class="field-item ${presente ? 'present' : ''}">
+                            <span class="field-label">${campo}</span>
+                            <div class="field-value">${order[campo] ? order[campo] : '(no informado)'}</div>
+                            <div class="field-status ${presente ? 'status-ok' : ''}">
+                                ${presente ? '✓ Presente' : '○ Omitido'}
+                            </div>
+                        </div>
+                    `;
+                });
+                checklistHTML += '</div>';
+                
+                fieldChecklist.innerHTML = checklistHTML;
+                
+                noDataMsg.style.display = 'none';
+                validationSummary.style.display = 'block';
+                
+                // Mostrar JSON
+                jsonOutput.textContent = JSON.stringify(order, null, 2);
+                
+                // Alerta si faltan campos
+                if (camposFaltantes.length > 0) {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-warning';
+                    alert.innerHTML = `
+                        <strong>⚠️ Faltan ${camposFaltantes.length} campo(s) requerido(s):</strong><br>
+                        <code>${camposFaltantes.join(', ')}</code>
+                        <br><br>
+                        Estos campos DEBEN estar presentes para que registro.html funcione correctamente.
+                        <br><br>
+                        <strong>Solución:</strong> Verifica que confirmacion-pago-firebase.html/contratacion-Spot.html estén guardando TODOS estos campos en localStorage.
+                    `;
+                    alertContainer.appendChild(alert);
+                } else {
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-info';
+                    alert.innerHTML = `
+                        <strong>✓ Todos los campos requeridos están presentes</strong><br>
+                        Los datos están listos para ser procesados por registro.html
+                    `;
+                    alertContainer.appendChild(alert);
+                }
+                
+            } catch (error) {
+                jsonOutput.textContent = '❌ Error al parsear JSON: ' + error.message;
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-warning';
+                alert.innerHTML = `
+                    <strong>❌ Error al validar datos:</strong><br>
+                    ${error.message}
+                `;
+                alertContainer.appendChild(alert);
+            }
+        }
+        
+        function copiarJSON() {
+            const jsonOutput = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonOutput).then(() => {
+                alert('✓ JSON copiado al portapapeles');
+            }).catch(err => {
+                alert('Error al copiar: ' + err);
+            });
+        }
+        
+        function limpiarStorage() {
+            if (confirm('¿Limpiar localStorage? Esta acción no se puede deshacer.')) {
+                localStorage.removeItem('gravecare_last_order');
+                sessionStorage.removeItem('gravecare_last_order');
+                document.getElementById('alertContainer').innerHTML = '';
+                document.getElementById('noDataMessage').style.display = 'block';
+                document.getElementById('validationSummary').style.display = 'none';
+                document.getElementById('jsonOutput').textContent = '{ Datos irán aquí }';
+                document.getElementById('statusBadge').textContent = 'Limpio';
+                alert('✓ localStorage limpiado');
+            }
+        }
+        
+        // Validar al cargar
+        window.addEventListener('load', () => {
+            const datos = localStorage.getItem('gravecare_last_order');
+            if (datos) {
+                validarDatos();
+            }
+        });
+    </script>
+</body>
+</html>

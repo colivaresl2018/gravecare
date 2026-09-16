@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+
+# Sistemas operativos
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos temporales
+.tmp/
+dist/
+build/

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mis Sepulturas | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#002d1a",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            "secondary": "#4e6451",
+            "secondary-fixed": "#d1e9d2",
+            "secondary-container": "#d1e9d2",
+            "on-secondary-container": "#546a57",
+            "tertiary": "#1d2821",
+            "tertiary-fixed": "#d9e6da",
+            "tertiary-container": "#333e36",
+            "surface": "#f8faf8",
+            "surface-container": "#eceeec",
+            "surface-container-low": "#f2f4f2",
+            "surface-container-high": "#e6e9e7",
+            "surface-container-lowest": "#ffffff",
+            "background": "#f8faf8",
+            "on-surface": "#191c1b",
+            "on-surface-variant": "#414943",
+            "outline": "#717973",
+            "outline-variant": "#c1c8c1",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6"
+          },
+          "fontFamily": {
+            "body": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .sidebar-item { transition: all 0.2s ease; }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+
+  <!-- Sidebar Navigation -->
+  <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
+    <div class="mb-10 flex items-center justify-center">
+      <a href="dashboard.html">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.jpg">
+      </a>
+    </div>
+    <nav class="flex flex-col space-y-2 flex-grow">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="dashboard.html">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-sm font-semibold">Resumen</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="sepulturas.html">
+        <span class="material-symbols-outlined">account_balance</span>
+        <span class="text-sm font-semibold">Mis Sepulturas</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
+        <span class="material-symbols-outlined">receipt_long</span>
+        <span class="text-sm font-semibold">Pagos & Suscripción</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
+        <span class="material-symbols-outlined">photo_library</span>
+        <span class="text-sm font-semibold">Fotos</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="perfil.html">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-sm font-semibold">Perfil</span>
+      </a>
+    </nav>
+    <div class="mt-auto pt-6 border-t border-outline-variant/30">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm font-semibold">Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
+    <header class="mb-8 flex justify-between items-center flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-primary">Mis Sepulturas Contratadas</h1>
+        <p class="text-on-surface-variant text-sm mt-1">Ubicación y estado de los servicios de cuidado y ornamentación floral.</p>
+      </div>
+      <a href="suscribirme-Plan.html" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-container text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all shadow-sm">
+        <span class="material-symbols-outlined text-sm">add</span>
+        Agregar Nueva Sepultura
+      </a>
+    </header>
+
+    <!-- Grilla Dinámica de Sepulturas -->
+    <div id="grilla-sepulturas" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="col-span-full text-center py-16 text-on-surface-variant">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent mb-3"></div>
+        <p class="text-sm">Cargando tus sepulturas contratadas desde la base de datos...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] mt-1">Resumen</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="sepulturas.html">
+      <span class="material-symbols-outlined">account_balance</span>
+      <span class="text-[10px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span class="text-[10px] mt-1">Pagos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
+      <span class="material-symbols-outlined">photo_library</span>
+      <span class="text-[10px] mt-1">Fotos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] mt-1">Perfil</span>
+    </a>
+  </nav>
+
+  <!-- Firebase Script Integration -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+      authDomain: "gravecare-2e8d2.firebaseapp.com",
+      projectId: "gravecare-2e8d2",
+      storageBucket: "gravecare-2e8d2.appspot.com",
+      messagingSenderId: "160012946248",
+      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Función Central de Cierre de Sesión
+    async function cerrarSesion() {
+      try {
+        await signOut(auth);
+        sessionStorage.removeItem('gravecare_user');
+        window.location.href = "login.html";
+      } catch (e) {
+        console.error("Error al salir:", e);
+      }
+    }
+
+    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
+    if (btnLogoutSidebar) {
+      btnLogoutSidebar.addEventListener("click", cerrarSesion);
+    }
+
+    // Formateo de fechas legible para Chile
+    function formatearFechaChile(fechaValor) {
+      if (!fechaValor) return "Por coordinar";
+      if (typeof fechaValor === "string" && fechaValor.length > 3 && !fechaValor.includes("T")) {
+        return fechaValor;
+      }
+      const d = fechaValor?.toDate ? fechaValor.toDate() : new Date(fechaValor);
+      if (isNaN(d.getTime())) return "Por coordinar";
+      return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
+    }
+
+    // Observador de Autenticación
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      await cargarSepulturas(user);
+    });
+
+    async function cargarSepulturas(user) {
+      const container = document.getElementById("grilla-sepulturas");
+      if (!container) return;
+
+      try {
+        let sepulturasList = [];
+        const ordenesRef = collection(db, "ordenes");
+
+        // 1. Buscar en 'ordenes' por UID del usuario autenticado
+        const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
+        const snapUid = await getDocs(qUid);
+        snapUid.forEach(doc => {
+          sepulturasList.push({ id: doc.id, ...doc.data() });
+        });
+
+        // 2. Si no encuentra por UID, buscar por email en titular o emailCliente
+        if (sepulturasList.length === 0 && user.email) {
+          const emailLower = user.email.toLowerCase();
+          
+          const qTitular = query(ordenesRef, where("titular.email", "==", emailLower));
+          const snapTitular = await getDocs(qTitular);
+          snapTitular.forEach(doc => sepulturasList.push({ id: doc.id, ...doc.data() }));
+
+          if (sepulturasList.length === 0) {
+            const qCliente = query(ordenesRef, where("emailCliente", "==", emailLower));
+            const snapCliente = await getDocs(qCliente);
+            snapCliente.forEach(doc => sepulturasList.push({ id: doc.id, ...doc.data() }));
+          }
+        }
+
+        // 3. Respaldo en subcolección directa (/usuarios/{uid}/sepulturas)
+        if (sepulturasList.length === 0) {
+          const subSnap = await getDocs(collection(db, "usuarios", user.uid, "sepulturas"));
+          subSnap.forEach(doc => {
+            const data = doc.data();
+            if (!data.placeholder) {
+              sepulturasList.push({ id: doc.id, ...data });
+            }
+          });
+        }
+
+        // Si no hay registros asociados
+        if (sepulturasList.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full text-center py-16 bg-surface-container-lowest rounded-2xl border border-dashed border-outline-variant p-8">
+              <span class="material-symbols-outlined text-5xl text-secondary mb-3">sentiment_content</span>
+              <h3 class="text-lg font-bold text-primary">Aún no tienes sepulturas asociadas</h3>
+              <p class="text-on-surface-variant text-sm mt-1 mb-6">Contrata un servicio spot o plan mensual para iniciar el cuidado y ornamentación.</p>
+              <a href="suscribirme-Plan.html" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-xs font-bold hover:bg-primary-container transition-all shadow-sm">
+                <span class="material-symbols-outlined text-sm">add</span> Contratar Servicio
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        // Renderizar tarjetas dinámicas con datos reales de Firestore
+        container.innerHTML = sepulturasList.map((sep, index) => {
+          // Nombre del difunto o sepultura
+          let titular = `Sepultura #${index + 1}`;
+          if (sep.difunto) {
+            titular = `${sep.difunto.nombres || ''} ${sep.difunto.apellidoPaterno || ''} ${sep.difunto.apellidoMaterno || ''}`.trim();
+          } else if (sep.nombreFallecido) {
+            titular = sep.nombreFallecido;
+          } else if (sep.nombreTitular) {
+            titular = sep.nombreTitular;
+          } else if (sep.titular && typeof sep.titular === 'object') {
+            titular = `Familia ${sep.titular.apellidoPaterno || ''}`;
+          }
+
+          // Ubicación en cementerio
+          let cementerio = "Cementerio por coordinar";
+          let ubicacionExacta = "Por coordinar";
+          if (sep.ubicacionSepultura) {
+            cementerio = sep.ubicacionSepultura.cementerio || cementerio;
+            const sec = sep.ubicacionSepultura.sector || "S/I";
+            const pat = sep.ubicacionSepultura.patio || "S/I";
+            const num = sep.ubicacionSepultura.numeroSepultura || "S/I";
+            ubicacionExacta = `Sector: ${sec}, Patio: ${pat}, N°: ${num}`;
+          } else {
+            cementerio = sep.cementerio || sep.cementerioNombre || cementerio;
+            ubicacionExacta = sep.ubicacion || `Sector: ${sep.sector || "S/I"}, N°: ${sep.numeroSepultura || "S/I"}`;
+          }
+
+          // Plan contratado
+          let plan = "Plan Activo";
+          if (sep.servicio) {
+            plan = `${sep.servicio.planNombre || 'Plan'} (${sep.servicio.nivel || 'Standard'})`;
+          } else if (sep.planNombre) {
+            plan = `${sep.planNombre} ${sep.nivel ? '(' + sep.nivel + ')' : ''}`;
+          }
+
+          // Fecha de visita dinámica
+          let proximaVisita = formatearFechaChile(
+            sep.proximaVisita || sep.servicio?.fechaServicio || sep.servicio?.fechaServicioLegible || sep.fechaCreacion
+          );
+
+          // Estado del servicio
+          const estado = sep.estado || sep.estadoSuscripcion || "Activo";
+          const esActivo = estado.toLowerCase().includes("activo") || estado.toLowerCase().includes("confirmado");
+          const badgeColor = esActivo ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
+
+          // Mensaje de WhatsApp dinámico
+          const numOrden = sep.numeroOrden || sep.id.substring(0, 8).toUpperCase();
+          const msgWa = encodeURIComponent(`Hola GraveCare, quisiera consultar sobre la mantención de la sepultura de ${titular} (Orden #${numOrden}).`);
+
+          return `
+            <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-start mb-4">
+                  <div>
+                    <span class="text-xs font-bold text-secondary uppercase tracking-wider block mb-1">Orden #${numOrden}</span>
+                    <h2 class="text-xl font-bold text-primary">${titular}</h2>
+                  </div>
+                  <span class="px-3 py-1 rounded-full ${badgeColor} text-xs font-bold capitalize">
+                    ${estado}
+                  </span>
+                </div>
+
+                <div class="space-y-3 my-6 text-sm">
+                  <div class="flex items-center gap-2 text-on-surface">
+                    <span class="material-symbols-outlined text-secondary text-base">location_on</span>
+                    <span class="font-semibold">${cementerio}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-on-surface">
+                    <span class="material-symbols-outlined text-secondary text-base">grid_view</span>
+                    <span><strong>Ubicación:</strong> ${ubicacionExacta}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-on-surface">
+                    <span class="material-symbols-outlined text-secondary text-base">verified</span>
+                    <span><strong>Plan Asignado:</strong> ${plan}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-on-surface">
+                    <span class="material-symbols-outlined text-secondary text-base">event_upcoming</span>
+                    <span><strong>Próxima Visita / Estado:</strong> ${proximaVisita}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 border-t border-outline-variant/20 flex gap-3">
+                <a href="fotos.html?ordenId=${sep.id}" class="flex-1 py-2.5 text-center rounded-full bg-surface-container-low text-primary text-xs font-bold hover:bg-secondary-container transition-colors">
+                  Ver Fotos
+                </a>
+                <a href="https://wa.me/56998280501?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 text-center rounded-full border border-primary text-primary text-xs font-bold hover:bg-surface-container-low transition-colors">
+                  Coordinar Visita
+                </a>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (error) {
+        console.error("Error al cargar sepulturas de Firestore:", error);
+        container.innerHTML = `
+          <div class="col-span-full bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl text-center text-sm">
+            ❌ Ocurrió un inconveniente al cargar las sepulturas: ${error.message}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
