@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraveCare - Resumen y Pago Online</title>
+    <style>
+        :root {
+          --primary-color: #002d1a;
+          --primary-hover: #1a432f;
+          --secondary-color: #40534c;
+          --bg-light: #f7f9f8;
+          --surface-color: #ffffff;
+          --text-main: #191c1b;
+          --text-muted: #666666;
+          --border-color: #dcdfdc;
+          --success-color: #276749;
+          --radius-sm: 6px;
+          --radius-md: 10px;
+          --radius-lg: 16px;
+          --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+          --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        .main-container { flex: 1; padding: 2.5rem 1.5rem; display: flex; justify-content: center; align-items: flex-start; }
+        .checkout-container { width: 100%; max-width: 900px; }
+        .checkout-card { background-color: var(--surface-color); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+        .section-title { font-size: 0.95rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1.2rem; }
+        .summary-box { background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; margin-bottom: 2.5rem; }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eeeeee; font-size: 0.95rem; }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: var(--text-muted); font-weight: 500; }
+        .summary-value { color: var(--text-main); font-weight: 600; }
+        .summary-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; margin-top: 0.5rem; font-weight: 800; font-size: 1.15rem; color: var(--text-main); }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem; }
+        .form-input { width: 100%; padding: 0.75rem 0.9rem; font-size: 0.95rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; }
+        .form-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,45,26, 0.1); }
+        .footer { background-color: var(--primary-color); color: #e2e8f0; padding: 2rem; margin-top: auto; text-align: center; }
+        @media (max-width: 768px) { .checkout-card { padding: 1.5rem; } .form-group-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <main class="main-container">
+        <div class="checkout-container">
+            <div class="checkout-card">
+                <!-- RESUMEN -->
+                <h2 class="section-title">RESUMEN</h2>
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span class="summary-label">Plan</span>
+                        <span class="summary-value" id="resumenPlan">Plan Bimestral</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Frecuencia</span>
+                        <span class="summary-value" id="resumenFrecuencia">1 visita cada 2 meses</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Nivel</span>
+                        <span class="summary-value" id="resumenNivel">Premium</span>
+                    </div>
+                    <div class="summary-total-row">
+                        <span>TOTAL A PAGAR</span>
+                        <span id="resumenTotal">$51.990</span>
+                    </div>
+                </div>
+
+                <!-- DATOS DE LA TARJETA -->
+                <h2 class="section-title">DATOS DE LA TARJETA</h2>
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label class="form-label">Número de Tarjeta *</label>
+                        <input type="text" id="numeroTarjeta" class="form-input" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" required>
+                    </div>
+
+                    <div class="form-group-grid">
+                        <div>
+                            <label class="form-label">Titular de la Tarjeta *</label>
+                            <input type="text" id="titularTarjeta" class="form-input" placeholder="JUAN PEREZ GARCIA" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Vencimiento (MM/YY) *</label>
+                            <input type="text" id="vencimientoTarjeta" class="form-input" placeholder="12/25" maxlength="5" inputmode="numeric" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="max-width: 250px;">
+                        <label class="form-label">CVV *</label>
+                        <input type="text" id="cvvTarjeta" class="form-input" placeholder="123" maxlength="4" inputmode="numeric" required>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; font-size: 0.95rem;">
+                            <input type="checkbox" id="aceptoTerminos" style="width: 18px; height: 18px; cursor: pointer;" required>
+                            <span>Acepto los términos y condiciones de pago</span>
+                        </label>
+                    </div>
+
+                    <div style="background-color: #f0fdf4; border-left: 4px solid var(--success-color); padding: 1rem; border-radius: var(--radius-sm); text-align: center; margin: 1.5rem 0;">
+                        <div style="font-weight: 700; color: var(--success-color); font-size: 0.95rem;">🔒 Tu información está segura</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Usamos encriptación SSL</div>
+                    </div>
+
+                    <button type="submit" id="btnPagar" style="width: 100%; padding: 1.1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">
+                        ✓ CONTINUAR AL PAGO →
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <h4>GraveCare - Preservación & Memoria</h4>
+        <p>contacto@gravecare.cl</p>
+        <p style="margin-top: 0.8rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
+    </footer>
+
+    <script type="module">
+        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { auth, db } from "./js/firebaseConfig.js";
+
+        let ordenCompleta = {};
+        let usuarioActual = null;
+
+        // Formato visual tarjeta
+        document.getElementById('numeroTarjeta').addEventListener('input', (e) => {
+            let valor = e.target.value.replace(/\s/g, '');
+            let formateado = '';
+            for (let i = 0; i < valor.length; i++) {
+                if (i > 0 && i % 4 === 0) formateado += ' ';
+                formateado += valor[i];
+            }
+            e.target.value = formateado;
+        });
+
+        document.getElementById('vencimientoTarjeta').addEventListener('input', (e) => {
+            let valor = e.target.value.replace(/\D/g, '');
+            if (valor.length >= 2) valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
+            e.target.value = valor;
+        });
+
+        document.getElementById('cvvTarjeta').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        function cargarResumen() {
+            const raw = localStorage.getItem('gravecare_datos_completos') ||
+                        localStorage.getItem('gravecare_last_order');
+
+            if (!raw) {
+                alert('No se encontraron datos de la orden. Por favor vuelve a seleccionar un servicio.');
+                window.location.href = 'planes.html';
+                return;
+            }
+
+            try {
+                ordenCompleta = JSON.parse(raw);
+                const esPlan = (ordenCompleta.tipoServicio === 'PLAN' || ordenCompleta.tipoSuscripcion === 'PLAN');
+
+                const nombrePlan = ordenCompleta.servicio?.planNombre || ordenCompleta.planNombre || (esPlan ? 'Plan Mensual' : 'Visita Spot');
+                const frecuencia = ordenCompleta.servicio?.frecuencia || ordenCompleta.frecuencia || (esPlan ? '1 visita al mes' : 'Visita Única');
+                const nivel = ordenCompleta.servicio?.nivel || ordenCompleta.nivel || 'Standard';
+
+                let totalNum = 34990;
+                if (ordenCompleta.valores?.total) totalNum = Number(ordenCompleta.valores.total);
+                else if (ordenCompleta.precioNumerico) totalNum = Number(ordenCompleta.precioNumerico);
+                else if (ordenCompleta.precioBase) totalNum = Number(ordenCompleta.precioBase) + (Number(ordenCompleta.adicional) || 0);
+
+                document.getElementById('resumenPlan').textContent = nombrePlan;
+                document.getElementById('resumenFrecuencia').textContent = frecuencia;
+                document.getElementById('resumenNivel').textContent = nivel;
+                document.getElementById('resumenTotal').textContent = '$' + totalNum.toLocaleString('es-CL');
+
+                ordenCompleta.valores = { moneda: 'CLP', total: totalNum };
+                ordenCompleta.precio = '$' + totalNum.toLocaleString('es-CL');
+                ordenCompleta.precioNumerico = totalNum;
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            usuarioActual = user;
+        });
+
+        document.getElementById('payment-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!document.getElementById('aceptoTerminos').checked) {
+                alert('Por favor, acepta los términos y condiciones de pago.');
+                return;
+            }
+
+            const btn = document.getElementById('btnPagar');
+            btn.disabled = true;
+            btn.textContent = 'Procesando pago...';
+
+            const numOrden = ordenCompleta.numeroOrden || ('ORD-' + Date.now());
+
+            const ordenFinalFirebase = {
+                ...ordenCompleta,
+                numeroOrden: numOrden,
+                creadoEl: serverTimestamp(),
+                createdAt: new Date(),
+                estado: 'pagado',
+                terminosAceptados: true,
+                pago: {
+                    titularTarjeta: document.getElementById('titularTarjeta').value.trim(),
+                    ultimosCuatroDigitos: document.getElementById('numeroTarjeta').value.replace(/\s/g, '').slice(-4),
+                    metodo: 'Tarjeta de Crédito/Débito'
+                }
+            };
+
+            if (usuarioActual) {
+                ordenFinalFirebase.usuarioId = usuarioActual.uid;
+                ordenFinalFirebase.emailCliente = usuarioActual.email;
+            }
+
+            try {
+                // Registrar orden en Firestore
+                await setDoc(doc(db, 'ordenes', numOrden), ordenFinalFirebase, { merge: true });
+                console.log('✓ Pago registrado exitosamente en Firestore:', numOrden);
+            } catch (errDb) {
+                console.warn('⚠️ Se guardó localmente tras aviso de conexión:', errDb);
+            }
+
+            localStorage.setItem('gravecare_last_order', JSON.stringify(ordenFinalFirebase));
+            localStorage.setItem('gravecare_datos_completos', JSON.stringify(ordenFinalFirebase));
+
+            window.location.href = 'confirmacion.html';
+        });
+
+        cargarResumen();
+    </script>
+</body>
+</html>

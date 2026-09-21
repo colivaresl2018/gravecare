@@ -7,6 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- SDK EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("Ve7RIbDVXeGzy27hA");
+  </script>
   
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -35,7 +41,7 @@
   <nav class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
     <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
       <a href="index.html" class="flex items-center gap-2">
-        <img alt="GraveCare Logo" class="h-10 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTE8Z1Z2khdSHbMToMYBd298ZFpMG04CY90ewx5ziCZI0L66W4p2gqHoFeNj1A1wOD4qg0zwcgVF5j6jvG98FZfQbsdQZB0nFyiWmJ-c3fVVttJkFhoHSF2gJp5w3JSv3zlgXSOYjcU8fgv79oSBoPeRx_AUq7FSSiVoWiCkvfplQka95sDIUGyVvViPabFVN2c_t5B9954ycXZaeGyGoDDToqrMQGKlfsE7viF14MqTHBylI7bMGqD8SshB14n2IVAQ"/>
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/Logo.jpg" onerror="this.onerror=null; this.src='Logo.jpg';"/>
       </a>
       <div class="hidden md:flex items-center gap-8">
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="index.html">Inicio</a>
@@ -116,7 +122,7 @@
               </div>
               <div>
                 <h3 class="font-bold text-[#002d1a] mb-0.5">WhatsApp Directo</h3>
-                <p class="text-sm text-gray-600">+56 9 9828 0501</p>
+                <p class="text-sm text-gray-600">+56 9 xxxx xxxx</p>
               </div>
             </a>
             <a href="mailto:contacto@gravecare.cl" class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 hover:border-[#002d1a] transition-all shadow-sm">
@@ -207,18 +213,19 @@
       <div>
         <h4 class="font-bold mb-3">Contacto</h4>
         <ul class="space-y-2 text-sm text-gray-300">
-          <li>WhatsApp: +56 9 9828 0501</li>
+          <li>WhatsApp: +56 9 xxxx xxxx</li>
           <li>Email: contacto@gravecare.cl</li>
         </ul>
       </div>
     </div>
   </footer>
 
-  <!-- Script Firebase Modular v10 importando directamente de firebaseConfig.js -->
   <script type="module">
     import { db } from "./js/firebaseConfig.js";
     import {
-      collection, addDoc, serverTimestamp
+      collection,
+      addDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // Acordeón FAQs
@@ -230,7 +237,7 @@
       });
     });
 
-    // Formulario
+    // Formulario de Contacto
     const form = document.getElementById('contact-form');
     const feedback = document.getElementById('contact-feedback');
     const errorEl = document.getElementById('contact-error');
@@ -242,13 +249,6 @@
         feedback.classList.add('hidden');
         errorEl.classList.add('hidden');
 
-        if (!db) {
-          console.error("Variable db no disponible desde firebaseConfig.js");
-          errorEl.textContent = "❌ Error interno: No se pudo conectar a la base de datos.";
-          errorEl.classList.remove('hidden');
-          return;
-        }
-
         const nombre = document.getElementById('contact-nombre').value.trim();
         const email = document.getElementById('contact-email').value.trim();
         const telefono = document.getElementById('contact-telefono').value.trim();
@@ -258,39 +258,37 @@
         btnSubmit.textContent = 'Enviando...';
 
         try {
-          // 1. Guardar en Firestore
-          await addDoc(collection(db, "contacto_mensajes"), {
-            nombre,
-            email,
-            telefono,
-            mensaje,
-            estado: "nuevo",
-            createdAt: serverTimestamp()
+          // 1. Envío prioritario del correo vía EmailJS con el servicio SMTP
+          await emailjs.send("service_uejxdhs", "template_0nqz4o5", {
+            from_name: nombre,
+            from_email: email,
+            teléfono: telefono,
+            mensaje: mensaje
           });
 
-          // 2. Notificación correo a contacto@gravecare.cl
-          await addDoc(collection(db, "mail"), {
-            to: "contacto@gravecare.cl",
-            replyTo: email,
-            message: {
-              subject: `[GraveCare Web] Consulta de ${nombre}`,
-              html: `
-                <h2>Nueva consulta desde el formulario web</h2>
-                <p><strong>Nombre:</strong> ${nombre}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Teléfono:</strong> ${telefono}</p>
-                <hr/>
-                <p><strong>Mensaje:</strong></p>
-                <p style="white-space: pre-line;">${mensaje}</p>
-              `
+          // 2. Respaldo en Firestore
+          try {
+            if (db) {
+              await addDoc(collection(db, "contacto_mensajes"), {
+                nombre: nombre,
+                email: email,
+                telefono: telefono,
+                mensaje: mensaje,
+                estado: "nuevo",
+                createdAt: serverTimestamp()
+              });
             }
-          });
+          } catch (dbErr) {
+            console.warn("Advertencia: No se pudo respaldar en Firestore, pero el correo fue enviado:", dbErr);
+          }
 
+          // Éxito confirmado
           form.reset();
           feedback.classList.remove('hidden');
+
         } catch (err) {
-          console.error("Error al enviar formulario:", err);
-          errorEl.textContent = "❌ Error: " + (err.message || "No se pudo enviar el mensaje");
+          console.error("Error al enviar mensaje:", err);
+          errorEl.textContent = "❌ " + (err.text || err.message || "Hubo un inconveniente al enviar tu mensaje.");
           errorEl.classList.remove('hidden');
         } finally {
           btnSubmit.disabled = false;

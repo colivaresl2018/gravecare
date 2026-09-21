@@ -17,12 +17,6 @@
             "primary-container": "#1a432f",
             "on-primary-container": "#84b096",
             "secondary": "#4e6451",
-            "secondary-fixed": "#d1e9d2",
-            "secondary-container": "#d1e9d2",
-            "on-secondary-container": "#546a57",
-            "tertiary": "#1d2821",
-            "tertiary-fixed": "#d9e6da",
-            "tertiary-container": "#333e36",
             "surface": "#f8faf8",
             "surface-container": "#eceeec",
             "surface-container-low": "#f2f4f2",
@@ -31,10 +25,8 @@
             "background": "#f8faf8",
             "on-surface": "#191c1b",
             "on-surface-variant": "#414943",
-            "outline": "#717973",
             "outline-variant": "#c1c8c1",
-            "error": "#ba1a1a",
-            "error-container": "#ffdad6"
+            "error": "#ba1a1a"
           },
           "fontFamily": {
             "body": ["Plus Jakarta Sans", "sans-serif"]
@@ -47,15 +39,17 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
     .sidebar-item { transition: all 0.2s ease; }
+    .loading-spinner { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+<body class="bg-background text-on-surface min-h-screen flex flex-col md:flex-row font-body">
 
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKPnw1HSeplL356MxjPJg5dD55e-ES5Y3WFjg2MlaWy6KJGAv3x7E1bb1S0yOc63zXr_QBNOsrsqyqDxboC96MYnpi_brPXGpEsn3h9-BSM8qIBUg9SSIziQtBQBn0xx49eQ9CEYL5oklh2oSzBqLJ2X4CONrfrJVVdRLHOiMPBRc1aM_eUUwl_KI0FnxIypdwJZYdeiDeG6E8RzgTTImP-hv7HRCW_xry_3ZNJdOrk3kNEvbdcm8kQSze9Hg4G6qf8Q">
+        <h2 class="text-2xl font-black text-primary tracking-tight">GraveCare</h2>
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -71,7 +65,7 @@
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-sm font-semibold">Pagos & Suscripción</span>
       </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="fotos.html">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-white font-bold" href="fotos.html">
         <span class="material-symbols-outlined">photo_library</span>
         <span class="text-sm font-semibold">Fotos</span>
       </a>
@@ -81,132 +75,45 @@
       </a>
     </nav>
     <div class="mt-auto pt-6 border-t border-outline-variant/30">
-      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left font-semibold text-sm">
         <span class="material-symbols-outlined">logout</span>
-        <span class="text-sm font-semibold">Cerrar Sesión</span>
+        <span>Cerrar Sesión</span>
       </button>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10">
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
     <header class="mb-8 flex justify-between items-center">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-primary">Reportes Fotográficos</h1>
-        <p class="text-on-surface-variant text-sm mt-1">Evidencia visual en alta resolución de cada visita y servicio en terreno.</p>
+        <p class="text-on-surface-variant text-sm mt-1">Evidencia visual en terreno de cada servicio aprobado.</p>
       </div>
       <a href="dashboard.html" class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">
         <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver al Dashboard
+        Volver
       </a>
     </header>
 
-    <!-- Galería organizada por Fecha de Visita -->
-    <div class="space-y-8">
-      
-      <!-- FECHA 1: 15 de Agosto de 2026 -->
-      <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-outline-variant/30 pb-4 mb-6">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary text-2xl">event</span>
-            <div>
-              <h2 class="text-lg font-bold text-primary">Visita del 15 de Agosto, 2026</h2>
-              <p class="text-xs text-on-surface-variant">Parque del Recuerdo — Sector 4, Sepultura #1248</p>
-            </div>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold self-start sm:self-auto">
-            Completada con Éxito
-          </span>
-        </div>
-
-        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">
-          Trabajo realizado: Limpieza profunda de lápida de mármol, abrillantado de bronce, desmalezado y colocación de ramo floral fresco de estación.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Foto Antes -->
-          <div class="space-y-2">
-            <span class="inline-block px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-xs font-bold uppercase">
-              Antes de la mantención
-            </span>
-            <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVZIrDJq7Zk5vOs0olWTsbgmI2oztkwlOiA3OGMx8ioZ7_MvXl8lfjzlQfP9OqtirONn8vCDlkF-nBxT305FnL8xXNq3DQpbqHsHVkC58FJfxcAZgjs9XCTklIF6y5oVPEr6GVmO7j9nHrB0hoqlLoF1lSzKnomClG-Lu9PXv4zOsw_1En2mRXPRz7-VEUiAMWRIYVjxm0N-vT8QslPRpj0OHOWMuDXfJWe8M7Pwig0Kl8IidjzFtW" alt="Foto Antes 15 Agosto" class="w-full h-full object-cover">
-            </div>
-          </div>
-
-          <!-- Foto Después -->
-          <div class="space-y-2">
-            <span class="inline-block px-2.5 py-0.5 rounded bg-primary-container text-on-primary-container text-xs font-bold uppercase">
-              Después de la mantención
-            </span>
-            <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSZ1vH5RHIrNtimjN3nevzhYOLpiYND0N_2CKzFaSQOVOAtmZQMf7BUnUBk9Mhyt-PoATON4pYfDU_IZyKsiqiOgDumNRlO3OHa5USbrLDjS3vFZbrvHbilVB3pUWGfKLSfCXNn68MMVLfpreeBZjoYy2Obsq6--Y8jNfCwWhyIjlTokY4b-vlygIqw1tVG9ApHpjaYFPPjbfNVKwOyiPz1LTV3N6k1aB_gB2HdZd9tilKGKgY3tT_" alt="Foto Después 15 Agosto" class="w-full h-full object-cover">
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
-          <a href="informe.html" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
-            <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
-            Ver Informe Oficial en PDF
-          </a>
-        </div>
+    <!-- Contenedor Dinámico -->
+    <div id="galeria-contenedor" class="space-y-8">
+      <div class="text-center py-16">
+        <div class="w-9 h-9 mx-auto mb-3 rounded-full border-4 border-primary/20 border-t-primary loading-spinner"></div>
+        <p class="text-on-surface-variant text-sm font-semibold">Cargando evidencias fotográficas...</p>
       </div>
-
-      <!-- FECHA 2: 01 de Agosto de 2026 -->
-      <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-outline-variant/30 pb-4 mb-6">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary text-2xl">event</span>
-            <div>
-              <h2 class="text-lg font-bold text-primary">Visita del 01 de Agosto, 2026</h2>
-              <p class="text-xs text-on-surface-variant">Parque del Recuerdo — Sector 4, Sepultura #1248</p>
-            </div>
-          </div>
-          <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold self-start sm:self-auto">
-            Completada con Éxito
-          </span>
-        </div>
-
-        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">
-          Trabajo realizado: Retiro de flores marchitas, lavado de floreros, colocación de nuevo arreglo floral de crisantemos y recorte de césped perimetral.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Foto Antes -->
-          <div class="space-y-2">
-            <span class="inline-block px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-xs font-bold uppercase">
-              Antes de la mantención
-            </span>
-            <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVZIrDJq7Zk5vOs0olWTsbgmI2oztkwlOiA3OGMx8ioZ7_MvXl8lfjzlQfP9OqtirONn8vCDlkF-nBxT305FnL8xXNq3DQpbqHsHVkC58FJfxcAZgjs9XCTklIF6y5oVPEr6GVmO7j9nHrB0hoqlLoF1lSzKnomClG-Lu9PXv4zOsw_1En2mRXPRz7-VEUiAMWRIYVjxm0N-vT8QslPRpj0OHOWMuDXfJWe8M7Pwig0Kl8IidjzFtW" alt="Foto Antes 01 Agosto" class="w-full h-full object-cover">
-            </div>
-          </div>
-
-          <!-- Foto Después -->
-          <div class="space-y-2">
-            <span class="inline-block px-2.5 py-0.5 rounded bg-primary-container text-on-primary-container text-xs font-bold uppercase">
-              Después de la mantención
-            </span>
-            <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSZ1vH5RHIrNtimjN3nevzhYOLpiYND0N_2CKzFaSQOVOAtmZQMf7BUnUBk9Mhyt-PoATON4pYfDU_IZyKsiqiOgDumNRlO3OHa5USbrLDjS3vFZbrvHbilVB3pUWGfKLSfCXNn68MMVLfpreeBZjoYy2Obsq6--Y8jNfCwWhyIjlTokY4b-vlygIqw1tVG9ApHpjaYFPPjbfNVKwOyiPz1LTV3N6k1aB_gB2HdZd9tilKGKgY3tT_" alt="Foto Después 01 Agosto" class="w-full h-full object-cover">
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
-          <a href="informe.html" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
-            <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
-            Ver Informe Oficial en PDF
-          </a>
-        </div>
-      </div>
-
     </div>
   </main>
 
+  <!-- Modal Lightbox -->
+  <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onclick="cerrarLightbox()">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+      <img id="img-ampliada" src="" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+      <p id="pie-foto" class="text-white text-xs mt-2 font-semibold"></p>
+    </div>
+  </div>
+
   <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-40">
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
       <span class="material-symbols-outlined">dashboard</span>
       <span class="text-[10px] mt-1">Resumen</span>
@@ -223,29 +130,188 @@
       <span class="material-symbols-outlined">photo_library</span>
       <span class="text-[10px] mt-1">Fotos</span>
     </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
-      <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] mt-1">Perfil</span>
-    </a>
+    <button id="btn-logout-mobile" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-error">
+      <span class="material-symbols-outlined">logout</span>
+      <span class="text-[10px] mt-1">Salir</span>
+    </button>
   </nav>
 
-  <!-- Firebase Script Integration -->
-  <script type="module">
+ <script type="module">
     import { observeAuthState, logoutUser } from "./js/auth.js";
+    import { db } from "./js/firebaseConfig.js";
+    import { 
+      collection, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    observeAuthState((user) => {
+    function formatFecha(str) {
+      if (!str) return "Fecha sin registrar";
+      const f = new Date(str);
+      return f.toLocaleDateString("es-CL", { day: "2-digit", month: "long", year: "numeric" });
+    }
+
+    window.ampliarFoto = function(url, pie) {
+      const modal = document.getElementById("modal-lightbox");
+      if (!modal) return;
+      document.getElementById("img-ampliada").src = url;
+      document.getElementById("pie-foto").textContent = pie || "";
+      modal.classList.remove("hidden");
+    };
+
+    window.cerrarLightbox = function() {
+      const modal = document.getElementById("modal-lightbox");
+      if (modal) modal.classList.add("hidden");
+    };
+
+    async function cargarFotosCliente(user) {
+      const contenedor = document.getElementById("galeria-contenedor");
+      if (!contenedor) return;
+
+      try {
+        console.log("Consultando fotos para usuario:", user.email, user.uid);
+        const emailCliente = (user.email || "").toLowerCase().trim();
+        const ordenesIds = new Set();
+
+        // 1. Rescatar órdenes asociadas al cliente
+        try {
+          const snapOrdenes = await getDocs(collection(db, "ordenes"));
+          snapOrdenes.forEach((docSnap) => {
+            const d = docSnap.data();
+            const emailTitular = (d.titular?.email || d.email || "").toLowerCase().trim();
+            const uidTitular = d.usuarioId || d.uid || d.titular?.uid;
+
+            if (emailTitular === emailCliente || uidTitular === user.uid) {
+              ordenesIds.add(docSnap.id);
+            }
+          });
+          console.log("Órdenes del cliente encontradas:", Array.from(ordenesIds));
+        } catch (e) {
+          console.warn("Aviso al consultar órdenes:", e);
+        }
+
+        // 2. Rescatar informes técnicos aprobados
+        const snapInformes = await getDocs(collection(db, "informes"));
+        const informesAprobados = [];
+
+        snapInformes.forEach((docSnap) => {
+          const inf = { id: docSnap.id, ...docSnap.data() };
+          const lePertenece = ordenesIds.has(inf.ordenId) || (inf.clienteEmail && inf.clienteEmail.toLowerCase() === emailCliente);
+          const estado = (inf.estado || "").toLowerCase().trim();
+
+          if ((ordenesIds.size === 0 || lePertenece) && (estado === "aprobado" || estado === "completada" || estado === "aprobada")) {
+            informesAprobados.push(inf);
+          }
+        });
+
+        informesAprobados.sort((a, b) => {
+          const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();
+          const fb = new Date(b.fechaCaptura || b.fechaAprobacion || 0).getTime();
+          return fb - fa;
+        });
+
+        if (informesAprobados.length === 0) {
+          contenedor.innerHTML = `
+            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-12 text-center shadow-sm">
+              <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">photo_library</span>
+              <h3 class="text-base font-bold text-primary mb-1">Aún no hay reportes fotográficos aprobados</h3>
+              <p class="text-xs text-on-surface-variant max-w-sm mx-auto">
+                Las fotografías del mantenimiento aparecerán aquí una vez que el equipo de terreno complete la visita y sea validada técnicamente por supervisión.
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        contenedor.innerHTML = informesAprobados.map((inf) => {
+          const fotos = inf.fotos || {};
+          const fAntes = fotos.antes?.url;
+          const fDespues = fotos.despues?.url;
+          const fFlores = fotos.flores?.url;
+          const fGeneral = fotos.general?.url;
+
+          return `
+            <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-outline-variant/30 pb-4 mb-6">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary text-2xl">event</span>
+                  <div>
+                    <h2 class="text-lg font-bold text-primary">Servicio del ${formatFecha(inf.fechaCaptura || inf.fechaAprobacion)}</h2>
+                    <p class="text-xs text-on-surface-variant">${inf.cementerio || 'Cementerio'} — Sector: ${inf.sector || 'S/S'}, Sepultura: #${inf.lote || 'S/N'}</p>
+                  </div>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold self-start sm:self-auto">
+                  ✓ Completada y Aprobada
+                </span>
+              </div>
+
+              ${inf.nota ? `<p class="text-xs font-semibold text-on-surface-variant mb-4 bg-surface-container-low p-3 rounded-lg"><strong class="text-primary">Observaciones de terreno:</strong> ${inf.nota}</p>` : ''}
+
+              <!-- 4 Fotos de Terreno -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="space-y-1.5">
+                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">1. Antes</span>
+                  <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
+                    ${fAntes ? `<img src="${fAntes}" alt="Antes" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fAntes}', '1. Estado Inicial - Antes')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span class="inline-block px-2 py-0.5 rounded bg-primary-container text-white text-[11px] font-bold uppercase">2. Después</span>
+                  <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
+                    ${fDespues ? `<img src="${fDespues}" alt="Después" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fDespues}', '2. Mantención Finalizada - Después')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">3. Flores</span>
+                  <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
+                    ${fFlores ? `<img src="${fFlores}" alt="Flores" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fFlores}', '3. Ornamentación Floral')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">4. General</span>
+                  <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
+                    ${fGeneral ? `<img src="${fGeneral}" alt="General" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fGeneral}', '4. Vista Panorámica del Lote')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
+                <a href="informe.html?ordenId=${inf.ordenId || ''}&informeId=${inf.id}" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
+                  <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                  Ver Informe Oficial
+                </a>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (err) {
+        console.error("Error al cargar fotos:", err);
+        contenedor.innerHTML = `
+          <div class="bg-red-50 text-error p-6 rounded-xl text-center text-sm font-semibold">
+            Error al consultar los registros fotográficos: ${err.message || err}
+          </div>
+        `;
+      }
+    }
+
+    observeAuthState(async (user) => {
       if (!user) {
         window.location.href = "login.html";
+        return;
       }
+      await cargarFotosCliente(user);
     });
 
-    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
-    if (btnLogoutSidebar) {
-      btnLogoutSidebar.addEventListener("click", async () => {
-        await logoutUser();
-        window.location.href = "login.html";
-      });
+    async function ejecutarLogout() {
+      await logoutUser();
+      window.location.href = "login.html";
     }
+
+    document.getElementById("btn-logout-sidebar")?.addEventListener("click", ejecutarLogout);
+    document.getElementById("btn-logout-mobile")?.addEventListener("click", ejecutarLogout);
   </script>
 </body>
 </html>

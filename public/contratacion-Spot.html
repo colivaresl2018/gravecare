@@ -3,519 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraveCare - Contratación y Pago</title>
-    
-    <!-- Flatpickr CDN (SIN DUPLICADOS) -->
+    <title>GraveCare - Contratación Spot</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js"></script>
-    
     <style>
-        /* ==========================================================================
-           GraveCare Chile - Hoja de Estilos Principal
-           Dominio: gravecare.cl
-           ========================================================================== */
-
         :root {
           --primary-color: #1a3636;
-          --primary-hover: #122525;
           --secondary-color: #40534c;
           --accent-gold: #c19a5b;
-          --accent-gold-hover: #a88448;
           --bg-light: #f7f9f8;
           --surface-color: #ffffff;
           --text-main: #222222;
           --text-muted: #666666;
           --border-color: #dcdfdc;
-          --danger-color: #c53030;
-          --success-color: #276749;
-          --info-color: #2b6cb0;
           --radius-sm: 6px;
           --radius-md: 10px;
           --radius-lg: 16px;
-          --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
           --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-          --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-          --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+          --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
-
-        * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
-
-        body {
-          font-family: var(--font-family);
-          background-color: var(--bg-light);
-          color: var(--text-main);
-          line-height: 1.6;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-        }
-
-        /* Header */
-        .page-header {
-          background-color: var(--surface-color);
-          border-bottom: 1px solid var(--border-color);
-          padding: 2rem;
-          text-align: center;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .page-header h1 {
-          font-size: 1.85rem;
-          color: var(--primary-color);
-          margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-          color: var(--text-muted);
-          font-size: 0.95rem;
-          margin-bottom: 0.8rem;
-        }
-
-        .back-link {
-          display: inline-block;
-          color: var(--text-muted);
-          text-decoration: none;
-          font-size: 0.9rem;
-          margin-bottom: 1rem;
-          transition: color 0.2s;
-        }
-
-        .back-link:hover {
-          color: var(--accent-gold);
-        }
-
-        /* Badge AGRANDADO */
-        .service-badge {
-          display: inline-block;
-          background-color: var(--primary-color);
-          color: white;
-          padding: 0.7rem 1.5rem;
-          border-radius: 50px;
-          font-size: 0.95rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          margin-bottom: 1.5rem;
-          letter-spacing: 0.5px;
-        }
-
-        /* COMANDO - Instrucción visual */
-        .page-instruction {
-          display: none !important;
-          background-color: #f0f8f6;
-          border-left: 4px solid var(--primary-color);
-          padding: 0.8rem 1.2rem;
-          border-radius: var(--radius-sm);
-          margin-top: 1rem;
-          display: inline-block;
-          font-size: 0.9rem;
-          color: var(--primary-color);
-          font-weight: 500;
-        }
-
-        .page-instruction strong {
-          display: block;
-          margin-bottom: 0.3rem;
-          font-size: 0.95rem;
-        }
-
-        /* Contenedor Principal */
-        .main-container {
-          flex: 1;
-          padding: 2rem;
-        }
-
-        .form-container {
-          max-width: 1000px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 2rem;
-        }
-
-        /* Formulario */
-        .form-card {
-          background-color: var(--surface-color);
-          border-radius: var(--radius-lg);
-          padding: 2rem;
-          box-shadow: var(--shadow-md);
-          border: 1px solid var(--border-color);
-        }
-
-        .form-section-title {
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: var(--secondary-color);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 1rem;
-          margin-top: 1.5rem;
-        }
-
-        .form-section-title:first-child {
-          margin-top: 0;
-        }
-
-        .form-group {
-          margin-bottom: 1.25rem;
-        }
-
-        .form-group-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-        }
-
-        .form-group-grid.cols-3 {
-          grid-template-columns: repeat(3, 1fr);
-        }
-
-        .form-group-grid.cols-4 {
-          grid-template-columns: repeat(4, 1fr);
-        }
-
-        .form-label {
-          display: block;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: var(--primary-color);
-          margin-bottom: 0.4rem;
-        }
-
-        .form-input,
-        .form-select {
-          width: 100%;
-          padding: 0.7rem 0.9rem;
-          font-size: 0.95rem;
-          border: 1.5px solid var(--border-color);
-          border-radius: var(--radius-sm);
-          background-color: #fff;
-          transition: border-color 0.2s, box-shadow 0.2s;
-          font-family: inherit;
-        }
-
-        .form-input:focus,
-        .form-select:focus {
-          outline: none;
-          border-color: var(--accent-gold);
-          box-shadow: 0 0 0 3px rgba(193, 154, 91, 0.15);
-        }
-
-        .form-input:disabled {
-          background-color: #f5f5f5;
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-
-        /* Campos ocultos */
-        .hidden {
-          display: none !important;
-        }
-
-        /* Panel Derecho */
-        .sidebar {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .sidebar-card {
-          background-color: var(--surface-color);
-          border-radius: var(--radius-lg);
-          padding: 1.5rem;
-          box-shadow: var(--shadow-md);
-          border: 1px solid var(--border-color);
-        }
-
-        .sidebar-card h3 {
-          font-size: 1rem;
-          color: var(--primary-color);
-          margin-bottom: 0.5rem;
-        }
-
-        .sidebar-card .subtitle {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-bottom: 1rem;
-        }
-
-        /* Resumen */
-        .summary-item {
-          display: flex;
-          justify-content: space-between;
-          padding: 0.6rem 0;
-          border-bottom: 1px solid var(--border-color);
-          font-size: 0.9rem;
-        }
-
-        .summary-item:last-child {
-          border-bottom: none;
-          font-weight: 700;
-          color: var(--primary-color);
-          margin-top: 0.5rem;
-          padding-top: 1rem;
-        }
-
-        .summary-label {
-          color: var(--text-muted);
-        }
-
-        .summary-value {
-          color: var(--primary-color);
-          font-weight: 600;
-        }
-
-        /* Botones */
-        .btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          padding: 0.85rem 1.5rem;
-          font-size: 1rem;
-          font-weight: 600;
-          border: none;
-          border-radius: var(--radius-sm);
-          cursor: pointer;
-          transition: background-color 0.2s, transform 0.1s;
-          text-decoration: none;
-          font-family: inherit;
-        }
-
-        .btn:active {
-          transform: translateY(1px);
-        }
-
-        .btn-primary {
-          background-color: var(--primary-color);
-          color: #fff;
-          width: 100%;
-        }
-
-        .btn-primary:hover {
-          background-color: var(--primary-hover);
-        }
-
-        /* Seguridad */
-        .security-info {
-          background-color: #f0fff4;
-          border-left: 4px solid var(--success-color);
-          padding: 1rem;
-          border-radius: var(--radius-sm);
-          text-align: center;
-        }
-
-        .security-info .label {
-          font-weight: 700;
-          color: var(--success-color);
-          font-size: 0.95rem;
-        }
-
-        .security-info .text {
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          margin-top: 0.3rem;
-        }
-
-        /* Footer */
-        .footer {
-          background-color: var(--primary-color);
-          color: #e2e8f0;
-          padding: 2rem;
-          margin-top: auto;
-          grid-column: 1 / -1;
-        }
-
-        .footer h4 {
-          font-size: 0.95rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .footer p {
-          font-size: 0.85rem;
-          margin-bottom: 0.3rem;
-          color: #e2e8f0;
-        }
-
-        .footer a {
-          color: var(--accent-gold);
-          text-decoration: none;
-        }
-
-        /* Flatpickr Personalizado */
-        .flatpickr-calendar {
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-color);
-          box-shadow: var(--shadow-lg);
-          font-family: var(--font-family);
-        }
-
-        /* FONDO VERDE EN MES/AÑO - LETRAS BLANCAS */
-        .flatpickr-months {
-          background: var(--primary-color) !important;
-          padding: 12px;
-        }
-
-        .flatpickr-month {
-          background: var(--primary-color) !important;
-          color: #ffffff !important;
-          font-weight: 600;
-        }
-
-        .flatpickr-year {
-          background: var(--primary-color) !important;
-          color: #ffffff !important;
-          font-weight: 700 !important;
-          font-size: 1.1rem !important;
-          text-shadow: none !important;
-        }
-
-        /* Selectores adicionales para el año */
-        .flatpickr-calendar .numInputWrapper .numInput.flatpickr-year {
-          color: #ffffff !important;
-          background: var(--primary-color) !important;
-        }
-
-        .flatpickr-year::selection {
-          background: rgba(193, 154, 91, 0.3) !important;
-          color: #ffffff !important;
-        }
-
-        .flatpickr-cur-month {
-          background: var(--primary-color) !important;
-          color: #ffffff !important;
-        }
-
-        /* Fuerza adicional al contenedor del año */
-        .flatpickr-calendar .flatpickr-current-month .numInputWrapper {
-          background: var(--primary-color) !important;
-        }
-
-        .flatpickr-calendar .flatpickr-current-month .numInputWrapper input {
-          color: #ffffff !important;
-          background: var(--primary-color) !important;
-          font-weight: 700 !important;
-        }
-
-        /* FLECHAS (< y >) - BLANCO */
-        .flatpickr-prev-month,
-        .flatpickr-next-month {
-          color: #ffffff !important;
-          fill: #ffffff !important;
-        }
-
-        /* ENCABEZADOS DE DÍAS - BLANCO + FONDO VERDE */
-        .flatpickr-weekdaycontainer {
-          background: var(--primary-color);
-        }
-
-        .flatpickr-weekday {
-          color: #ffffff !important;
-          font-weight: 600;
-          background: var(--primary-color);
-        }
-
-        /* NÚMEROS DE DÍAS - BLANCO + FONDO VERDE */
-        .flatpickr-innerContainer {
-          background: var(--primary-color);
-        }
-
-        .flatpickr-day {
-          color: #ffffff !important;
-        }
-
-        .flatpickr-day:hover {
-          background: rgba(193, 154, 91, 0.3);
-          color: #ffffff !important;
-        }
-
-        .flatpickr-day.selected {
-          background: var(--primary-color);
-          color: #ffffff;
-          border-color: var(--primary-color);
-        }
-
-        .flatpickr-day.today {
-          border-color: var(--accent-gold);
-          color: #ffffff;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-          .form-container {
-            grid-template-columns: 1fr;
-          }
-
-          .form-group-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .form-group-grid.cols-3 {
-            grid-template-columns: 1fr;
-          }
-
-          .form-group-grid.cols-4 {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .page-header h1 {
-            font-size: 1.5rem;
-          }
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+        .page-header { background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); padding: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.85rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .service-badge { display: inline-block; background-color: var(--primary-color); color: white; padding: 0.7rem 1.5rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 1.5rem; }
+        .main-container { flex: 1; padding: 2rem; }
+        .form-container { max-width: 1000px; margin: 0 auto; }
+        .form-card { background-color: var(--surface-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
+        .form-section-title { font-size: 0.9rem; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; margin-bottom: 1rem; margin-top: 1.5rem; }
+        .form-section-title:first-child { margin-top: 0; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .form-group-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; }
+        .form-input, .form-select { width: 100%; padding: 0.7rem 0.9rem; font-size: 0.95rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-gold); }
+        .hidden { display: none !important; }
+        .footer { background-color: var(--primary-color); color: #e2e8f0; padding: 2rem; margin-top: auto; text-align: center; }
+        @media (max-width: 768px) { .form-group-grid, .form-group-grid.cols-3 { grid-template-columns: 1fr; } }
     </style>
-
 </head>
-
 <body>
 
-    <!-- Header MEJORADO -->
     <div class="page-header">
         <span class="service-badge">Servicio Spot</span>
-        <h1>Contratación y Pago</h1>
+        <h1>Datos de Contratación</h1>
     </div>
 
-    <!-- Main Content -->
     <div class="main-container">
         <div class="form-container">
-            <!-- Formulario -->
             <form id="contratacion-form" class="form-card">
-                <!-- PASO 1 INSTRUCCIÓN -->
                 <div style="background-color: #f0f8f6; border-left: 4px solid var(--primary-color); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-                    <strong style="color: var(--primary-color); font-size: 1rem;">📋 Paso 1 - Datos Personales</strong>
-                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Completa la información del titular y del ser querido</p>
+                    <strong style="color: var(--primary-color); font-size: 1rem;">📋 Paso 1 - Datos del Servicio Spot</strong>
+                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del titular, ser querido y fecha de visita</p>
                 </div>
 
-                <!-- Datos del Titular -->
+                <!-- Titular -->
                 <h2 class="form-section-title">Datos del Titular</h2>
                 <div class="form-group-grid cols-3">
                     <div>
                         <label class="form-label">Nombres *</label>
-                        <input type="text" id="nombresTitular" name="nombresTitular" class="form-input" placeholder="Juan" required>
+                        <input type="text" id="nombresTitular" class="form-input" placeholder="Juan" required>
                     </div>
                     <div>
                         <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaternoTitular" name="apellidoPaternoTitular" class="form-input" placeholder="Pérez" required>
+                        <input type="text" id="apellidoPaternoTitular" class="form-input" placeholder="Pérez" required>
                     </div>
                     <div>
                         <label class="form-label">Apellido Materno</label>
-                        <input type="text" id="apellidoMaternoTitular" name="apellidoMaternoTitular" class="form-input" placeholder="García">
+                        <input type="text" id="apellidoMaternoTitular" class="form-input" placeholder="García">
                     </div>
                 </div>
 
                 <!-- Contacto -->
                 <h2 class="form-section-title">Datos de Contacto</h2>
-                
-                <!-- País -->
                 <div class="form-group">
                     <label class="form-label">País *</label>
-                    <select id="pais" name="pais" class="form-select" required>
-                        <option disabled selected>Selecciona país</option>
-                        <option value="Chile">Chile</option>
+                    <select id="pais" class="form-select" required>
+                        <option value="Chile" selected>Chile</option>
                         <option value="Argentina">Argentina</option>
                         <option value="Estados Unidos">Estados Unidos</option>
                         <option value="España">España</option>
@@ -532,225 +98,119 @@
 
                 <div class="form-group-grid">
                     <div>
-                        <label class="form-label" id="idLabel">RUT/DNI/Pasaporte *</label>
-                        <input type="text" id="rut" name="rut" class="form-input" placeholder="12345678-9 / DNI / Pasaporte" required>
+                        <label class="form-label">RUT/DNI/Pasaporte *</label>
+                        <input type="text" id="rut" class="form-input" placeholder="12.345.678-9 / Pasaporte" required>
                     </div>
                     <div>
                         <label class="form-label">Email *</label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="correo@ejemplo.com" required>
+                        <input type="email" id="email" class="form-input" placeholder="correo@ejemplo.com" required>
                     </div>
                 </div>
 
                 <div class="form-group-grid">
                     <div>
                         <label class="form-label">Teléfono</label>
-                        <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="+56 9 1234 5678">
+                        <input type="tel" id="telefono" class="form-input" placeholder="+56 9 1234 5678">
                     </div>
                     <div>
-                        <label class="form-label">Dirección *</label>
-                        <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Calle Principal" required>
+                        <label class="form-label">Dirección (Calle) *</label>
+                        <input type="text" id="direccion" class="form-input" placeholder="Calle Principal" required>
                     </div>
                 </div>
 
-                <!-- Dirección Desglosada -->
                 <div class="form-group-grid cols-3">
                     <div>
                         <label class="form-label">Número *</label>
-                        <input type="text" id="numero" name="numero" class="form-input" placeholder="1250" required>
+                        <input type="text" id="numero" class="form-input" placeholder="1250" required>
                     </div>
                     <div>
                         <label class="form-label">Depto</label>
-                        <input type="text" id="departamento" name="departamento" class="form-input" placeholder="Apto 305">
+                        <input type="text" id="departamento" class="form-input" placeholder="Apto 305">
                     </div>
                     <div>
                         <label class="form-label">Región *</label>
-                        <!-- Select para Chile -->
-                        <select id="region" name="region" class="form-select" required>
-                            <option disabled selected>Selecciona región</option>
+                        <select id="region" class="form-select" required>
+                            <option disabled selected value="">Selecciona región</option>
                         </select>
-                        <!-- Input text para otros países -->
-                        <input type="text" id="regionText" name="regionText" class="form-input hidden" placeholder="Región/Provincia/Estado" required>
+                        <input type="text" id="regionText" class="form-input hidden" placeholder="Región/Provincia/Estado">
                     </div>
                 </div>
 
-                <!-- Comuna -->
                 <div class="form-group">
                     <label class="form-label">Comuna *</label>
-                    <!-- Select para Chile -->
-                    <select id="comuna" name="comuna" class="form-select" required>
-                        <option disabled selected>Selecciona región primero</option>
+                    <select id="comuna" class="form-select" required>
+                        <option disabled selected value="">Selecciona región primero</option>
                     </select>
-                    <!-- Input text para otros países -->
-                    <input type="text" id="comunaText" name="comunaText" class="form-input hidden" placeholder="Comuna/Ciudad/Localidad" required>
+                    <input type="text" id="comunaText" class="form-input hidden" placeholder="Comuna/Ciudad">
                 </div>
 
-                <!-- Datos del Difunto -->
+                <!-- Ser Querido -->
                 <h2 class="form-section-title">Datos del Ser Querido</h2>
                 <div class="form-group-grid cols-3">
                     <div>
                         <label class="form-label">Nombres *</label>
-                        <input type="text" id="nombresDifunto" name="nombresDifunto" class="form-input" placeholder="María" required>
+                        <input type="text" id="nombresDifunto" class="form-input" placeholder="María" required>
                     </div>
                     <div>
                         <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaternoDifunto" name="apellidoPaternoDifunto" class="form-input" placeholder="González" required>
+                        <input type="text" id="apellidoPaternoDifunto" class="form-input" placeholder="González" required>
                     </div>
                     <div>
                         <label class="form-label">Apellido Materno</label>
-                        <input type="text" id="apellidoMaternoDifunto" name="apellidoMaternoDifunto" class="form-input" placeholder="Soto">
+                        <input type="text" id="apellidoMaternoDifunto" class="form-input" placeholder="Soto">
                     </div>
                 </div>
 
-                <!-- Ubicación -->
+                <!-- Ubicación Sepultura -->
                 <h2 class="form-section-title">Ubicación de la Sepultura</h2>
                 <div class="form-group">
-                    <label class="form-label">Cementerio *</label>
-                    <select id="cementerio" name="cementerio" class="form-select" required>
-                        <option disabled selected value="">Selecciona cementerio</option>
-                        <option>Parque del Recuerdo Américo Vespucio</option>
-                        <option>Cementerio General de Santiago</option>
-                        <option>Cementerio Católico de Recoleta</option>
-                        <option>Cementerio Parque del Santiago</option>
-                        <option>Parque Canaán</option>
-                        <option>Cementerio Metropolitano</option>
-                        <option>Parque del Recuerdo Cordillera</option>
-                        <option>Parque del Prado</option>
-                        <option>Parque Sendero San Bernardo</option>
-                        <option>Parque Sendero Maipú</option>
-                        <option>Parque El Manantial</option>
-                        <option>Cementerio Católico de Maipú</option>
-                        <option>Parque del Recuerdo Padre Hurtado</option>
-                        <option>Parque del Recuerdo Rancagua</option>
-                        <option>Parque Sendero Rancagua</option>
-                        <option>Cementerio Municipal N° 1 de Rancagua</option>
-                        <option>Cementerio Municipal N° 2 (Baquedano)</option>
-                        <option>Parque Jardín Rancagua</option>
-                        <option>Parque Jardín Las Flores</option>
-                    </select>
+                    <label class="form-label">Cementerio (Fijado según selección previa) *</label>
+                    <input type="text" id="cementerio" class="form-input" style="background-color: #e9ecef; cursor: not-allowed; font-weight: 600;" readonly required>
                 </div>
 
                 <div class="form-group-grid cols-3">
                     <div>
                         <label class="form-label">Sector</label>
-                        <input type="text" id="sector" name="sector" class="form-input" placeholder="A">
+                        <input type="text" id="sector" class="form-input" placeholder="Sector">
                     </div>
                     <div>
                         <label class="form-label">Patio</label>
-                        <input type="text" id="patio" name="patio" class="form-input" placeholder="4">
+                        <input type="text" id="patio" class="form-input" placeholder="Patio">
                     </div>
                     <div>
                         <label class="form-label">Nº Sepultura</label>
-                        <input type="text" id="numeroSepultura" name="numeroSepultura" class="form-input" placeholder="456">
+                        <input type="text" id="numeroSepultura" class="form-input" placeholder="456">
                     </div>
                 </div>
 
-                <!-- PASO 2: AGENDA TU VISITA -->
-                <h2 class="form-section-title">Paso 2: Agenda tu Visita</h2>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">(Solo Visita Spot)</p>
-                
+                <div class="form-group">
+                    <label class="form-label">Referencias de ubicación en terreno</label>
+                    <textarea id="referenciasSepultura" class="form-input" rows="3" placeholder="Puntos de referencia para ubicar la lápida rápidamente"></textarea>
+                </div>
+
+                <!-- Fecha de Visita Spot -->
+                <h2 class="form-section-title">Fecha del Servicio Spot</h2>
                 <div class="form-group">
                     <label class="form-label">Selecciona la fecha del servicio *</label>
-                    <input type="text" id="fechaServicio" name="fechaServicio" class="form-input" placeholder="Haz clic para seleccionar" readonly required>
+                    <input type="text" id="fechaServicio" class="form-input" placeholder="Haz clic para seleccionar fecha" readonly required>
                 </div>
 
-                <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem;">
-                    Recibirás confirmación por WhatsApp y Email.
-                </p>
-
-                <!-- RESUMEN -->
-                <h2 class="form-section-title">Resumen</h2>
-                <div style="background-color: var(--bg-light); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;">
-                        <span style="color: var(--text-muted);">Nivel</span>
-                        <span style="color: var(--primary-color); font-weight: 600;" id="summaryNivel">—</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;">
-                        <span style="color: var(--text-muted);">Precio Base</span>
-                        <span style="color: var(--primary-color); font-weight: 600;" id="summaryBase">$0</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;">
-                        <span style="color: var(--text-muted);">Adicional</span>
-                        <span style="color: var(--primary-color); font-weight: 600;" id="summaryAdicional">$0</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 0.6rem 0; padding-top: 1rem; font-weight: 700; color: var(--primary-color); font-size: 0.95rem;">
-                        <span>TOTAL</span>
-                        <span id="summaryTotal">$0</span>
-                    </div>
-                </div>
-
-                <!-- Datos de la Tarjeta de Crédito -->
-                <h2 class="form-section-title">Datos de la Tarjeta</h2>
-                
-                <div class="form-group">
-                    <label class="form-label">Número de Tarjeta *</label>
-                    <input type="text" id="numeroTarjeta" name="numeroTarjeta" class="form-input" 
-                           placeholder="1234 5678 9012 3456" 
-                           inputmode="numeric" 
-                           maxlength="19"
-                           required>
-                </div>
-
-                <div class="form-group-grid">
-                    <div>
-                        <label class="form-label">Titular de la Tarjeta *</label>
-                        <input type="text" id="titularTarjeta" name="titularTarjeta" class="form-input" 
-                               placeholder="JUAN PEREZ GARCIA" 
-                               required>
-                    </div>
-                    <div>
-                        <label class="form-label">Vencimiento (MM/YY) *</label>
-                        <input type="text" id="vencimientoTarjeta" name="vencimientoTarjeta" class="form-input" 
-                               placeholder="12/25" 
-                               maxlength="5"
-                               inputmode="numeric"
-                               required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">CVV *</label>
-                    <input type="text" id="cvvTarjeta" name="cvvTarjeta" class="form-input" 
-                           placeholder="123" 
-                           maxlength="4"
-                           inputmode="numeric"
-                           required>
-                </div>
-
-                <!-- Términos y Condiciones -->
-                <div class="form-group" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                    <label style="display: flex; align-items: center; gap: 0.8rem; cursor: pointer; font-weight: 500; color: var(--text-main);">
-                        <input type="checkbox" id="aceptoTerminos" name="aceptoTerminos" 
-                               style="width: 20px; height: 20px; cursor: pointer;" 
-                               required>
-                        <span>Acepto los términos y condiciones de pago</span>
-                    </label>
-                </div>
-
-                <!-- SEGURIDAD -->
-                <div style="background-color: #f0fff4; border-left: 4px solid var(--success-color); padding: 1rem; border-radius: var(--radius-sm); text-align: center; margin-top: 1.5rem; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; color: var(--success-color); font-size: 0.95rem;">🔒 Tu información está segura</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem;">Usamos encriptación SSL</div>
-                </div>
-
-                <!-- BOTÓN SUBMIT -->
-                <button type="submit" style="width: 100%; padding: 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s; text-transform: uppercase; letter-spacing: 0.5px;">
-                    ✓ Continuar al Pago →
+                <button type="submit" id="btnSubmit" style="width: 100%; padding: 1.1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1rem;">
+                    Continuar al Resumen y Pago →
                 </button>
             </form>
-
-
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <h4>GraveCare - Preservación & Memoria</h4>
-        <p>contacto@gravecare.cl | +56 9 XXXX XXXX</p>
-        <p style="margin-top: 1rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
+        <p>contacto@gravecare.cl</p>
+        <p style="margin-top: 0.8rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
     </footer>
 
-    <script>
-        // BASE DE DATOS REGIONES Y COMUNAS (SOLO CHILE)
+    <script type="module">
+        let datosDelPlanGlobal = {};
+
         const regionesComunas = {
             "Región de Arica y Parinacota": ["Arica", "Camarones", "General Lagos", "Putre"],
             "Región de Tarapacá": ["Alto Hospicio", "Camiña", "Colchane", "Huara", "Iquique", "Pica", "Pozo Almonte"],
@@ -770,280 +230,166 @@
             "Región de Magallanes y de la Antártica Chilena": ["Antártica", "Cabo de Hornos", "Laguna Blanca", "Natales", "Porvenir", "Primavera", "Punta Arenas", "Río Verde", "San Gregorio", "Timaukel", "Torres del Paine"]
         };
 
-        // Cargar regiones en el select
         const regionSelect = document.getElementById('region');
-        Object.keys(regionesComunas).forEach(region => {
-            const option = document.createElement('option');
-            option.value = region;
-            option.textContent = region;
-            regionSelect.appendChild(option);
+        Object.keys(regionesComunas).forEach(reg => {
+            const opt = document.createElement('option');
+            opt.value = reg;
+            opt.textContent = reg;
+            regionSelect.appendChild(opt);
         });
 
-        // Elementos del formulario
         const paisSelect = document.getElementById('pais');
-        const regionSelect2 = document.getElementById('region');
-        const regionTextInput = document.getElementById('regionText');
+        const regionText = document.getElementById('regionText');
         const comunaSelect = document.getElementById('comuna');
-        const comunaTextInput = document.getElementById('comunaText');
+        const comunaText = document.getElementById('comunaText');
 
-        // Evento: Cambiar País
         paisSelect.addEventListener('change', function() {
-            const isPais = this.value === 'Chile';
-
-            if (isPais) {
-                // Mostrar selects de Chile
-                regionSelect2.classList.remove('hidden');
-                regionSelect2.required = true;
-                regionTextInput.classList.add('hidden');
-                regionTextInput.required = false;
-                
-                comunaSelect.classList.remove('hidden');
-                comunaSelect.required = true;
-                comunaTextInput.classList.add('hidden');
-                comunaTextInput.required = false;
-
-                // Resetear campos de otros países
-                regionTextInput.value = '';
-                comunaTextInput.value = '';
-                comunaSelect.innerHTML = '<option disabled selected>Selecciona región primero</option>';
-            } else {
-                // Mostrar inputs de texto para otros países
-                regionSelect2.classList.add('hidden');
-                regionSelect2.required = false;
-                regionTextInput.classList.remove('hidden');
-                regionTextInput.required = true;
-                
-                comunaSelect.classList.add('hidden');
-                comunaSelect.required = false;
-                comunaTextInput.classList.remove('hidden');
-                comunaTextInput.required = true;
-
-                // Resetear campos de Chile
-                regionSelect2.value = '';
-                comunaSelect.value = '';
-            }
+            const isChile = this.value === 'Chile';
+            regionSelect.classList.toggle('hidden', !isChile);
+            regionSelect.required = isChile;
+            regionText.classList.toggle('hidden', isChile);
+            regionText.required = !isChile;
+            comunaSelect.classList.toggle('hidden', !isChile);
+            comunaSelect.required = isChile;
+            comunaText.classList.toggle('hidden', isChile);
+            comunaText.required = !isChile;
         });
 
-        // Evento: Cambiar Región (solo Chile)
-        regionSelect2.addEventListener('change', function() {
-            const comunaSelect2 = document.getElementById('comuna');
-            comunaSelect2.innerHTML = '<option disabled selected>Selecciona comuna</option>';
-            
-            const selectedRegion = this.value;
-            if (regionesComunas[selectedRegion]) {
-                regionesComunas[selectedRegion].forEach(comuna => {
-                    const option = document.createElement('option');
-                    option.value = comuna;
-                    option.textContent = comuna;
-                    comunaSelect2.appendChild(option);
+        regionSelect.addEventListener('change', function() {
+            comunaSelect.innerHTML = '<option disabled selected value="">Selecciona comuna</option>';
+            const coms = regionesComunas[this.value];
+            if (coms) {
+                coms.forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c;
+                    o.textContent = c;
+                    comunaSelect.appendChild(o);
                 });
             }
         });
 
-        // Formatear número de tarjeta (agregar espacios cada 4 dígitos)
-        const numeroTarjetaInput = document.getElementById('numeroTarjeta');
-        numeroTarjetaInput.addEventListener('input', function(e) {
-            let valor = e.target.value.replace(/\s/g, '');
-            let valorFormateado = '';
-            for (let i = 0; i < valor.length; i++) {
-                if (i > 0 && i % 4 === 0) {
-                    valorFormateado += ' ';
+        flatpickr('#fechaServicio', {
+            mode: 'single',
+            minDate: 'today',
+            locale: 'es',
+            dateFormat: 'd \\d\\e F Y',
+            closeOnSelect: true,
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    document.getElementById('fechaServicio').dataset.fechaIso = selectedDates[0].toISOString().split('T')[0];
                 }
-                valorFormateado += valor[i];
             }
-            e.target.value = valorFormateado;
         });
 
-        // Formatear vencimiento (MM/YY)
-        const vencimientoInput = document.getElementById('vencimientoTarjeta');
-        vencimientoInput.addEventListener('input', function(e) {
-            let valor = e.target.value.replace(/\D/g, '');
-            if (valor.length >= 2) {
-                valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
+        function cargarDatosPrevios() {
+            const raw = localStorage.getItem('gravecare_last_order') ||
+                        localStorage.getItem('gravecare_datos_completos') ||
+                        sessionStorage.getItem('gravecare_registro_datos');
+
+            if (raw) {
+                try {
+                    datosDelPlanGlobal = JSON.parse(raw);
+                    // Rescatar cementerio fijado
+                    const cemFijo = datosDelPlanGlobal.cementerio || 
+                                   datosDelPlanGlobal.ubicacionSepultura?.cementerio || 
+                                   'Parque del Recuerdo Américo Vespucio';
+                    document.getElementById('cementerio').value = cemFijo;
+                } catch(e) {
+                    console.error(e);
+                }
             }
-            e.target.value = valor;
-        });
+        }
 
-        // Formatear CVV (solo números)
-        const cvvInput = document.getElementById('cvvTarjeta');
-        cvvInput.addEventListener('input', function(e) {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-
-        const form = document.getElementById('contratacion-form');
-
-        form.addEventListener('submit', (e) => {
+        document.getElementById('contratacion-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
             const fechaInput = document.getElementById('fechaServicio');
             const fechaISO = fechaInput.dataset.fechaIso;
-            const pais = document.getElementById('pais').value;
-
             if (!fechaISO) {
-                alert('Por favor, selecciona una fecha para el servicio');
+                alert('Por favor, selecciona una fecha para el servicio Spot.');
                 return;
             }
 
-            // Validar tarjeta de crédito
-            const aceptoTerminos = document.getElementById('aceptoTerminos').checked;
-            if (!aceptoTerminos) {
-                alert('Por favor, acepta los términos y condiciones de pago');
-                return;
-            }
+            const pais = document.getElementById('pais').value;
+            const region = (pais === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
+            const comuna = (pais === 'Chile') ? document.getElementById('comuna').value : document.getElementById('comunaText').value;
 
-            // Determinar región y comuna según el país
-            let region, comuna;
-            if (pais === 'Chile') {
-                region = document.getElementById('region').value;
-                comuna = document.getElementById('comuna').value;
-            } else {
-                region = document.getElementById('regionText').value;
-                comuna = document.getElementById('comunaText').value;
-            }
+            const nombresTit = document.getElementById('nombresTitular').value.trim();
+            const apPatTit = document.getElementById('apellidoPaternoTitular').value.trim();
+            const apMatTit = document.getElementById('apellidoMaternoTitular').value.trim();
 
-            const datos = {
-                numeroOrden: datosDelPlanGlobal.numeroOrden || 'ORD-' + Date.now(),
+            const nombresDif = document.getElementById('nombresDifunto').value.trim();
+            const apPatDif = document.getElementById('apellidoPaternoDifunto').value.trim();
+            const apMatDif = document.getElementById('apellidoMaternoDifunto').value.trim();
+
+            const dirCalle = document.getElementById('direccion').value.trim();
+            const dirNum = document.getElementById('numero').value.trim();
+            const dirDepto = document.getElementById('departamento').value.trim();
+
+            const ordenActualizada = {
+                ...datosDelPlanGlobal,
+                numeroOrden: datosDelPlanGlobal.numeroOrden || ('GC-SPOT-' + Date.now()),
+                tipoServicio: 'SPOT',
                 tipoSuscripcion: 'SPOT',
-                tipo: document.querySelector('[name="cementerio"]').value || '',
-		nombres: document.getElementById('nombresTitular').value,
-		apellidoPaterno: document.getElementById('apellidoPaternoTitular').value,
-		apellidoMaterno: document.getElementById('apellidoMaternoTitular').value || '',
-                pais: pais,
-                email: document.getElementById('email').value,
-                rut: document.getElementById('rut').value,
-                telefono: document.getElementById('telefono').value,
-                direccion: document.getElementById('direccion').value,
-                numero: document.getElementById('numero').value,
-                departamento: document.getElementById('departamento').value || '',
-                region: region,
-                comuna: comuna,
-                nombresDifunto: document.getElementById('nombresDifunto').value,
-                apellidoPaternoDifunto: document.getElementById('apellidoPaternoDifunto').value,
-                apellidoMaternoDifunto: document.getElementById('apellidoMaternoDifunto').value || '',
-                cementerio: document.getElementById('cementerio').value,
-                sector: document.getElementById('sector').value || '',
-                patio: document.getElementById('patio').value || '',
-                numeroSepultura: document.getElementById('numeroSepultura').value || '',
-                fechaServicio: fechaISO,
-                fechaServicioLegible: document.getElementById('fechaServicio').value || '',
-                
-                // ✅ PRESERVAR DATOS DEL PLAN (Viene de suscribirme-Spot.html)
-                nivel: datosDelPlanGlobal.nivel || '',
-                frecuencia: datosDelPlanGlobal.frecuencia || '',
-                precioBase: datosDelPlanGlobal.precioBase || 0,
-                adicional: datosDelPlanGlobal.adicional || 0,
-                
-                // ✅ CORREGIDO: SIN datos de tarjeta en localStorage (CRÍTICO DE SEGURIDAD)
-                // Los datos de tarjeta se procesan directamente con la pasarela de pagos
-                timestamp: new Date().toISOString()
+                fechaServicioProgramada: fechaISO,
+                fechaServicioTexto: fechaInput.value,
+                titular: {
+                    nombre: `${nombresTit} ${apPatTit} ${apMatTit}`.trim(),
+                    nombres: nombresTit,
+                    apellidoPaterno: apPatTit,
+                    apellidoMaterno: apMatTit,
+                    email: document.getElementById('email').value.trim(),
+                    rut: document.getElementById('rut').value.trim(),
+                    rutDni: document.getElementById('rut').value.trim(),
+                    telefono: document.getElementById('telefono').value.trim(),
+                    pais: pais,
+                    direccion: dirCalle,
+                    numero: dirNum,
+                    departamento: dirDepto,
+                    region: region,
+                    comuna: comuna
+                },
+                direccionTitular: {
+                    pais: pais,
+                    direccion: dirCalle,
+                    numero: dirNum,
+                    departamento: dirDepto,
+                    region: region,
+                    comuna: comuna
+                },
+                difunto: {
+                    nombre: `${nombresDif} ${apPatDif} ${apMatDif}`.trim(),
+                    nombres: nombresDif,
+                    apellidoPaterno: apPatDif,
+                    apellidoMaterno: apMatDif
+                },
+                ubicacionSepultura: {
+                    cementerio: document.getElementById('cementerio').value,
+                    sector: document.getElementById('sector').value.trim(),
+                    patio: document.getElementById('patio').value.trim(),
+                    numero: document.getElementById('numeroSepultura').value.trim(),
+                    numeroSepultura: document.getElementById('numeroSepultura').value.trim(),
+                    referencias: document.getElementById('referenciasSepultura').value.trim()
+                },
+                servicio: {
+                    tipo: 'SPOT',
+                    planNombre: datosDelPlanGlobal.nivel ? `Visita Spot - ${datosDelPlanGlobal.nivel}` : 'Visita Única Spot',
+                    frecuencia: 'Visita Única',
+                    nivel: datosDelPlanGlobal.nivel || 'Estándar',
+                    fechaServicioProgramada: fechaISO,
+                    fechaServicioTexto: fechaInput.value,
+                    fechaServicioLegible: fechaInput.value
+                }
             };
 
-            localStorage.setItem('gravecare_last_order', JSON.stringify(datos));
-            sessionStorage.setItem('gravecare_registro_datos', JSON.stringify(datos));
-            console.log('✓ Orden guardada:', datos);
-            setTimeout(() => {
-                window.location.href = 'confirmacion.html';
-            }, 100);
+            const jsonFinal = JSON.stringify(ordenActualizada);
+            localStorage.setItem('gravecare_datos_completos', jsonFinal);
+            localStorage.setItem('gravecare_last_order', jsonFinal);
+
+            window.location.href = 'resumen-pago.html';
         });
 
-        // GUARDAR EN SESSIONBSTORAGE PARA PRESERVAR ENTRE PÁGINAS
-        var datosDelPlanGlobal = {};
-
-        // CARGAR DATOS DEL PLAN INMEDIATAMENTE (SIN ESPERAR DOMContentLoaded)
-        function cargarDatosDelPlan() {
-            const ordenGuardada = localStorage.getItem('gravecare_last_order');
-            console.log('📋 localStorage.getItem resultado:', ordenGuardada);
-            
-            if (ordenGuardada) {
-                try {
-                    const datos = JSON.parse(ordenGuardada);
-                    console.log('✅ Datos parseados:', datos);
-                    
-                    // GUARDAR EN VARIABLE GLOBAL para usarla después
-                    datosDelPlanGlobal = datos;
-                    
-                    // Actualizar RESUMEN con datos del plan
-                    const summaryNivel = document.getElementById('summaryNivel');
-                    const summaryBase = document.getElementById('summaryBase');
-                    const summaryAdicional = document.getElementById('summaryAdicional');
-                    const summaryTotal = document.getElementById('summaryTotal');
-                    
-                    if (summaryNivel && datos.nivel) {
-                        summaryNivel.textContent = datos.nivel;
-                        console.log('✓ Nivel actualizado:', datos.nivel);
-                    }
-                    if (summaryBase && datos.precioBase) {
-                        summaryBase.textContent = '$' + datos.precioBase.toLocaleString('es-CL');
-                        console.log('✓ Precio Base actualizado:', datos.precioBase);
-                    }
-                    if (summaryAdicional && datos.adicional) {
-                        summaryAdicional.textContent = '$' + datos.adicional.toLocaleString('es-CL');
-                        console.log('✓ Adicional actualizado:', datos.adicional);
-                    }
-                    if (summaryTotal && datos.precioBase && datos.adicional) {
-                        const total = datos.precioBase + datos.adicional;
-                        summaryTotal.textContent = '$' + total.toLocaleString('es-CL');
-                        console.log('✓ Total actualizado:', total);
-                    }
-                } catch (error) {
-                    console.log('❌ Error al parsear localStorage:', error);
-                }
-            } else {
-                console.log('ℹ️ No hay orden previa en localStorage');
-            }
-        }
-
-        // Ejecutar al cargar el documento
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔄 DOMContentLoaded disparado');
-            cargarDatosDelPlan();
-
-            // INICIALIZAR CALENDARIO
-            const fechasDisponibles = [
-                '2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19',
-                '2026-09-20', '2026-09-21', '2026-09-22', '2026-09-23', '2026-09-24',
-                '2026-09-25', '2026-09-26', '2026-09-27', '2026-09-28', '2026-09-29',
-                '2026-09-30', '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04',
-                '2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09',
-                '2026-10-10', '2026-10-11', '2026-10-12', '2026-10-13', '2026-10-14',
-                '2026-10-15'
-            ];
-
-            window.fechaPickr = flatpickr('#fechaServicio', {
-                mode: 'single',
-                minDate: '2026-09-15',
-                maxDate: '2026-10-15',
-                enable: fechasDisponibles,
-                locale: 'es',
-                dateFormat: 'd \\d\\e F Y',
-                closeOnSelect: true,
-                clickOpens: true,
-                allowInput: false,
-                disable: [
-                    function(date) {
-                        const dateStr = date.toISOString().split('T')[0];
-                        return !fechasDisponibles.includes(dateStr);
-                    }
-                ],
-                onChange: function(selectedDates) {
-                    if (selectedDates.length > 0) {
-                        const fecha = selectedDates[0];
-                        const fechaISO = fecha.toISOString().split('T')[0];
-                        document.getElementById('fechaServicio').dataset.fechaIso = fechaISO;
-                        console.log('✓ Fecha:', document.getElementById('fechaServicio').value);
-                    }
-                }
-            });
-        });
-
-        // También ejecutar cuando el DOM esté listo pero antes de cargar todas las imágenes
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', cargarDatosDelPlan);
-        } else {
-            // Si el script se ejecuta después de que DOMContentLoaded ya se disparó
-            cargarDatosDelPlan();
-        }
+        cargarDatosPrevios();
     </script>
-
 </body>
 </html>

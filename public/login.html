@@ -1,98 +1,125 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>GraveCare - Iniciar Sesión</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingreso a Mi Perfil — GraveCare Chile</title>
   
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f8faf8",
-            "surface-container-lowest": "#ffffff",
-            "primary": "#002d1a",
-            "secondary": "#4e6451",
-            "primary-container": "#1a432f"
-          }
-        }
-      }
-    };
-  </script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col">
+<body class="bg-[#f7f9f8] min-h-screen flex flex-col text-[#191c1b]">
 
-  <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-    <div class="flex justify-between items-center w-full px-6 max-w-6xl mx-auto h-20">
-      <a href="dashboard.html" class="flex items-center gap-2">
-        <img src="/assets/Logo.jpg" alt="GraveCare Logo" class="h-12 w-auto object-contain">
+  <!-- Top Navbar -->
+  <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
+    <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="assets/Logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='Logo.jpg';">
       </a>
-      <a href="registro.html" class="text-sm font-semibold text-primary hover:underline">¿No tienes cuenta? Regístrate</a>
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-gray-600 hidden sm:inline">¿No tienes cuenta?</span>
+        <a href="registro.html" class="text-[#002d1a] font-bold hover:underline">Regístrate</a>
+      </div>
     </div>
   </header>
 
-  <main class="flex-grow flex items-center justify-center relative overflow-hidden px-4 py-12">
-    <div class="relative z-10 w-full max-w-md">
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-xl p-8 md:p-10 flex flex-col items-center">
-        
-        <div class="text-center mb-6 w-full">
-          <h1 class="text-2xl font-bold text-primary mb-2">Ingreso a Mi Perfil</h1>
-          <p class="text-sm text-gray-600">Ingresa con tu RUT o Correo Electrónico</p>
+  <!-- Contenedor Principal -->
+  <main class="flex-grow flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10">
+      
+      <!-- Título de la tarjeta -->
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#002d1a]">Ingreso a Mi Perfil</h1>
+        <p class="text-gray-500 text-sm mt-2">Ingresa con tu RUT o Correo Electrónico</p>
+      </div>
+
+      <!-- Alerta de Notificaciones / Errores -->
+      <div id="alertBox" style="display: none;" class="p-4 rounded-xl text-sm font-medium mb-6 transition-all"></div>
+
+      <!-- Formulario de Inicio de Sesión -->
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5" for="identificador">RUT o Correo Electrónico</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3.5 top-3 text-gray-400 text-lg">badge</span>
+            <input type="text" id="identificador" required placeholder="ejemplo@correo.cl o 12.345.678-9" 
+                   class="w-full pl-10 pr-4 py-3 bg-[#f2f4f2] border border-gray-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] focus:border-[#002d1a] outline-none transition-all">
+          </div>
         </div>
 
-        <!-- Alertas -->
-        <div id="alert-error" class="w-full p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200" style="display: none;"></div>
-        <div id="alert-success" class="w-full p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg border border-green-200" style="display: none;"></div>
-
-        <form id="form-login" class="w-full space-y-5" novalidate>
-          
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1" for="rut">RUT o Correo Electrónico</label>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">badge</span>
-              <input class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm" id="rut" name="rut" placeholder="12.345.678-K o correo@ejemplo.com" type="text" required autocomplete="username">
-            </div>
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="block text-xs font-bold text-gray-700 uppercase" for="contrasena">Contraseña</label>
+            <button type="button" id="btnOlvidoClave" class="text-xs text-[#002d1a] font-semibold hover:underline cursor-pointer">¿Olvidaste tu clave?</button>
           </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <label class="block text-sm font-semibold text-gray-700" for="password">Contraseña</label>
-              <a href="https://wa.me/56998280501?text=Hola%20GraveCare,%20olvidé%20mi%20contraseña" target="_blank" class="text-xs text-primary font-semibold hover:underline">¿Olvidaste tu clave?</a>
-            </div>
-            <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
-              <input class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm" id="password" name="password" placeholder="••••••••" type="password" required autocomplete="current-password">
-            </div>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-3.5 top-3 text-gray-400 text-lg">lock</span>
+            <input type="password" id="contrasena" required placeholder="••••••••" 
+                   class="w-full pl-10 pr-11 py-3 bg-[#f2f4f2] border border-gray-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] focus:border-[#002d1a] outline-none transition-all">
+            <button type="button" id="togglePassword" class="absolute right-3 top-3 text-gray-400 hover:text-gray-700 focus:outline-none cursor-pointer">
+              <span class="material-symbols-outlined text-lg select-none" id="iconPassword">visibility</span>
+            </button>
           </div>
-
-          <button type="submit" id="btn-login" class="w-full bg-primary text-white font-semibold py-3.5 px-6 rounded-lg shadow-md hover:bg-primary-container transition-colors duration-300 flex justify-center items-center gap-2 text-sm cursor-pointer">
-            <span>Ingresar</span>
-            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </button>
-        </form>
-
-        <div class="mt-6 text-center text-sm text-gray-600">
-          ¿Aún no tienes cuenta? <a href="registro.html" class="text-primary font-bold hover:underline">Regístrate aquí</a>
         </div>
 
+        <button type="submit" id="btnIngresar" 
+                class="w-full py-3.5 px-4 bg-[#002d1a] hover:bg-[#1a432f] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+          <span>Ingresar</span>
+          <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+        </button>
+      </form>
+
+      <!-- Enlace inferior -->
+      <div class="text-center mt-8 pt-6 border-t border-gray-100 text-xs text-gray-600">
+        ¿Aún no tienes cuenta? <a href="registro.html" class="text-[#002d1a] font-bold hover:underline">Regístrate aquí</a>
       </div>
     </div>
   </main>
 
-  <!-- Script Firebase Autónomo (Sin imports relativos rotos) -->
+  <!-- Modal para Recuperar Contraseña -->
+  <div id="modalRecuperar" style="display: none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl border border-gray-100">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-green-50 text-[#002d1a] rounded-full flex items-center justify-center mx-auto mb-3">
+          <span class="material-symbols-outlined text-2xl">lock_reset</span>
+        </div>
+        <h3 class="text-xl font-bold text-[#002d1a]">Restablecer Contraseña</h3>
+        <p class="text-xs text-gray-500 mt-1">Ingresa tu correo registrado para enviarte un enlace de recuperación seguro.</p>
+      </div>
+
+      <div id="modalAlert" style="display: none;" class="p-3 rounded-lg text-xs font-medium mb-4"></div>
+
+      <form id="formRecuperar" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="emailRecuperar">Correo Electrónico</label>
+          <input type="email" id="emailRecuperar" required placeholder="correo@ejemplo.com" 
+                 class="w-full px-4 py-2.5 bg-[#f2f4f2] border border-gray-300 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] outline-none">
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="btnCerrarModal" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50">Cancelar</button>
+          <button type="submit" id="btnEnviarRecuperar" class="w-1/2 py-2.5 bg-[#002d1a] text-white rounded-lg text-sm font-bold hover:bg-[#1a432f]">Enviar Enlace</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-gray-500 py-6 border-t border-gray-200">
+    GraveCare SpA · Preservación & Memoria · contacto@gravecare.cl · 2026
+  </footer>
+
+  <!-- Script Modular Firebase -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
@@ -107,106 +134,156 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const form = document.getElementById("form-login");
-    const inputIdent = document.getElementById("rut");
-    const inputPass = document.getElementById("password");
-    const btnLogin = document.getElementById("btn-login");
-    const alertError = document.getElementById("alert-error");
-    const alertSuccess = document.getElementById("alert-success");
+    const loginForm = document.getElementById('loginForm');
+    const btnIngresar = document.getElementById('btnIngresar');
+    const alertBox = document.getElementById('alertBox');
+    const togglePassword = document.getElementById('togglePassword');
+    const contrasenaInput = document.getElementById('contrasena');
+    const iconPassword = document.getElementById('iconPassword');
 
-    // Prellenar si viene en la URL (?rut=... o ?email=...)
-    const urlParams = new URLSearchParams(window.location.search);
-    const autoIdent = urlParams.get("rut") || urlParams.get("email");
-    const autoPass = urlParams.get("password");
+    // Alternar visibilidad de contraseña
+    togglePassword.addEventListener('click', () => {
+      const isPassword = contrasenaInput.type === 'password';
+      contrasenaInput.type = isPassword ? 'text' : 'password';
+      iconPassword.textContent = isPassword ? 'visibility_off' : 'visibility';
+    });
 
-    if (autoIdent) inputIdent.value = decodeURIComponent(autoIdent);
-    if (autoPass) inputPass.value = decodeURIComponent(autoPass);
-
-    // Si viene con ?logout=true cerramos sesión previa
-    if (urlParams.get("logout") === "true") {
-      await signOut(auth);
-      sessionStorage.removeItem("gravecare_user");
-    } else {
-      // Si ya hay sesión activa y no se forzó el logout, redirigir
-      onAuthStateChanged(auth, (user) => {
-        if (user && !autoIdent) {
-          window.location.href = "dashboard.html";
-        }
-      });
+    // Manejo de alertas visuales
+    function showAlert(mensaje, tipo = 'error') {
+      alertBox.className = `p-4 rounded-xl text-sm font-medium mb-6 ${
+        tipo === 'error' 
+          ? 'bg-red-50 text-red-900 border border-red-200' 
+          : 'bg-green-50 text-green-900 border border-green-200'
+      }`;
+      alertBox.innerHTML = mensaje;
+      alertBox.style.display = 'block';
     }
 
-    function cleanRut(rut) {
-      return rut.toLowerCase().replace(/\./g, "").replace(/\s/g, "");
+    // Traductor exhaustivo de errores de Firebase
+    function traducirErrorFirebase(codigo) {
+      switch (codigo) {
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+          return 'El usuario o la contraseña no coinciden. Verifica los datos o haz clic en <strong>¿Olvidaste tu clave?</strong> para generar una nueva.';
+        case 'auth/user-not-found':
+          return 'No existe una cuenta registrada con este correo o RUT. Por favor regístrate primero.';
+        case 'auth/too-many-requests':
+          return 'Demasiados intentos fallidos consecutivos. Tu acceso ha sido suspendido temporalmente por seguridad. Restablece tu clave o intenta en 10 minutos.';
+        case 'auth/invalid-email':
+          return 'El formato de correo ingresado no es válido.';
+        case 'auth/user-disabled':
+          return 'Esta cuenta ha sido inhabilitada. Escríbenos a contacto@gravecare.cl.';
+        case 'auth/network-request-failed':
+          return 'Error de conexión. Verifica tu acceso a Internet.';
+        default:
+          return 'No se pudo iniciar sesión. Verifica tus credenciales o restablece tu clave.';
+      }
     }
 
-    form.addEventListener("submit", async (e) => {
+    // Proceso de Login
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      alertError.style.display = "none";
-      alertSuccess.style.display = "none";
+      alertBox.style.display = 'none';
 
-      const identifier = inputIdent.value.trim();
-      const password = inputPass.value;
+      const identificador = document.getElementById('identificador').value.trim();
+      const contrasena = document.getElementById('contrasena').value.trim();
 
-      if (!identifier || !password) {
-        alertError.textContent = "Por favor completa ambos campos.";
-        alertError.style.display = "block";
+      if (!identificador || !contrasena) {
+        showAlert('Por favor completa todos los campos.');
         return;
       }
 
+      btnIngresar.disabled = true;
+      btnIngresar.innerHTML = `
+        <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Verificando...</span>
+      `;
+
+      let emailFinal = identificador.toLowerCase();
+
       try {
-        btnLogin.disabled = true;
-        btnLogin.querySelector("span").textContent = "Verificando...";
-
-        let email = identifier;
-
-        // Si ingresó RUT, buscar el email correspondiente
-        if (!identifier.includes("@")) {
-          const rutLimpio = cleanRut(identifier);
-          const snapRut = await getDoc(doc(db, "rut_lookup", rutLimpio));
-          
-          if (!snapRut.exists()) {
-            // Intento adicional buscando en colección 'usuarios'
-            const qUsers = query(collection(db, "usuarios"), where("rut", "==", identifier));
-            const snapUsers = await getDocs(qUsers);
-            if (snapUsers.empty) {
-              throw new Error("El RUT ingresado no está registrado.");
-            }
-            email = snapUsers.docs[0].data().email;
+        // Si no contiene '@', buscar correspondencia de RUT en Firestore
+        if (!identificador.includes('@')) {
+          const rutLimpio = identificador.toLowerCase().replace(/\./g, '').replace(/-/g, '').replace(/\s/g, '');
+          const rutDoc = await getDoc(doc(db, 'rut_lookup', rutLimpio));
+          if (rutDoc.exists() && rutDoc.data().email) {
+            emailFinal = rutDoc.data().email.toLowerCase();
           } else {
-            email = snapRut.data().email;
+            throw { code: 'auth/user-not-found' };
           }
         }
 
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
-        
-        await setDoc(doc(db, "usuarios", userCred.user.uid), {
-          lastLogin: serverTimestamp()
-        }, { merge: true });
+        // Autenticación oficial
+        await signInWithEmailAndPassword(auth, emailFinal, contrasena);
 
-        sessionStorage.setItem("gravecare_user", JSON.stringify({
-          uid: userCred.user.uid,
-          email: userCred.user.email
-        }));
-
-        alertSuccess.textContent = "Acceso correcto. Redirigiendo...";
-        alertSuccess.style.display = "block";
-
+        showAlert('✓ Acceso concedido. Redirigiendo...', 'success');
         setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 800);
+          window.location.href = 'dashboard.html';
+        }, 600);
 
       } catch (err) {
-        let msg = "Credenciales incorrectas. Verifica tus datos.";
-        if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
-          msg = "RUT/Correo o contraseña incorrectos.";
-        } else if (err.message) {
-          msg = err.message;
-        }
-        alertError.textContent = msg;
-        alertError.style.display = "block";
+        console.error('Error de autenticación:', err);
+        const mensajeTraducido = traducirErrorFirebase(err.code);
+        showAlert(mensajeTraducido, 'error');
       } finally {
-        btnLogin.disabled = false;
-        btnLogin.querySelector("span").textContent = "Ingresar";
+        btnIngresar.disabled = false;
+        btnIngresar.innerHTML = `
+          <span>Ingresar</span>
+          <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+        `;
+      }
+    });
+
+    // ================= MODAL RECUPERAR CONTRASEÑA =================
+    const modalRecuperar = document.getElementById('modalRecuperar');
+    const btnOlvidoClave = document.getElementById('btnOlvidoClave');
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    const formRecuperar = document.getElementById('formRecuperar');
+    const modalAlert = document.getElementById('modalAlert');
+    const btnEnviarRecuperar = document.getElementById('btnEnviarRecuperar');
+
+    btnOlvidoClave.addEventListener('click', () => {
+      const inputIdentificador = document.getElementById('identificador').value.trim();
+      if (inputIdentificador.includes('@')) {
+        document.getElementById('emailRecuperar').value = inputIdentificador;
+      }
+      modalAlert.style.display = 'none';
+      modalRecuperar.style.display = 'flex';
+    });
+
+    btnCerrarModal.addEventListener('click', () => {
+      modalRecuperar.style.display = 'none';
+    });
+
+    formRecuperar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      modalAlert.style.display = 'none';
+
+      const email = document.getElementById('emailRecuperar').value.trim().toLowerCase();
+      btnEnviarRecuperar.disabled = true;
+      btnEnviarRecuperar.textContent = 'Enviando...';
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-green-50 text-green-900 border border-green-200';
+        modalAlert.textContent = '✓ Enlace de recuperación enviado. Revisa tu bandeja de entrada o carpeta de spam.';
+        modalAlert.style.display = 'block';
+
+        setTimeout(() => {
+          modalRecuperar.style.display = 'none';
+          btnEnviarRecuperar.disabled = false;
+          btnEnviarRecuperar.textContent = 'Enviar Enlace';
+        }, 3500);
+
+      } catch (err) {
+        modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-red-50 text-red-900 border border-red-200';
+        modalAlert.textContent = '❌ Error al enviar el correo: ' + (err.code === 'auth/user-not-found' ? 'Correo no registrado.' : err.message);
+        modalAlert.style.display = 'block';
+        btnEnviarRecuperar.disabled = false;
+        btnEnviarRecuperar.textContent = 'Enviar Enlace';
       }
     });
   </script>

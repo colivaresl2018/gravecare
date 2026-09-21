@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link rel="icon" href="data:,">
   <title>GraveCare - Dashboard</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -47,7 +48,7 @@
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
 
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar Navigation Desktop -->
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
@@ -129,14 +130,14 @@
         </div>
       </div>
 
-      <!-- Maintenance History -->
+      <!-- Maintenance History / Informes Oficiales -->
       <div class="lg:col-span-8 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-lg font-bold text-primary">Historial de Mantenimiento</h2>
-          <a class="text-xs font-bold text-primary hover:underline" href="fotos.html">Ver todo</a>
+          <a class="text-xs font-bold text-primary hover:underline" href="fotos.html">Ver todas las fotos</a>
         </div>
         <div class="space-y-4" id="contenedor-mantenimientos">
-          <div class="p-6 text-center text-sm text-on-surface-variant">Cargando registros...</div>
+          <div class="p-6 text-center text-sm text-on-surface-variant">Cargando reportes de mantenimiento...</div>
         </div>
       </div>
 
@@ -168,7 +169,7 @@
     </div>
   </main>
 
-  <!-- Mobile Navigation -->
+  <!-- Mobile Navigation Bottom -->
   <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
     <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="dashboard.html">
       <span class="material-symbols-outlined">dashboard</span>
@@ -192,33 +193,26 @@
     </a>
   </nav>
 
-  <!-- Firebase Script Integration -->
+  <!-- Script Firebase v10.7.0 Unificado -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
-      authDomain: "gravecare-2e8d2.firebaseapp.com",
-      projectId: "gravecare-2e8d2",
-      storageBucket: "gravecare-2e8d2.appspot.com",
-      messagingSenderId: "160012946248",
-      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    import { observeAuthState, logoutUser } from "./js/auth.js";
+    import { db } from "./js/firebaseConfig.js";
+    import { 
+      doc, 
+      getDoc, 
+      collection, 
+      query, 
+      where, 
+      getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     async function cerrarSesion() {
-      await signOut(auth);
+      await logoutUser();
       sessionStorage.removeItem("gravecare_user");
       window.location.href = "login.html";
     }
 
-    const btnLogoutSidebar = document.getElementById("btn-logout-sidebar");
-    if (btnLogoutSidebar) btnLogoutSidebar.addEventListener("click", cerrarSesion);
+    document.getElementById("btn-logout-sidebar")?.addEventListener("click", cerrarSesion);
 
     function formatearFechaChile(f) {
       if (!f) return "Por coordinar";
@@ -227,98 +221,155 @@
       return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
     }
 
-    onAuthStateChanged(auth, async (user) => {
+    observeAuthState(async (user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
       }
 
       try {
-        // 1. Perfil
+        const emailCliente = (user.email || "").toLowerCase().trim();
+
+        // 1. Datos del Perfil del Usuario
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (userDoc.exists()) {
           const profile = userDoc.data();
           const nombre = profile.nombres || profile.nombreCompleto || profile.displayName || user.email.split("@")[0];
           document.getElementById("greeting").textContent = `Hola, Bienvenido(a) ${nombre}`;
           document.getElementById("estadoSuscripcion").textContent = (profile.estadoSuscripcion || "Activo").toUpperCase();
-          document.getElementById("tipoPlan").textContent = profile.planNombre || "Plan Base";
+          document.getElementById("tipoPlan").textContent = profile.planNombre || profile.plan || "Plan Base";
         }
 
-        // 2. Sepulturas / Próxima Visita
+        // 2. Órdenes Asociadas al Cliente (por UID o email)
         let fechaProxima = null;
         let countServicios = 0;
-        let fotosList = [];
+        const fotosList = [];
+        const ordenesIds = new Set();
 
-        const qOrdenes = query(collection(db, "ordenes"), where("usuarioId", "==", user.uid));
-        const snapOrdenes = await getDocs(qOrdenes);
-        
+        const snapOrdenes = await getDocs(collection(db, "ordenes"));
         snapOrdenes.forEach(docSnap => {
           const o = docSnap.data();
-          if (o.proximaVisita) fechaProxima = o.proximaVisita;
-          if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
-          if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
+          const emailTitular = (o.titular?.email || o.email || "").toLowerCase().trim();
+          const uidTitular = o.usuarioId || o.uid || o.titular?.uid;
+
+          if (emailTitular === emailCliente || uidTitular === user.uid) {
+            ordenesIds.add(docSnap.id);
+            if (o.proximaVisita) fechaProxima = o.proximaVisita;
+            if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
+            
+            // Si la orden tiene fotos directas
+            if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
+          }
         });
 
         document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
-        document.getElementById("serviciosCount").textContent = countServicios;
 
-        // 3. Mantenimientos
+        // 3. Consultar Informes Aprobados / Terminados
         const contenedorMant = document.getElementById("contenedor-mantenimientos");
-        const snapMant = await getDocs(query(collection(db, "usuarios", user.uid, "mantenimientos"), orderBy("fecha", "desc"), limit(2)));
-        if (snapMant.empty) {
+        const snapInformes = await getDocs(collection(db, "informes"));
+        const misInformes = [];
+
+        snapInformes.forEach(docSnap => {
+          const inf = { id: docSnap.id, ...docSnap.data() };
+          const estado = (inf.estado || "").toLowerCase().trim();
+          const lePertenece = ordenesIds.has(inf.ordenId) || (inf.clienteEmail && inf.clienteEmail.toLowerCase() === emailCliente);
+
+          if (lePertenece && (estado === "aprobado" || estado === "completada" || estado === "aprobada")) {
+            misInformes.push(inf);
+
+            // Rescatar fotos del informe para la galería del dashboard
+            const fotos = inf.fotos || {};
+            if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
+            if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
+            if (fotos.antes?.url) fotosList.unshift(fotos.antes.url);
+            if (fotos.general?.url) fotosList.unshift(fotos.general.url);
+          }
+        });
+
+        // Ordenar informes de forma descendente por fecha
+        misInformes.sort((a, b) => {
+          const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();
+          const fb = new Date(b.fechaCaptura || b.fechaAprobacion || 0).getTime();
+          return fb - fa;
+        });
+
+        // Actualizar contador total de servicios
+        document.getElementById("serviciosCount").textContent = misInformes.length || countServicios;
+
+        // Renderizar Historial de Mantenimientos
+        if (misInformes.length === 0) {
           contenedorMant.innerHTML = `
             <div class="text-center py-6 text-on-surface-variant">
               <span class="material-symbols-outlined text-4xl text-outline-variant block mb-1">cleaning_services</span>
-              <p class="text-sm">Aún no registras mantenimientos ejecutados.</p>
+              <p class="text-sm">Aún no registras informes de mantenimientos aprobados.</p>
             </div>`;
         } else {
-          contenedorMant.innerHTML = snapMant.docs.map(d => {
-            const m = d.data();
+          contenedorMant.innerHTML = misInformes.slice(0, 3).map(inf => {
+            const fechaTxt = formatearFechaChile(inf.fechaCaptura || inf.fechaAprobacion);
             return `
-              <div class="flex items-start space-x-4">
-                <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-                  <span class="material-symbols-outlined">cleaning_services</span>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant/30 hover:bg-surface-container transition gap-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container flex-shrink-0">
+                    <span class="material-symbols-outlined">verified</span>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-on-surface">${inf.difunto || "Mantenimiento General"}</h3>
+                    <p class="text-xs text-on-surface-variant">${inf.cementerio || "Cementerio"} — ${fechaTxt}</p>
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <h3 class="text-sm font-bold text-on-surface">${m.tipo || "Mantenimiento General"}</h3>
-                  <p class="text-xs text-on-surface-variant">${formatearFechaChile(m.fecha)}</p>
-                </div>
+                <a href="informe.html?informeId=${inf.id}&ordenId=${inf.ordenId || ''}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-container transition shadow-sm self-end sm:self-auto">
+                  <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Ver Informe
+                </a>
               </div>`;
           }).join("");
         }
 
-        // 4. Fotos
+        // 4. Vista Previa de Últimas Fotografías
         const contenedorFotos = document.getElementById("contenedor-fotos-dashboard");
-        if (fotosList.length > 0) {
-          contenedorFotos.innerHTML = fotosList.slice(0, 2).map(url => `
-            <img class="w-full h-32 object-cover rounded-lg" src="${url}" alt="Reporte">
+        const fotosUnicas = [...new Set(fotosList)].filter(Boolean);
+
+        if (fotosUnicas.length > 0) {
+          contenedorFotos.innerHTML = fotosUnicas.slice(0, 2).map(url => `
+            <div class="w-full h-32 rounded-lg overflow-hidden border border-outline-variant/30 bg-surface-container">
+              <img class="w-full h-full object-cover hover:scale-105 transition duration-300" src="${url}" alt="Foto de Mantención">
+            </div>
           `).join("");
         }
 
-        // 5. Facturación
+        // 5. Facturación Reciente
         const contenedorFact = document.getElementById("contenedor-facturas");
-        const snapPagos = await getDocs(query(collection(db, "pagos"), where("usuarioId", "==", user.uid), orderBy("fecha", "desc"), limit(2)));
-        if (snapPagos.empty) {
-          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
-        } else {
-          contenedorFact.innerHTML = snapPagos.docs.map(d => {
-            const p = d.data();
-            const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 0);
-            return `
-              <li class="flex items-center justify-between py-3">
-                <div>
-                  <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
-                  <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — ${monto}</p>
-                </div>
-                <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors">
-                  <span class="material-symbols-outlined text-base">visibility</span>
-                </a>
-              </li>`;
-          }).join("");
+        try {
+          const snapPagos = await getDocs(query(
+            collection(db, "pagos"),
+            where("usuarioId", "==", user.uid)
+          ));
+
+          const pagosDocs = snapPagos.docs.map(d => ({ id: d.id, ...d.data() }));
+          pagosDocs.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+
+          if (pagosDocs.length === 0) {
+            contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
+          } else {
+            contenedorFact.innerHTML = pagosDocs.slice(0, 2).map(p => {
+              const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 0);
+              return `
+                <li class="flex items-center justify-between py-3">
+                  <div>
+                    <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
+                    <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — ${monto}</p>
+                  </div>
+                  <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                  </a>
+                </li>`;
+            }).join("");
+          }
+        } catch (e) {
+          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago disponibles.</li>`;
         }
 
       } catch (err) {
-        console.error("Error al cargar dashboard:", err);
+        console.error("Error al cargar datos en dashboard:", err);
       }
     });
   </script>

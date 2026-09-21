@@ -5,18 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Completar Registro — GraveCare</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen py-10 px-4">
+<body class="bg-[#f7f9f8] min-h-screen py-10 px-4 text-[#191c1b]">
 
   <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-    <!-- Encabezado -->
-    <div class="bg-slate-900 text-white p-6 sm:p-8 text-center">
+    <!-- Encabezado con identidad de marca -->
+    <div class="bg-[#002d1a] text-white p-6 sm:p-8 text-center">
+      <div class="flex justify-center mb-3">
+        <img src="assets/Logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='Logo.jpg';">
+      </div>
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Crea tu Cuenta en GraveCare</h1>
-      <p class="text-slate-400 text-sm mt-2">Completa tu clave de acceso para activar tu plan y gestionar tus sepulturas.</p>
+      <p class="text-gray-300 text-sm mt-2">Completa tu clave de acceso para activar tu plan y gestionar tus sepulturas.</p>
     </div>
 
     <!-- Contenedor del Formulario -->
@@ -24,95 +27,89 @@
       <!-- Alertas -->
       <div id="alertBox" style="display: none;" class="p-4 rounded-lg mb-6 text-sm font-medium"></div>
 
-      <form id="registroForm" class="space-y-6">
+      <form id="registroForm" class="space-y-5">
         <!-- Nombres y Apellidos -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nombres *</label>
-            <input type="text" id="nombres" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombres *</label>
+            <input type="text" id="nombres" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Apellido Paterno *</label>
-            <input type="text" id="apellidoPaterno" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Apellido Paterno *</label>
+            <input type="text" id="apellidoPaterno" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Apellido Materno</label>
-            <input type="text" id="apellidoMaterno" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Apellido Materno</label>
+            <input type="text" id="apellidoMaterno" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
         <!-- RUT y Teléfono -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">RUT / DNI *</label>
-            <input type="text" id="rut" required placeholder="12.345.678-9" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">RUT / DNI *</label>
+            <input type="text" id="rut" required placeholder="12.345.678-9" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Teléfono *</label>
-            <input type="tel" id="telefono" required placeholder="+56 9 1234 5678" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Teléfono *</label>
+            <input type="tel" id="telefono" required placeholder="+56 9 1234 5678" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
         <!-- Correo y Fecha Nacimiento -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Correo Electrónico *</label>
-            <input type="email" id="email" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-gray-50">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico *</label>
+            <input type="email" id="email" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none bg-gray-50">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Fecha de Nacimiento *</label>
-            <input type="date" id="fechaNacimiento" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Fecha de Nacimiento *</label>
+            <input type="date" id="fechaNacimiento" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
         <!-- Contraseñas -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Crear Contraseña *</label>
-            <input type="password" id="contrasena" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <input type="password" id="contrasena" required minlength="6" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Confirmar Contraseña *</label>
-            <input type="password" id="confirmarContrasena" required minlength="6" placeholder="Repite la contraseña" class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <input type="password" id="confirmarContrasena" required minlength="6" placeholder="Repite la contraseña" class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
         <!-- Dirección -->
         <div>
-          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Dirección (Calle y Número) *</label>
-          <input type="text" id="direccion" required placeholder="Av. Ejemplo 1234, Depto 501" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dirección (Calle y Número) *</label>
+          <input type="text" id="direccion" required placeholder="Av. Ejemplo 1234, Depto 501" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Comuna *</label>
-            <input type="text" id="comuna" required placeholder="Ej: Las Condes" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Comuna *</label>
+            <input type="text" id="comuna" required placeholder="Ej: Las Condes" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Región *</label>
-            <input type="text" id="region" required placeholder="Ej: Metropolitana" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Región *</label>
+            <input type="text" id="region" required placeholder="Ej: Metropolitana" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">País *</label>
-            <input type="text" id="pais" value="Chile" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">País *</label>
+            <input type="text" id="pais" value="Chile" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
-        <!-- Términos -->
-        <div class="flex items-center gap-2 pt-2">
-          <input type="checkbox" id="aceptoTerminos" required class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded">
-          <label for="aceptoTerminos" class="text-xs text-gray-600">Acepto los <a href="#" class="text-emerald-600 font-semibold underline">Términos y Condiciones</a> del servicio GraveCare.</label>
-        </div>
-
-        <!-- Botón de Envío y Loading -->
+        <!-- Botón de Envío -->
         <div class="pt-4">
-          <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
+          <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 bg-[#002d1a] hover:bg-[#1a432f] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
             <span>Completar Registro y Activar Cuenta</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
           </button>
           
           <div id="loading" style="display: none;" class="items-center justify-center gap-2 mt-4 text-sm text-gray-500">
-            <svg class="animate-spin h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-5 w-5 text-[#002d1a]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -121,7 +118,7 @@
         </div>
       </form>
 
-      <!-- Panel de Depuración Opcional -->
+      <!-- Panel de Depuración -->
       <div class="mt-8 pt-6 border-t border-gray-100">
         <details class="text-xs text-gray-400">
           <summary class="cursor-pointer hover:text-gray-600">Ver registro de depuración (Debug Info)</summary>
@@ -130,6 +127,10 @@
       </div>
     </div>
   </div>
+
+  <footer class="text-center text-xs text-gray-500 mt-8 mb-4">
+    GraveCare SpA · Preservación & Memoria · contacto@gravecare.cl
+  </footer>
 
   <!-- Script Firebase Unificado -->
   <script type="module">
@@ -166,25 +167,35 @@
 
       let ordenIdDetectada = null;
 
-      // ============ RESCATAR DATOS DESDE FIREBASE FIRESTORE ============
       async function rescatarDatosFirebase() {
+        const local = sessionStorage.getItem('gravecare_registro_datos') ||
+                      localStorage.getItem('gravecare_last_order') ||
+                      localStorage.getItem('gravecare_datos_completos');
+
+        if (local) {
+          try {
+            const parsed = JSON.parse(local);
+            if (parsed && (parsed.titular || parsed.email || parsed.emailCliente)) {
+              addLog('✅ Usando datos prioritarios de la orden reciente (Local/Session)');
+              if (parsed.numeroOrden) ordenIdDetectada = parsed.numeroOrden;
+              return parsed;
+            }
+          } catch(e) {
+            console.error(e);
+          }
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const idParam = urlParams.get('id') || urlParams.get('orden');
         const emailParam = urlParams.get('email');
-        const rutParam = urlParams.get('rut');
 
-        addLog(`🔍 Analizando parámetros URL: id=${idParam}, email=${emailParam}, rut=${rutParam}`);
-
-        // 1. Buscar en colección 'ordenes' o 'solicitudes' por ID
         if (idParam) {
           ordenIdDetectada = idParam;
           try {
             let snap = await getDoc(doc(db, 'ordenes', idParam));
-            if (!snap.exists()) {
-              snap = await getDoc(doc(db, 'solicitudes', idParam));
-            }
+            if (!snap.exists()) snap = await getDoc(doc(db, 'solicitudes', idParam));
             if (snap.exists()) {
-              addLog(`✅ Datos encontrados por ID: ${idParam}`);
+              addLog(`✅ Datos encontrados en Firestore por ID: ${idParam}`);
               return snap.data();
             }
           } catch (e) {
@@ -192,14 +203,13 @@
           }
         }
 
-        // 2. Buscar en 'ordenes' por Email
         if (emailParam) {
           try {
             const cleanEmail = decodeURIComponent(emailParam).trim().toLowerCase();
             const q = query(collection(db, 'ordenes'), where('emailCliente', '==', cleanEmail));
             const snapEmail = await getDocs(q);
             if (!snapEmail.empty) {
-              addLog(`✅ Datos de orden encontrados por Email`);
+              addLog(`✅ Datos encontrados por Email en Firestore`);
               ordenIdDetectada = snapEmail.docs[0].id;
               return snapEmail.docs[0].data();
             }
@@ -208,37 +218,40 @@
           }
         }
 
-        // 3. Fallback a almacenamiento local
-        const local = sessionStorage.getItem('gravecare_registro_datos') ||
-                      localStorage.getItem('gravecare_datos_completos') ||
-                      localStorage.getItem('gravecare_last_order');
-        if (local) {
-          addLog('ℹ️ Usando respaldo desde almacenamiento local');
-          return JSON.parse(local);
-        }
-
         addLog('ℹ️ Sin registros previos vinculados');
         return null;
       }
 
-      // ============ PRELLENAR Y BLOQUEAR CAMPOS ============
       function poblarFormulario(datos) {
         if (!datos) return;
 
         const titular = datos.titular || {};
         const dir = datos.direccionTitular || {};
 
+        let direccionFormateada = datos.direccion || dir.direccion || titular.direccion || '';
+        const numCalle = dir.numero || titular.numero || '';
+        const deptoCalle = dir.departamento || titular.departamento || '';
+
+        if (numCalle && !direccionFormateada.includes(numCalle)) {
+          direccionFormateada += ` ${numCalle}`;
+        }
+        if (deptoCalle && !direccionFormateada.includes(deptoCalle)) {
+          direccionFormateada += `, ${deptoCalle}`;
+        }
+
+        const correoRescatado = titular.email || datos.emailCliente || datos.email || titular.emailCliente || '';
+
         const valores = {
-          nombres: datos.nombres || titular.nombres || datos.nombre || '',
+          nombres: datos.nombres || titular.nombres || datos.nombre || titular.nombre || '',
           apellidoPaterno: datos.apellidoPaterno || titular.apellidoPaterno || '',
           apellidoMaterno: datos.apellidoMaterno || titular.apellidoMaterno || '',
-          email: datos.email || datos.emailCliente || titular.email || '',
+          email: correoRescatado,
           telefono: datos.telefono || titular.telefono || '',
           rut: datos.rut || titular.rutDni || titular.rut || '',
-          direccion: datos.direccion || dir.direccion || '',
-          comuna: datos.comuna || dir.comuna || '',
-          region: datos.region || dir.region || '',
-          pais: datos.pais || dir.pais || 'Chile',
+          direccion: direccionFormateada.trim(),
+          comuna: datos.comuna || dir.comuna || titular.comuna || '',
+          region: datos.region || dir.region || titular.region || '',
+          pais: datos.pais || dir.pais || titular.pais || 'Chile',
           fechaNacimiento: datos.fechaNacimiento || ''
         };
 
@@ -275,7 +288,6 @@
         alertBox.style.display = "block";
       }
 
-      // ============ PROCESO DE REGISTRO ============
       async function iniciarRegistro() {
         const datosEncontrados = await rescatarDatosFirebase();
         poblarFormulario(datosEncontrados);
@@ -309,7 +321,6 @@
           if (loading) loading.style.display = "flex";
 
           try {
-            // 1. Crear usuario en Firebase Authentication
             addLog(`👤 Creando usuario Auth para: ${email}...`);
             const userCredential = await createUserWithEmailAndPassword(auth, email, contrasena);
             const user = userCredential.user;
@@ -322,11 +333,9 @@
 
             await updateProfile(user, { displayName: nombreCompleto });
 
-            // 2. Extraer nombre de plan de la orden previa
             const sesionDatos = JSON.parse(localStorage.getItem('gravecare_last_order') || '{}');
-            const nombrePlanFinal = sesionDatos.planNombre || 'Servicio Spot';
+            const nombrePlanFinal = sesionDatos.planNombre || sesionDatos.servicio?.planNombre || 'Servicio Spot';
 
-            // 3. Consolidar documento en colección 'usuarios'
             const userData = {
               uid,
               email,
@@ -351,7 +360,6 @@
             addLog('💾 Guardando perfil en Firestore (/usuarios)...');
             await setDoc(doc(db, 'usuarios', uid), userData, { merge: true });
 
-            // 4. Si vino con orden vinculada, actualizarla con el uid final
             if (ordenIdDetectada) {
               addLog(`🔗 Vinculando orden ${ordenIdDetectada}...`);
               await setDoc(doc(db, 'ordenes', ordenIdDetectada), {
@@ -361,7 +369,6 @@
               }, { merge: true });
             }
 
-            // 5. Crear índice para login por RUT
             const cleanRut = userData.rut.toLowerCase().replace(/\./g, '').replace(/\s/g, '');
             if (cleanRut) {
               await setDoc(doc(db, 'rut_lookup', cleanRut), {
@@ -371,7 +378,6 @@
               });
             }
 
-            // 6. Limpieza y redirección directa al dashboard
             sessionStorage.removeItem('gravecare_registro_datos');
             localStorage.removeItem('gravecare_datos_completos');
 
