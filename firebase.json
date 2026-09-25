@@ -9,20 +9,20 @@
     ],
     "rewrites": [
       {
-        "source": "/webpayCrear",
-        "function": "webpayCrear"
+        "source": "/crearTransaccionWebpay",
+        "function": "crearTransaccionWebpay"
       },
       {
-        "source": "/webpayConfirmar",
-        "function": "webpayConfirmar"
+        "source": "/confirmarTransaccionWebpay",
+        "function": "confirmarTransaccionWebpay"
       },
       {
-        "source": "/oneclickInscribir",
-        "function": "oneclickInscribir"
+        "source": "/iniciarInscripcionOneclick",
+        "function": "iniciarInscripcionOneclick"
       },
       {
-        "source": "/oneclickInscripcionFinalizar",
-        "function": "oneclickInscripcionFinalizar"
+        "source": "/confirmarInscripcionOneclick",
+        "function": "confirmarInscripcionOneclick"
       },
       {
         "source": "/enviarContacto",
