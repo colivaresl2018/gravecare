@@ -47,6 +47,14 @@ function calcularProximaVisita(plan) {
  * el trigger automático como por una prueba manual.
  */
 async function sincronizarSepulturaDesdeOrden(ordenId, orden) {
+  // No crear la sepultura hasta que el pago esté realmente confirmado por
+  // Transbank (ver confirmarTransaccionWebpay / confirmarInscripcionOneclick,
+  // que son quienes ponen estado:"pagado"). Antes de eso, resumen-pago.html
+  // deja la orden en "pendiente_pago".
+  if (orden.estado !== "pagado") {
+    console.log(`[sincronizarSepultura] Orden ${ordenId} con estado "${orden.estado}" (no pagado) — se omite.`);
+    return {omitido: true, motivo: `estado actual: ${orden.estado}`};
+  }
   if (!orden.usuarioId) {
     console.log(`[sincronizarSepultura] Orden ${ordenId} sin usuarioId todavía — se omite.`);
     return {omitido: true, motivo: "sin usuarioId"};
