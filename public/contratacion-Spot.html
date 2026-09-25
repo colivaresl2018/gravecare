@@ -56,7 +56,59 @@
             <form id="contratacion-form" class="form-card">
                 <div style="background-color: #f0f8f6; border-left: 4px solid var(--primary-color); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
                     <strong style="color: var(--primary-color); font-size: 1rem;">📋 Paso 1 - Datos del Servicio Spot</strong>
-                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del titular, ser querido y fecha de visita</p>
+                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del ser querido. ubicación de la sepultura, fecha de visita y titular</p>
+                </div>
+
+                <!-- Ser Querido -->
+                <h2 class="form-section-title">Datos del Ser Querido</h2>
+                <div class="form-group-grid cols-3">
+                    <div>
+                        <label class="form-label">Nombres *</label>
+                        <input type="text" id="nombresDifunto" class="form-input" placeholder="María" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Apellido Paterno *</label>
+                        <input type="text" id="apellidoPaternoDifunto" class="form-input" placeholder="González" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Apellido Materno</label>
+                        <input type="text" id="apellidoMaternoDifunto" class="form-input" placeholder="Soto">
+                    </div>
+                </div>
+
+                <!-- Fecha de Visita Spot -->
+                <h2 class="form-section-title">Fecha del Servicio Spot</h2>
+                <div class="form-group">
+                    <label class="form-label">Selecciona la fecha del servicio *</label>
+                    <input type="text" id="fechaServicio" class="form-input" placeholder="Haz clic para seleccionar fecha" readonly required>
+                </div>
+
+                <!-- Ubicación Sepultura -->
+                <h2 class="form-section-title">Ubicación de la Sepultura</h2>
+                <div class="form-group">
+                    <label class="form-label">Cementerio (Fijado según selección previa) *</label>
+                    <input type="text" id="cementerio" class="form-input" style="background-color: #e9ecef; cursor: not-allowed; font-weight: 600;" readonly required>
+                </div>
+
+                <div class="form-group-grid cols-3">
+                    <div>
+                        <label class="form-label">Sector</label>
+                        <input type="text" id="sector" class="form-input" placeholder="Sector">
+                    </div>
+                    <div>
+                        <label class="form-label">Patio</label>
+                        <input type="text" id="patio" class="form-input" placeholder="Patio">
+                    </div>
+                    <div>
+                        <label class="form-label">Nº Sepultura</label>
+                        <input type="text" id="numeroSepultura" class="form-input" placeholder="456">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Referencias de ubicación en terreno</label>
+                    <textarea id="referenciasSepultura" class="form-input" rows="3" placeholder="Puntos de referencia para ubicar la lápida rápidamente"></textarea>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">*Si no recuerdas la ubicación de tu ser querido, ingresa a la página web del cementerio y busca la ubicación.</p>
                 </div>
 
                 <!-- Titular -->
@@ -142,57 +194,6 @@
                         <option disabled selected value="">Selecciona región primero</option>
                     </select>
                     <input type="text" id="comunaText" class="form-input hidden" placeholder="Comuna/Ciudad">
-                </div>
-
-                <!-- Ser Querido -->
-                <h2 class="form-section-title">Datos del Ser Querido</h2>
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Nombres *</label>
-                        <input type="text" id="nombresDifunto" class="form-input" placeholder="María" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaternoDifunto" class="form-input" placeholder="González" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Materno</label>
-                        <input type="text" id="apellidoMaternoDifunto" class="form-input" placeholder="Soto">
-                    </div>
-                </div>
-
-                <!-- Ubicación Sepultura -->
-                <h2 class="form-section-title">Ubicación de la Sepultura</h2>
-                <div class="form-group">
-                    <label class="form-label">Cementerio (Fijado según selección previa) *</label>
-                    <input type="text" id="cementerio" class="form-input" style="background-color: #e9ecef; cursor: not-allowed; font-weight: 600;" readonly required>
-                </div>
-
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Sector</label>
-                        <input type="text" id="sector" class="form-input" placeholder="Sector">
-                    </div>
-                    <div>
-                        <label class="form-label">Patio</label>
-                        <input type="text" id="patio" class="form-input" placeholder="Patio">
-                    </div>
-                    <div>
-                        <label class="form-label">Nº Sepultura</label>
-                        <input type="text" id="numeroSepultura" class="form-input" placeholder="456">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Referencias de ubicación en terreno</label>
-                    <textarea id="referenciasSepultura" class="form-input" rows="3" placeholder="Puntos de referencia para ubicar la lápida rápidamente"></textarea>
-                </div>
-
-                <!-- Fecha de Visita Spot -->
-                <h2 class="form-section-title">Fecha del Servicio Spot</h2>
-                <div class="form-group">
-                    <label class="form-label">Selecciona la fecha del servicio *</label>
-                    <input type="text" id="fechaServicio" class="form-input" placeholder="Haz clic para seleccionar fecha" readonly required>
                 </div>
 
                 <button type="submit" id="btnSubmit" style="width: 100%; padding: 1.1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1rem;">
@@ -328,7 +329,7 @@
 
             const ordenActualizada = {
                 ...datosDelPlanGlobal,
-                numeroOrden: datosDelPlanGlobal.numeroOrden || ('GC-SPOT-' + Date.now()),
+                numeroOrden: datosDelPlanGlobal.numeroOrden || ('ORD-' + Date.now()),
                 tipoServicio: 'SPOT',
                 tipoSuscripcion: 'SPOT',
                 fechaServicioProgramada: fechaISO,
