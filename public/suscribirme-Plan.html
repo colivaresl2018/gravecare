@@ -397,8 +397,8 @@
 <body>
     <!-- Header -->
     <div class="page-header">
-        <span class="service-badge" id="serviceBadge">Plan Mensual</span>
-        <h1 id="pageTitle">Suscripción Plan Mensual</h1>
+        <span class="service-badge" id="serviceBadge">Plan 12</span>
+        <h1 id="pageTitle">Suscripción</h1>
         <p id="pageSubtitle">Selecciona el nivel de servicio que deseas contratar.</p>
     </div>
 
@@ -474,37 +474,71 @@
                 </div>
             </div>
 
+            <!-- Nota: Cantidad de ramos por sepultura -->
+            <div class="flowers-note" style="background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem 2rem; margin: 0 auto 3rem; max-width: 700px; text-align: center;">
+                <h3 style="font-size: 1.05rem; color: var(--primary-color); margin-bottom: 0.75rem;">🌷 Cantidad de ramos por sepultura</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.6rem;">
+                    Los planes Standard y Premium incluyen la cantidad de varas estipuladas para un (1) florero. Si la sepultura cuenta con más de un florero y deseas cubrir todos los espacios, puedes agregar ramos adicionales mediante el selector de cantidad.
+                </p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    De no seleccionar ramos extras, la cantidad total de flores correspondiente al plan se colocará en un solo florero.
+                </p>
+                <ul style="list-style: none; font-size: 0.85rem; color: var(--text-main); margin-bottom: 1.25rem;">
+                    <li>Plan Standard: <strong>$8.000</strong> por cada ramo adicional.</li>
+                    <li>Plan Premium: <strong>$10.000</strong> por cada ramo adicional.</li>
+                </ul>
+                <div id="ramosAdicionalesWrapper" style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                    <label for="ramosAdicionalesValor" style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color: var(--text-muted);">🎛️ Ramos adicionales</label>
+                    <div style="display:flex; align-items:center; gap:1rem; background:var(--surface-color); border:1px solid var(--border-color); border-radius:50px; padding:0.35rem 0.5rem;">
+                        <button type="button" id="btnRamosMenos" onclick="cambiarCantidadRamos(-1)" aria-label="Disminuir cantidad de ramos adicionales" style="width:34px; height:34px; border-radius:50%; border:none; background:var(--bg-light); color: var(--primary-color); font-size:1.1rem; cursor:pointer; opacity:0.4; cursor:not-allowed;" disabled>−</button>
+                        <span id="ramosAdicionalesValor" data-cantidad="0" style="min-width: 1.5rem; text-align:center; font-weight:700; color: var(--primary-color); font-size:1.05rem;">0</span>
+                        <button type="button" id="btnRamosMas" onclick="cambiarCantidadRamos(1)" aria-label="Aumentar cantidad de ramos adicionales" style="width:34px; height:34px; border-radius:50%; border:none; background:var(--bg-light); color: var(--primary-color); font-size:1.1rem; cursor:pointer;">+</button>
+                    </div>
+                    <p id="ramosAdicionalesBloqueadoMsg" style="display:none; font-size:0.78rem; color: var(--accent-gold-hover); font-weight:600; margin-top:0.25rem;">✦ El plan Deluxe no admite ramos adicionales.</p>
+                </div>
+            </div>
+
             <!-- Formulario de Confirmación -->
             <form id="suscribirme-form" class="form-section">
                 <h3>Paso 1: Confirmación</h3>
                 <p class="subtitle">Selecciona el cementerio, revisa tu pedido y procede al pago</p>
 
-                <!-- Menú Desplegable Centrado -->
-                <div class="form-group-center">
-                    <label class="form-label" for="cementerio">Ubicación del Cementerio *</label>
-                    <select id="cementerio" name="cementerio" class="form-select" required>
-                        <option disabled selected value="">Selecciona cementerio</option>
-                        <option>Parque del Recuerdo Américo Vespucio</option>
-                        <option>Cementerio General de Santiago</option>
-                        <option>Cementerio Católico de Recoleta</option>
-                        <option>Cementerio Parque del Santiago</option>
-                        <option>Parque Canaán</option>
-                        <option>Cementerio Metropolitano</option>
-                        <option>Parque del Recuerdo Cordillera</option>
-                        <option>Parque del Prado</option>
-                        <option>Parque Sendero San Bernardo</option>
-                        <option>Parque Sendero Maipú</option>
-                        <option>Parque El Manantial</option>
-                        <option>Cementerio Católico de Maipú</option>
-                        <option>Parque del Recuerdo Padre Hurtado</option>
-                        <option>Parque del Recuerdo Rancagua</option>
-                        <option>Parque Sendero Rancagua</option>
-                        <option>Cementerio Municipal N° 1 de Rancagua</option>
-                        <option>Cementerio Municipal N° 2 (Baquedano)</option>
-                        <option>Parque Jardín Rancagua</option>
-                        <option>Parque Jardín Las Flores</option>
-                    </select>
-                </div>
+		<!-- Menú Desplegable Centrado -->
+		<div class="form-group-center">
+  		  <label class="form-label" for="cementerio">Ubicación del Cementerio *</label>
+  		  <select id="cementerio" name="cementerio" class="form-select" required>
+   		     <option disabled selected value="">Selecciona cementerio</option>
+        
+    		    <optgroup label="Región Metropolitana">
+       	    <option>Parque del Recuerdo Américo Vespucio</option>
+            <option>Cementerio General de Santiago</option>
+            <option>Cementerio Católico de Recoleta</option>
+            <option>Cementerio Parque del Santiago</option>
+            <option>Parque Canaán</option>
+            <option>Cementerio Metropolitano</option>
+            <option>Parque del Recuerdo Cordillera</option>
+            <option>Parque del Prado</option>
+            <option>Parque Sendero San Bernardo</option>
+            <option>Parque Sendero Maipú</option>
+            <option>Parque El Manantial</option>
+            <option>Cementerio Católico de Maipú</option>
+            <option>Parque del Recuerdo Padre Hurtado</option>
+        </optgroup>
+
+        <optgroup label="Región de O'Higgins">
+            <option>Parque del Recuerdo Rancagua</option>
+            <option>Parque Sendero Rancagua</option>
+            <option>Cementerio Municipal N° 1 de Rancagua</option>
+            <option>Cementerio Municipal N° 2 (Baquedano)</option>
+            <option>Parque Jardín Rancagua</option>
+        </optgroup>
+
+        <optgroup label="Región del Maule">
+            <option>Parque Jardín Las Flores</option>
+        </optgroup>
+    </select>
+</div>
+
 
                 <!-- Resumen -->
                 <div class="summary-box">
@@ -526,7 +560,15 @@
                     </div>
 
                     <div class="summary-row">
-                        <span class="summary-label">TOTAL A PAGAR</span>
+                        <span class="summary-label">Ramos adicionales</span>
+                        <span class="summary-value" id="summaryRamosAdicionales">0</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <div style="display:flex; flex-direction:column;">
+                            <span class="summary-label">TOTAL A PAGAR PLAN</span>
+                            <span class="summary-label" style="font-size:0.75rem; font-weight:400; margin-top:0.25rem;">HASTA EN 12 CUOTAS PRECIO CONTADO</span>
+                        </div>
                         <span class="summary-value" id="summaryTotal">—</span>
                     </div>
                 </div>
@@ -546,29 +588,28 @@
     </footer>
 
     <script>
-        // ===== TARIFARIO EXACTO POR PLAN Y NIVEL DE RAMO =====
         const planesData = {
-            'mensual': {
-                nombre: 'Plan Mensual',
-                frecuencia: '1 visita al mes',
+            '12': {
+                nombre: 'Plan 12',
+                frecuencia: '12 visitas anuales, 1 cada mes',
                 precios: {
-                    'Standard': 34990,
+                    'Standard': 38990,
                     'Premium': 44990,
                     'Deluxe': 54990
                 }
             },
-            'bimestral': {
-                nombre: 'Plan Bimestral',
-                frecuencia: '1 visita cada 2 meses',
+            '6': {
+                nombre: 'Plan 6',
+                frecuencia: '6 visitas anuales,1 cada 2 meses',
                 precios: {
                     'Standard': 44990,
                     'Premium': 51990,
                     'Deluxe': 62990
                 }
             },
-            'trimestral': {
-                nombre: 'Plan Trimestral',
-                frecuencia: '1 visita cada 3 meses',
+            '4': {
+                nombre: 'Plan 4',
+                frecuencia: '4 visitas anuales, 1 cada 3 meses',
                 precios: {
                     'Standard': 46990,
                     'Premium': 53990,
@@ -579,15 +620,66 @@
                 nombre: 'Servicio Spot',
                 frecuencia: 'Visita Única',
                 precios: {
-                    'Standard': 59990,
+                    'Standard': 58990,
                     'Premium': 67990,
                     'Deluxe': 82990
                 }
             }
         };
 
-        let planSeleccionado = 'mensual';
+        const precioRamoAdicional = { 'Standard': 8000, 'Premium': 10000 };
+
+        let planSeleccionado = '12';
         let nivelSeleccionado = null;
+        let cantidadRamosAdicionales = 0;
+
+        function obtenerVisitasPlan() {
+            // Cantidad de visitas anuales segun el plan seleccionado.
+            // Plan 12 -> 12 visitas, Plan 6 -> 6 visitas, Plan 4 -> 4 visitas.
+            // Servicio Spot es una unica visita, no se multiplica.
+            if (planSeleccionado === 'spot') return 1;
+            const visitas = parseInt(planSeleccionado, 10);
+            return isNaN(visitas) ? 1 : visitas;
+        }
+
+        function calcularTotalConRamos(nivel) {
+            const planInfo = planesData[planSeleccionado];
+            const precioUnitario = planInfo.precios[nivel];
+            const visitas = obtenerVisitasPlan();
+            const base = precioUnitario * visitas;
+            const precioExtra = precioRamoAdicional[nivel] || 0;
+            const extras = cantidadRamosAdicionales;
+            // Cada ramo adicional se agrega en TODAS las visitas del plan,
+            // no solo una vez: costo extra total = precio x cantidad x visitas.
+            const totalExtras = extras * precioExtra * visitas;
+            return base + totalExtras;
+        }
+
+        function cambiarCantidadRamos(delta) {
+            if (nivelSeleccionado === 'Deluxe') return; // Deluxe no admite ramos adicionales
+            const valorEl = document.getElementById('ramosAdicionalesValor');
+            const menosBtn = document.getElementById('btnRamosMenos');
+            if (!valorEl) return;
+            const actual = parseInt(valorEl.getAttribute('data-cantidad'), 10) || 0;
+            const nuevo = Math.max(0, actual + delta);
+            valorEl.setAttribute('data-cantidad', nuevo);
+            valorEl.textContent = nuevo;
+            cantidadRamosAdicionales = nuevo;
+
+            if (menosBtn) {
+                menosBtn.disabled = nuevo <= 0;
+                menosBtn.style.opacity = nuevo <= 0 ? '0.4' : '1';
+                menosBtn.style.cursor = nuevo <= 0 ? 'not-allowed' : 'pointer';
+            }
+
+            const summaryRamos = document.getElementById('summaryRamosAdicionales');
+            if (summaryRamos) summaryRamos.textContent = nuevo;
+
+            if (nivelSeleccionado) {
+                const total = calcularTotalConRamos(nivelSeleccionado);
+                document.getElementById('summaryTotal').textContent = '$' + total.toLocaleString('es-CL');
+            }
+        }
 
         function inicializar() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -600,14 +692,12 @@
             actualizarHeader();
             actualizarPreciosCards();
             actualizarResumenInicial();
-
-            console.log(`✓ Plan activo: ${planSeleccionado}`);
         }
 
         function actualizarHeader() {
             const planInfo = planesData[planSeleccionado];
             document.getElementById('serviceBadge').textContent = planInfo.nombre;
-            document.getElementById('pageTitle').textContent = 'Suscripción ' + planInfo.nombre;
+            document.getElementById('pageTitle').textContent = 'Suscripción ';
             document.getElementById('pageSubtitle').textContent = planInfo.frecuencia;
         }
 
@@ -626,6 +716,53 @@
             document.getElementById('summaryTotal').textContent = '—';
         }
 
+        function actualizarEstadoRamosAdicionales() {
+            const esDeluxe = nivelSeleccionado === 'Deluxe';
+            const wrapper = document.getElementById('ramosAdicionalesWrapper');
+            const menosBtn = document.getElementById('btnRamosMenos');
+            const masBtn = document.getElementById('btnRamosMas');
+            const valorEl = document.getElementById('ramosAdicionalesValor');
+            const msg = document.getElementById('ramosAdicionalesBloqueadoMsg');
+            const summaryRamos = document.getElementById('summaryRamosAdicionales');
+
+            if (esDeluxe) {
+                // Reiniciar cantidad a 0 al pasar a Deluxe
+                cantidadRamosAdicionales = 0;
+                if (valorEl) {
+                    valorEl.setAttribute('data-cantidad', 0);
+                    valorEl.textContent = 0;
+                }
+                if (summaryRamos) summaryRamos.textContent = 0;
+
+                if (masBtn) {
+                    masBtn.disabled = true;
+                    masBtn.style.opacity = '0.4';
+                    masBtn.style.cursor = 'not-allowed';
+                }
+                if (menosBtn) {
+                    menosBtn.disabled = true;
+                    menosBtn.style.opacity = '0.4';
+                    menosBtn.style.cursor = 'not-allowed';
+                }
+                if (wrapper) wrapper.style.opacity = '0.55';
+                if (msg) msg.style.display = 'block';
+            } else {
+                if (masBtn) {
+                    masBtn.disabled = false;
+                    masBtn.style.opacity = '1';
+                    masBtn.style.cursor = 'pointer';
+                }
+                if (menosBtn) {
+                    const actual = valorEl ? (parseInt(valorEl.getAttribute('data-cantidad'), 10) || 0) : 0;
+                    menosBtn.disabled = actual <= 0;
+                    menosBtn.style.opacity = actual <= 0 ? '0.4' : '1';
+                    menosBtn.style.cursor = actual <= 0 ? 'not-allowed' : 'pointer';
+                }
+                if (wrapper) wrapper.style.opacity = '1';
+                if (msg) msg.style.display = 'none';
+            }
+        }
+
         function selectLevel(nivel, element) {
             nivelSeleccionado = nivel;
             
@@ -634,15 +771,14 @@
                 element.classList.add('selected');
             }
 
-            const planInfo = planesData[planSeleccionado];
-            const total = planInfo.precios[nivel];
+            actualizarEstadoRamosAdicionales();
+
+            const total = calcularTotalConRamos(nivel);
 
             document.getElementById('summaryNivel').textContent = nivel;
             document.getElementById('summaryTotal').textContent = '$' + total.toLocaleString('es-CL');
             
             document.getElementById('submitBtn').disabled = false;
-
-            console.log(`✓ Selección -> Plan: ${planSeleccionado}, Nivel: ${nivel}, Total: $${total}`);
         }
 
         document.getElementById('suscribirme-form').addEventListener('submit', (e) => {
@@ -661,9 +797,11 @@
             }
 
             const planInfo = planesData[planSeleccionado];
-            const precioTotal = planInfo.precios[nivelSeleccionado];
+            const precioTotal = calcularTotalConRamos(nivelSeleccionado);
 
             let nextPage = planSeleccionado === 'spot' ? 'contratacion-Spot.html' : 'contratacion-plan.html';
+
+            const visitas = obtenerVisitasPlan();
 
             const datos = {
                 numeroOrden: 'ORD-' + Date.now(),
@@ -672,14 +810,30 @@
                 planNombre: planInfo.nombre,
                 frecuencia: planInfo.frecuencia,
                 nivel: nivelSeleccionado,
+                // precioUnitario: valor de UNA visita (sin ramos extra) — es lo
+                // que cobra Oneclick cada vez (functions/oneclick.js -> cobrarUnaVisita).
+                precioUnitario: planInfo.precios[nivelSeleccionado],
+                visitas: visitas,
+                cantidadRamosAdicionales: cantidadRamosAdicionales,
+                precioRamoAdicional: precioRamoAdicional[nivelSeleccionado] || 0,
                 cementerio: cementerioSelect.value,
+                // precio/precioNumerico: total a pagar HOY (unitario x visitas +
+                // ramos extra x visitas) — usado por Webpay Plus para el Spot y
+                // como referencia visual en el resumen.
                 precio: '$' + precioTotal.toLocaleString('es-CL'),
                 precioNumerico: precioTotal,
+                titular: {
+                    nombres: "",
+                    apellidoPaterno: "",
+                    email: "",
+                    rut: "",
+                    telefono: ""
+                },
                 timestamp: new Date().toISOString()
             };
 
             localStorage.setItem('gravecare_last_order', JSON.stringify(datos));
-            console.log('✓ Orden guardada en localStorage:', datos);
+            sessionStorage.setItem('gravecare_registro_datos', JSON.stringify(datos));
 
             window.location.href = nextPage;
         });
