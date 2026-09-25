@@ -174,6 +174,10 @@ exports.confirmarInscripcionOneclick = onRequest(
         }
 
         await ordenRef.update({
+          // "estado" es el campo que leen ordenes.html, sepulturas.html y
+          // onOrdenEscrita (sepulturas.js) — debe reflejar el pago real,
+          // no solo el campo específico de Oneclick.
+          estado: "pagado",
           oneclickEstado: "inscrito",
           oneclickTbkUser: response.tbk_user,
           oneclickCardType: response.card_type,
