@@ -99,7 +99,10 @@ exports.crearTransaccionWebpay = onRequest(
           return res.status(404).json({error: "Orden no encontrada"});
         }
         const orden = ordenSnap.data();
-        const amount = orden.total;
+        // El total NUNCA se guarda como "orden.total" — resumen-pago.html lo
+        // escribe como "precioNumerico" (todos los flujos) o, si viene de un
+        // registro más antiguo, anidado en "valores.total".
+        const amount = orden.precioNumerico || orden.valores?.total;
         if (!amount || amount <= 0) {
           return res.status(400).json({error: "La orden no tiene un total válido"});
         }

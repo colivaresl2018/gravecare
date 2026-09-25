@@ -101,13 +101,16 @@ exports.iniciarInscripcionOneclick = onRequest(
             error: "Esta orden no corresponde a un plan recurrente (12/6/4)",
           });
         }
-        if (!orden.email) {
+        // El email del cliente se guarda anidado en titular.email
+        // (contratacion-plan.html), nunca como campo plano "orden.email".
+        const emailCliente = orden.titular?.email || orden.emailCliente || orden.email;
+        if (!emailCliente) {
           return res.status(400).json({error: "La orden no tiene email"});
         }
 
         const responseUrl = `${req.protocol}://${req.get("host")}/confirmarInscripcionOneclick`;
         const inscription = new Oneclick.MallInscription(obtenerOptions());
-        const response = await inscription.start(ordenId, orden.email, responseUrl);
+        const response = await inscription.start(ordenId, emailCliente, responseUrl);
 
         await ordenRef.update({
           oneclickToken: response.token,
