@@ -9,6 +9,26 @@
     ],
     "rewrites": [
       {
+        "source": "/webpayCrear",
+        "function": "webpayCrear"
+      },
+      {
+        "source": "/webpayConfirmar",
+        "function": "webpayConfirmar"
+      },
+      {
+        "source": "/oneclickInscribir",
+        "function": "oneclickInscribir"
+      },
+      {
+        "source": "/oneclickInscripcionFinalizar",
+        "function": "oneclickInscripcionFinalizar"
+      },
+      {
+        "source": "/enviarContacto",
+        "function": "enviarContacto"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
@@ -27,5 +47,8 @@
         "*.local"
       ]
     }
-  ]
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
 }

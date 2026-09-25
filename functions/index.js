@@ -333,3 +333,12 @@ exports.testSuscripcion = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("internal", error.message);
   }
 });
+
+const transbank = require("./transbank");
+exports.crearTransaccionWebpay = transbank.crearTransaccionWebpay;
+exports.confirmarTransaccionWebpay = transbank.confirmarTransaccionWebpay;
+
+const oneclick = require("./oneclick");
+exports.iniciarInscripcionOneclick = oneclick.iniciarInscripcionOneclick;
+exports.confirmarInscripcionOneclick = oneclick.confirmarInscripcionOneclick;
+exports.cobrarSuscripcionesOneclick = oneclick.cobrarSuscripcionesOneclick;
