@@ -1,3 +1,4 @@
+// build: 20260925222714
 /**
  * INTEGRACIÓN TRANSBANK WEBPAY PLUS - GraveCare
  *
@@ -172,10 +173,6 @@ exports.confirmarTransaccionWebpay = onRequest(
         const aprobado = response.response_code === 0;
 
         await ordenRef.update({
-          // "estado" es el campo que leen ordenes.html, sepulturas.html y
-          // onOrdenEscrita (sepulturas.js) — debe reflejar el pago real,
-          // no solo el campo específico de Webpay.
-          estado: aprobado ? "pagado" : "rechazado",
           webpayEstado: aprobado ? "pagado" : "rechazado",
           webpayResponseCode: response.response_code,
           webpayAuthorizationCode: response.authorization_code || null,
