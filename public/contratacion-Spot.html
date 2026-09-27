@@ -269,9 +269,16 @@
             }
         });
 
+        // El servicio Spot necesita al menos 2 días de anticipación para dar
+        // tiempo a la planificación del operador — si se contrata hoy
+        // domingo, la primera fecha disponible es el martes (hoy + 2 días),
+        // no mañana lunes.
+        const fechaMinimaSpot = new Date();
+        fechaMinimaSpot.setDate(fechaMinimaSpot.getDate() + 2);
+
         flatpickr('#fechaServicio', {
             mode: 'single',
-            minDate: 'today',
+            minDate: fechaMinimaSpot,
             locale: 'es',
             dateFormat: 'd \\d\\e F Y',
             closeOnSelect: true,
@@ -308,6 +315,19 @@
             const fechaISO = fechaInput.dataset.fechaIso;
             if (!fechaISO) {
                 alert('Por favor, selecciona una fecha para el servicio Spot.');
+                return;
+            }
+
+            // Segunda validación (además del calendario, que ya bloquea la
+            // selección visualmente): por si el campo fue manipulado
+            // directamente. Debe haber al menos 2 días completos entre hoy
+            // y la fecha elegida.
+            const hoySinHora = new Date();
+            hoySinHora.setHours(0, 0, 0, 0);
+            const fechaElegida = new Date(fechaISO + 'T00:00:00');
+            const diasDeAnticipacion = Math.round((fechaElegida - hoySinHora) / (1000 * 60 * 60 * 24));
+            if (diasDeAnticipacion < 2) {
+                alert('El servicio Spot requiere al menos 2 días de anticipación para poder planificarlo. Por favor, elige una fecha más adelante.');
                 return;
             }
 
