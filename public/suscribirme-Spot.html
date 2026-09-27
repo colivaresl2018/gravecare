@@ -485,6 +485,7 @@
             },
             'spot': {
                 nombre: 'Servicio Único',
+                badgeTexto: 'SPOT',
                 frecuenciaTexto: 'Única',
                 precios: {
                     'Standard': 58990,
@@ -543,7 +544,7 @@
 
             const info = tarifario[planActual];
 
-            document.getElementById('badgeFrecuencia').textContent = info.nombre;
+            document.getElementById('badgeFrecuencia').textContent = info.badgeTexto || info.nombre;
             document.getElementById('tituloFrecuencia').textContent = info.nombre;
             document.getElementById('summaryPlan').textContent = info.nombre;
             document.getElementById('summaryFrecuencia').textContent = info.frecuenciaTexto;
