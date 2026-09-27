@@ -1,0 +1,148 @@
+// ⚠️ SINCRONIZADO CON gravecare-operaciones/firestore.rules
+// Ambos repos apuntan al mismo proyecto Firebase (gravecare-2e8d2) y
+// comparten la misma base de datos Firestore, por lo que deben tener
+// EXACTAMENTE las mismas reglas. Si editas este archivo, replica el
+// cambio también en gravecare-operaciones/firestore.rules (y viceversa).
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =================================================================
+    // HELPERS
+    // =================================================================
+    function esStaff() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/staff/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.activo == true;
+    }
+
+    function esAdministrador() {
+      return esStaff() &&
+             get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.rol == 'administrador';
+    }
+
+    // El email del cliente NUNCA se guarda como campo plano "email" en la
+    // orden — según la página que la escribió puede estar en titular.email
+    // (contratacion-plan.html) o en emailCliente (registro.html). Se
+    // comparan ambos para no dejar al dueño real sin acceso.
+    //
+    // Además, resumen-pago.html guarda usuarioId = uid en la orden cuando el
+    // cliente compra logueado, y sepulturas.html / dashboard.html / fotos.html
+    // / pagos.html consultan primero por ese campo (where("usuarioId","==",uid))
+    // antes de caer a la búsqueda por email. Sin reconocer usuarioId aquí,
+    // Firestore rechaza esas queries completas con "Missing or insufficient
+    // permissions" aunque el dueño real sea quien consulta.
+    function esDuenoDeOrden() {
+      return request.auth != null && (
+        (('usuarioId' in resource.data && resource.data.usuarioId == request.auth.uid) ||
+         ('uid' in resource.data && resource.data.uid == request.auth.uid)) ||
+        ('titular' in resource.data && resource.data.titular.email == request.auth.token.email) ||
+        ('emailCliente' in resource.data && resource.data.emailCliente == request.auth.token.email) ||
+        // "informes" (informe-captura.html) usa este nombre en vez de los dos de arriba.
+        ('clienteEmail' in resource.data && resource.data.clienteEmail == request.auth.token.email)
+      );
+    }
+
+    // =================================================================
+    // Perfiles de CLIENTES (gravecare.cl)
+    // =================================================================
+    match /usuarios/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+
+      // Sepulturas del cliente (usuarios/{uid}/sepulturas/{sepulturaId})
+      // El cliente ve las suyas; el staff puede leer y escribir para
+      // registrar sepulturas al crear una orden (mapa.html, Cloud Function).
+      match /sepulturas/{sepulturaId} {
+        allow read: if request.auth != null &&
+          (request.auth.uid == userId || esStaff());
+        allow create, update: if request.auth != null &&
+          (request.auth.uid == userId || esStaff());
+        allow delete: if esAdministrador();
+      }
+    }
+
+    // Índice público de resolución de RUT a Correo (login con RUT)
+    match /rut_lookup/{rut} {
+      allow read: if true;
+      allow create, update: if request.auth != null &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        rut == get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rut;
+      allow delete: if false;
+    }
+
+    // =================================================================
+    // Perfiles de STAFF (Portal de Operaciones)
+    // =================================================================
+    match /staff/{staffId} {
+      allow read: if esStaff();
+      allow create, update, delete: if esAdministrador();
+    }
+
+    // =================================================================
+    // Órdenes (creadas en resumen-pago.html, gestionadas en operaciones)
+    // =================================================================
+    match /ordenes/{ordenId} {
+      // El cliente dueño puede leer/actualizar su orden; el staff, cualquiera.
+      allow read, update: if esDuenoDeOrden() || esStaff();
+      // El checkout actual (resumen-pago.html) no exige login previo.
+      // ⚠️ Cualquiera puede crear un documento con datos arbitrarios mientras
+      // no haya validación de pago real (Transbank/Webpay) o Auth Anónima.
+      // Revisar cuando se integre el cobro real.
+      allow create: if true;
+      allow delete: if esAdministrador();
+    }
+
+    // =================================================================
+    // Informes de trabajo (fotos antes/después, notas, capturados en terreno)
+    // =================================================================
+    match /informes/{informeId} {
+      allow read: if esDuenoDeOrden() || esStaff();
+      allow create, update: if esStaff();
+      allow delete: if esAdministrador();
+    }
+
+    // =================================================================
+    // Pagos (histórico, si se usa como colección propia)
+    // =================================================================
+    match /pagos/{pagoId} {
+      allow read: if esDuenoDeOrden() || esStaff();
+      allow create: if true; // mismo motivo que "ordenes" — revisar con Transbank real
+      allow update, delete: if esStaff();
+    }
+
+    // =================================================================
+    // Mensajes del formulario de contacto (contacto.html)
+    // =================================================================
+    match /contacto_mensajes/{mensajeId} {
+      allow create: if true; // formulario público, sin login
+      allow read, update, delete: if esStaff();
+    }
+
+    // =================================================================
+    // Gastos e ingresos (contabilidad interna, gastos-ingresos.html)
+    // Solo administradores según PERMISOS_PAGINAS en portal-common.js
+    // =================================================================
+    match /gastos_ingresos/{movimientoId} {
+      allow read, create, update, delete: if esAdministrador();
+    }
+
+    // =================================================================
+    // Colección legacy (mantener temporalmente por compatibilidad con
+    // órdenes antiguas guardadas antes de migrar todo a "ordenes").
+    // Eliminar este bloque una vez confirmado que ya no hay lecturas.
+    // =================================================================
+    match /solicitudes_suscripcion/{ordenId} {
+      allow read: if esDuenoDeOrden() || esStaff();
+      allow create: if true;
+      allow update: if esStaff();
+      allow delete: if esAdministrador();
+    }
+
+    // Bloqueo por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

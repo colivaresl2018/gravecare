@@ -13,7 +13,6 @@
 <body class="bg-[#f7f9f8] min-h-screen py-10 px-4 text-[#191c1b]">
 
   <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-    <!-- Encabezado con identidad de marca -->
     <div class="bg-[#002d1a] text-white p-6 sm:p-8 text-center">
       <div class="flex justify-center mb-3">
         <img src="assets/Logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='Logo.jpg';">
@@ -22,13 +21,10 @@
       <p class="text-gray-300 text-sm mt-2">Completa tu clave de acceso para activar tu plan y gestionar tus sepulturas.</p>
     </div>
 
-    <!-- Contenedor del Formulario -->
     <div class="p-6 sm:p-8">
-      <!-- Alertas -->
       <div id="alertBox" style="display: none;" class="p-4 rounded-lg mb-6 text-sm font-medium"></div>
 
       <form id="registroForm" class="space-y-5">
-        <!-- Nombres y Apellidos -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nombres *</label>
@@ -44,7 +40,6 @@
           </div>
         </div>
 
-        <!-- RUT y Teléfono -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">RUT / DNI *</label>
@@ -56,7 +51,6 @@
           </div>
         </div>
 
-        <!-- Correo y Fecha Nacimiento -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico *</label>
@@ -68,7 +62,6 @@
           </div>
         </div>
 
-        <!-- Contraseñas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Crear Contraseña *</label>
@@ -80,7 +73,6 @@
           </div>
         </div>
 
-        <!-- Dirección -->
         <div>
           <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dirección (Calle y Número) *</label>
           <input type="text" id="direccion" required placeholder="Av. Ejemplo 1234, Depto 501" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
@@ -101,7 +93,6 @@
           </div>
         </div>
 
-        <!-- Botón de Envío -->
         <div class="pt-4">
           <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 bg-[#002d1a] hover:bg-[#1a432f] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
             <span>Completar Registro y Activar Cuenta</span>
@@ -118,7 +109,6 @@
         </div>
       </form>
 
-      <!-- Panel de Depuración -->
       <div class="mt-8 pt-6 border-t border-gray-100">
         <details class="text-xs text-gray-400">
           <summary class="cursor-pointer hover:text-gray-600">Ver registro de depuración (Debug Info)</summary>
@@ -132,7 +122,6 @@
     GraveCare SpA · Preservación & Memoria · contacto@gravecare.cl
   </footer>
 
-  <!-- Script Firebase Unificado -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
     import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
@@ -175,8 +164,8 @@
         if (local) {
           try {
             const parsed = JSON.parse(local);
-            if (parsed && (parsed.titular || parsed.email || parsed.emailCliente)) {
-              addLog('✅ Usando datos prioritarios de la orden reciente (Local/Session)');
+            if (parsed) {
+              addLog('✅ Usando datos de la orden reciente (Local/Session)');
               if (parsed.numeroOrden) ordenIdDetectada = parsed.numeroOrden;
               return parsed;
             }
@@ -206,8 +195,14 @@
         if (emailParam) {
           try {
             const cleanEmail = decodeURIComponent(emailParam).trim().toLowerCase();
-            const q = query(collection(db, 'ordenes'), where('emailCliente', '==', cleanEmail));
-            const snapEmail = await getDocs(q);
+            let q = query(collection(db, 'ordenes'), where('titular.email', '==', cleanEmail));
+            let snapEmail = await getDocs(q);
+
+            if (snapEmail.empty) {
+              q = query(collection(db, 'ordenes'), where('emailCliente', '==', cleanEmail));
+              snapEmail = await getDocs(q);
+            }
+
             if (!snapEmail.empty) {
               addLog(`✅ Datos encontrados por Email en Firestore`);
               ordenIdDetectada = snapEmail.docs[0].id;
@@ -255,15 +250,14 @@
           fechaNacimiento: datos.fechaNacimiento || ''
         };
 
-        const camposBloqueables = ['nombres', 'apellidoPaterno', 'apellidoMaterno', 'email', 'rut', 'telefono', 'direccion', 'comuna', 'region', 'pais'];
-
         Object.keys(valores).forEach(id => {
           const elem = document.getElementById(id);
           if (elem && valores[id]) {
             elem.value = valores[id];
             addLog(`  ✓ ${id}: ${valores[id]}`);
             
-            if (camposBloqueables.includes(id)) {
+            // Solo bloquea si el valor realmente existe y no está vacío
+            if (valores[id].trim() !== '') {
               elem.readOnly = true;
               elem.classList.add('bg-gray-100', 'text-gray-700', 'cursor-not-allowed');
             }

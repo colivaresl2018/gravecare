@@ -60,13 +60,27 @@ function obtenerOptions() {
   );
 }
 
-const SITE_URL = "https://gravecare.cl"; // Ajustar al dominio real
+const ALLOWED_ORIGINS = [
+  "https://gravecare.cl",
+  "https://www.gravecare.cl",
+  "https://gravecare-2e8d2.web.app",
+  "https://gravecare-2e8d2.firebaseapp.com",
+];
+const SITE_URL_POR_DEFECTO = "https://gravecare.cl";
+
+function resolverSiteUrl(orden) {
+  return orden && ALLOWED_ORIGINS.includes(orden.origenSitio) ?
+    orden.origenSitio : SITE_URL_POR_DEFECTO;
+}
 
 // Meses entre cada cobro, según el plan (12 visitas al año repartidas).
 const MESES_ENTRE_COBROS = {"12": 1, "6": 2, "4": 3};
 
-function setCors(res) {
-  res.set("Access-Control-Allow-Origin", SITE_URL);
+function setCors(req, res) {
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+  }
   res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type");
 }
@@ -78,7 +92,7 @@ function setCors(res) {
 exports.iniciarInscripcionOneclick = onRequest(
     {secrets: [TBK_COMMERCE_CODE, TBK_API_KEY]},
     async (req, res) => {
-      setCors(res);
+      setCors(req, res);
       if (req.method === "OPTIONS") return res.status(204).send("");
       if (req.method !== "POST") {
         return res.status(405).json({error: "Método no permitido"});
@@ -113,9 +127,13 @@ exports.iniciarInscripcionOneclick = onRequest(
         const inscription = new Oneclick.MallInscription(obtenerOptions());
         const response = await inscription.start(ordenId, emailCliente, responseUrl);
 
+        const origenPermitido = ALLOWED_ORIGINS.includes(req.headers.origin) ?
+          req.headers.origin : SITE_URL_POR_DEFECTO;
+
         await ordenRef.update({
           oneclickToken: response.token,
           oneclickEstado: "inscripcion_iniciada",
+          origenSitio: origenPermitido,
         });
 
         return res.status(200).json({
@@ -140,8 +158,9 @@ exports.confirmarInscripcionOneclick = onRequest(
       const token = req.body.TBK_TOKEN || req.query.TBK_TOKEN;
 
       if (!token) {
-        // El usuario canceló la inscripción antes de completarla.
-        return res.redirect(302, `${SITE_URL}/suscribirme-Plan.html?estado=inscripcion_cancelada`);
+        // El usuario canceló la inscripción antes de completarla — sin
+        // token no hay forma de identificar la orden ni su origenSitio.
+        return res.redirect(302, `${SITE_URL_POR_DEFECTO}/suscribirme-Plan.html?estado=inscripcion_cancelada`);
       }
 
       // ordenId fue enviado como "username" en el start() — lo recuperamos
@@ -164,13 +183,15 @@ exports.confirmarInscripcionOneclick = onRequest(
         return res.status(500).send("Error interno");
       }
 
+      const siteUrl = resolverSiteUrl((await ordenRef.get()).data());
+
       try {
         const inscription = new Oneclick.MallInscription(obtenerOptions());
         const response = await inscription.finish(token);
 
         if (response.response_code !== 0) {
           await ordenRef.update({oneclickEstado: "inscripcion_rechazada"});
-          return res.redirect(302, `${SITE_URL}/suscribirme-Plan.html?estado=inscripcion_rechazada`);
+          return res.redirect(302, `${siteUrl}/suscribirme-Plan.html?estado=inscripcion_rechazada`);
         }
 
         await ordenRef.update({
@@ -188,11 +209,11 @@ exports.confirmarInscripcionOneclick = onRequest(
         // Primer cobro inmediato (primera visita) + agenda el próximo.
         await cobrarUnaVisita(ordenId, ordenRef);
 
-        return res.redirect(302, `${SITE_URL}/confirmacion.html?orden=${ordenId}&suscripcion=activa`);
+        return res.redirect(302, `${siteUrl}/confirmacion.html?orden=${ordenId}&suscripcion=activa`);
       } catch (err) {
         console.error("[confirmarInscripcionOneclick] Error confirmando:", err);
         await ordenRef.update({oneclickEstado: "error_confirmacion"});
-        return res.redirect(302, `${SITE_URL}/suscribirme-Plan.html?estado=error`);
+        return res.redirect(302, `${siteUrl}/suscribirme-Plan.html?estado=error`);
       }
     },
 );

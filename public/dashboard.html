@@ -246,45 +246,64 @@
         const fotosList = [];
         const ordenesIds = new Set();
 
-        const snapOrdenes = await getDocs(collection(db, "ordenes"));
-        snapOrdenes.forEach(docSnap => {
-          const o = docSnap.data();
-          const emailTitular = (o.titular?.email || o.email || "").toLowerCase().trim();
-          const uidTitular = o.usuarioId || o.uid || o.titular?.uid;
+        // Firestore rechaza un getDocs() sin filtro sobre toda la colección
+        // cuando las reglas son por documento (esDuenoDeOrden()), así que se
+        // consulta con where() por cada campo posible en vez de traer todo.
+        const ordenesRef = collection(db, "ordenes");
+        const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
+        const snapUid = await getDocs(qUid);
+        snapUid.forEach(docSnap => ordenesIds.add(docSnap.id));
 
-          if (emailTitular === emailCliente || uidTitular === user.uid) {
-            ordenesIds.add(docSnap.id);
-            if (o.proximaVisita) fechaProxima = o.proximaVisita;
-            if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
-            
-            // Si la orden tiene fotos directas
-            if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
-          }
-        });
+        if (emailCliente) {
+          const qTitular = query(ordenesRef, where("titular.email", "==", emailCliente));
+          const snapTitular = await getDocs(qTitular);
+          snapTitular.forEach(docSnap => ordenesIds.add(docSnap.id));
+
+          const qCliente = query(ordenesRef, where("emailCliente", "==", emailCliente));
+          const snapCliente = await getDocs(qCliente);
+          snapCliente.forEach(docSnap => ordenesIds.add(docSnap.id));
+        }
+
+        // Traer los datos completos de cada orden encontrada (por ID, no
+        // por query masiva) para calcular próxima visita y fotos directas.
+        for (const ordenId of ordenesIds) {
+          const ordenSnap = await getDoc(doc(db, "ordenes", ordenId));
+          if (!ordenSnap.exists()) continue;
+          const o = ordenSnap.data();
+          if (o.proximaVisita) fechaProxima = o.proximaVisita;
+          if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
+          if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
+        }
 
         document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
 
-        // 3. Consultar Informes Aprobados / Terminados
+        // 3. Consultar Informes Aprobados / Terminados.
+        //    Igual motivo: se filtra por clienteEmail en la query (coincide
+        //    con lo que permite esDuenoDeOrden() en las reglas de "informes")
+        //    en vez de traer toda la colección.
         const contenedorMant = document.getElementById("contenedor-mantenimientos");
-        const snapInformes = await getDocs(collection(db, "informes"));
         const misInformes = [];
 
-        snapInformes.forEach(docSnap => {
-          const inf = { id: docSnap.id, ...docSnap.data() };
-          const estado = (inf.estado || "").toLowerCase().trim();
-          const lePertenece = ordenesIds.has(inf.ordenId) || (inf.clienteEmail && inf.clienteEmail.toLowerCase() === emailCliente);
+        if (emailCliente) {
+          const qInformes = query(collection(db, "informes"), where("clienteEmail", "==", emailCliente));
+          const snapInformes = await getDocs(qInformes);
 
-          if (lePertenece && (estado === "aprobado" || estado === "completada" || estado === "aprobada")) {
-            misInformes.push(inf);
+          snapInformes.forEach(docSnap => {
+            const inf = { id: docSnap.id, ...docSnap.data() };
+            const estado = (inf.estado || "").toLowerCase().trim();
 
-            // Rescatar fotos del informe para la galería del dashboard
-            const fotos = inf.fotos || {};
-            if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
-            if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
-            if (fotos.antes?.url) fotosList.unshift(fotos.antes.url);
-            if (fotos.general?.url) fotosList.unshift(fotos.general.url);
-          }
-        });
+            if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
+              misInformes.push(inf);
+
+              // Rescatar fotos del informe para la galería del dashboard
+              const fotos = inf.fotos || {};
+              if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
+              if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
+              if (fotos.antes?.url) fotosList.unshift(fotos.antes.url);
+              if (fotos.general?.url) fotosList.unshift(fotos.general.url);
+            }
+          });
+        }
 
         // Ordenar informes de forma descendente por fecha
         misInformes.sort((a, b) => {

@@ -49,3 +49,6 @@ const oneclick = require("./oneclick");
 exports.iniciarInscripcionOneclick = oneclick.iniciarInscripcionOneclick;
 exports.confirmarInscripcionOneclick = oneclick.confirmarInscripcionOneclick;
 exports.cobrarSuscripcionesOneclick = oneclick.cobrarSuscripcionesOneclick;
+
+const contacto = require("./contacto");
+exports.enviarContacto = contacto.enviarContacto;

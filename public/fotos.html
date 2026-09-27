@@ -141,6 +141,8 @@
     import { db } from "./js/firebaseConfig.js";
     import { 
       collection, 
+      query,
+      where,
       getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -171,37 +173,48 @@
         console.log("Consultando fotos para usuario:", user.email, user.uid);
         const emailCliente = (user.email || "").toLowerCase().trim();
         const ordenesIds = new Set();
+        const ordenesRef = collection(db, "ordenes");
 
-        // 1. Rescatar órdenes asociadas al cliente
+        // 1. Rescatar órdenes asociadas al cliente.
+        //    Firestore rechaza un getDocs() sin filtro sobre toda la
+        //    colección cuando las reglas son por documento (esDuenoDeOrden()),
+        //    así que se consulta con where() por cada campo posible, igual
+        //    que en sepulturas.html — nunca un getDocs(collection(...)) plano.
         try {
-          const snapOrdenes = await getDocs(collection(db, "ordenes"));
-          snapOrdenes.forEach((docSnap) => {
-            const d = docSnap.data();
-            const emailTitular = (d.titular?.email || d.email || "").toLowerCase().trim();
-            const uidTitular = d.usuarioId || d.uid || d.titular?.uid;
+          const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
+          const snapUid = await getDocs(qUid);
+          snapUid.forEach((docSnap) => ordenesIds.add(docSnap.id));
 
-            if (emailTitular === emailCliente || uidTitular === user.uid) {
-              ordenesIds.add(docSnap.id);
-            }
-          });
+          if (emailCliente) {
+            const qTitular = query(ordenesRef, where("titular.email", "==", emailCliente));
+            const snapTitular = await getDocs(qTitular);
+            snapTitular.forEach((docSnap) => ordenesIds.add(docSnap.id));
+
+            const qCliente = query(ordenesRef, where("emailCliente", "==", emailCliente));
+            const snapCliente = await getDocs(qCliente);
+            snapCliente.forEach((docSnap) => ordenesIds.add(docSnap.id));
+          }
           console.log("Órdenes del cliente encontradas:", Array.from(ordenesIds));
         } catch (e) {
           console.warn("Aviso al consultar órdenes:", e);
         }
 
-        // 2. Rescatar informes técnicos aprobados
-        const snapInformes = await getDocs(collection(db, "informes"));
+        // 2. Rescatar informes técnicos aprobados.
+        //    Mismo motivo: se filtra por clienteEmail en la query (coincide
+        //    con lo que permite esDuenoDeOrden() en las reglas de "informes")
+        //    en vez de traer toda la colección.
         const informesAprobados = [];
-
-        snapInformes.forEach((docSnap) => {
-          const inf = { id: docSnap.id, ...docSnap.data() };
-          const lePertenece = ordenesIds.has(inf.ordenId) || (inf.clienteEmail && inf.clienteEmail.toLowerCase() === emailCliente);
-          const estado = (inf.estado || "").toLowerCase().trim();
-
-          if ((ordenesIds.size === 0 || lePertenece) && (estado === "aprobado" || estado === "completada" || estado === "aprobada")) {
-            informesAprobados.push(inf);
-          }
-        });
+        if (emailCliente) {
+          const qInformes = query(collection(db, "informes"), where("clienteEmail", "==", emailCliente));
+          const snapInformes = await getDocs(qInformes);
+          snapInformes.forEach((docSnap) => {
+            const inf = { id: docSnap.id, ...docSnap.data() };
+            const estado = (inf.estado || "").toLowerCase().trim();
+            if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
+              informesAprobados.push(inf);
+            }
+          });
+        }
 
         informesAprobados.sort((a, b) => {
           const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();

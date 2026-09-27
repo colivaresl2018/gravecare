@@ -61,15 +61,36 @@ function obtenerOptions() {
   );
 }
 
-// URL base de tu sitio (donde vive confirmacion.html, resumen-pago.html, etc.)
-// Ajusta esto al dominio real (gravecare.cl o el que corresponda).
-const SITE_URL = "https://gravecare.cl";
+// Dominios desde los que se puede llamar a estas funciones. Incluye el
+// dominio final y las URLs por defecto de Firebase Hosting (útiles para
+// probar antes de que gravecare.cl esté apuntando aquí, o si se prueba
+// directo desde *.web.app).
+const ALLOWED_ORIGINS = [
+  "https://gravecare.cl",
+  "https://www.gravecare.cl",
+  "https://gravecare-2e8d2.web.app",
+  "https://gravecare-2e8d2.firebaseapp.com",
+];
+// Se usa como último recurso solo para construir URLs de redirección cuando
+// no se puede determinar el origen real (ver resolverSiteUrl).
+const SITE_URL_POR_DEFECTO = "https://gravecare.cl";
 
-// CORS: solo tu propio dominio puede llamar a crearTransaccionWebpay.
-function setCors(res) {
-  res.set("Access-Control-Allow-Origin", SITE_URL);
+// CORS: refleja el origen de la llamada solo si está en la lista permitida.
+function setCors(req, res) {
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+  }
   res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type");
+}
+
+// Determina a qué dominio devolver al navegador. Usa el origen guardado en
+// la orden (el mismo desde el que se inició el pago) para no perder la
+// sesión/localStorage al volver; si no hay dato, cae al valor por defecto.
+function resolverSiteUrl(orden) {
+  return orden && ALLOWED_ORIGINS.includes(orden.origenSitio) ?
+    orden.origenSitio : SITE_URL_POR_DEFECTO;
 }
 
 // ============================================================================
@@ -79,7 +100,7 @@ function setCors(res) {
 exports.crearTransaccionWebpay = onRequest(
     {secrets: [TBK_COMMERCE_CODE, TBK_API_KEY]},
     async (req, res) => {
-      setCors(res);
+      setCors(req, res);
       if (req.method === "OPTIONS") {
         return res.status(204).send("");
       }
@@ -117,10 +138,16 @@ exports.crearTransaccionWebpay = onRequest(
 
         // Guarda el token en la orden para poder cruzarlo cuando Transbank
         // redirija de vuelta.
+        const origenPermitido = ALLOWED_ORIGINS.includes(req.headers.origin) ?
+          req.headers.origin : SITE_URL_POR_DEFECTO;
+
         await ordenRef.update({
           webpayToken: response.token,
           webpayEstado: "iniciado",
           webpayCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          // Dominio desde el que se inició el pago, para volver ahí mismo
+          // en confirmarTransaccionWebpay (evita perder localStorage).
+          origenSitio: origenPermitido,
         });
 
         return res.status(200).json({url: response.url, token: response.token});
@@ -146,6 +173,7 @@ exports.confirmarTransaccionWebpay = onRequest(
 
       // Caso: el usuario canceló el pago antes de terminar.
       if (!token && tokenAbortado) {
+        let siteUrl = SITE_URL_POR_DEFECTO;
         try {
           const ordenSnap = await db
               .collection("ordenes")
@@ -153,12 +181,14 @@ exports.confirmarTransaccionWebpay = onRequest(
               .limit(1)
               .get();
           if (!ordenSnap.empty) {
+            const ordenData = ordenSnap.docs[0].data();
+            siteUrl = resolverSiteUrl(ordenData);
             await ordenSnap.docs[0].ref.update({webpayEstado: "abortado_por_usuario"});
           }
         } catch (err) {
           console.error("[confirmarTransaccionWebpay] Error registrando abandono:", err);
         }
-        return res.redirect(302, `${SITE_URL}/resumen-pago.html?estado=cancelado`);
+        return res.redirect(302, `${siteUrl}/resumen-pago.html?estado=cancelado`);
       }
 
       if (!token) {
@@ -170,6 +200,8 @@ exports.confirmarTransaccionWebpay = onRequest(
         const response = await tx.commit(token);
 
         const ordenRef = db.collection("ordenes").doc(response.buy_order);
+        const ordenSnapActual = await ordenRef.get();
+        const siteUrl = resolverSiteUrl(ordenSnapActual.data());
         const aprobado = response.response_code === 0;
 
         await ordenRef.update({
@@ -188,13 +220,13 @@ exports.confirmarTransaccionWebpay = onRequest(
         });
 
         const destino = aprobado ?
-          `${SITE_URL}/confirmacion.html?orden=${response.buy_order}` :
-          `${SITE_URL}/resumen-pago.html?estado=rechazado&orden=${response.buy_order}`;
+          `${siteUrl}/confirmacion.html?orden=${response.buy_order}` :
+          `${siteUrl}/resumen-pago.html?estado=rechazado&orden=${response.buy_order}`;
 
         return res.redirect(302, destino);
       } catch (err) {
         console.error("[confirmarTransaccionWebpay] Error confirmando pago:", err);
-        return res.redirect(302, `${SITE_URL}/resumen-pago.html?estado=error`);
+        return res.redirect(302, `${SITE_URL_POR_DEFECTO}/resumen-pago.html?estado=error`);
       }
     },
 );

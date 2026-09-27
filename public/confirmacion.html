@@ -202,18 +202,69 @@
   </footer>
 
   <!-- Script Unificado de Confirmación -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('=== CARGANDO CONFIRMACIÓN GRAVECARE ===');
-      
-      // Buscar la orden en cualquier clave guardada
-      const ordenStr = localStorage.getItem('gravecare_datos_completos') ||
-                       sessionStorage.getItem('gravecare_registro_datos') ||
-                       localStorage.getItem('gravecare_last_order') ||
-                       sessionStorage.getItem('gravecare_order_for_registro');
+  <script type="module">
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { db } from "./js/firebaseConfig.js";
 
-      if (!ordenStr) {
-        console.warn('⚠️ No se encontraron datos de la orden en el navegador.');
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('=== CARGANDO CONFIRMACIÓN GRAVECARE ===');
+
+      // Si venimos de Webpay, el resultado real viene en la URL — nunca asumir éxito sin verificarlo.
+      const urlParams = new URLSearchParams(window.location.search);
+      const resultadoPago = urlParams.get('resultado');
+      const numeroOrdenUrl = urlParams.get('orden');
+
+      if (resultadoPago && resultadoPago !== 'exito') {
+        localStorage.removeItem('gravecare_datos_completos');
+        localStorage.removeItem('gravecare_last_order');
+        const mensajes = {
+          rechazado: 'Tu pago fue rechazado por el banco. No se realizó ningún cargo.',
+          anulado: 'Cancelaste el pago antes de completarlo. No se realizó ningún cargo.',
+          error: 'Ocurrió un error al procesar el pago. No se realizó ningún cargo.',
+        };
+        alert(mensajes[resultadoPago] || 'No se pudo confirmar el pago.');
+        window.location.href = 'resumen-pago.html';
+        return;
+      }
+
+      // Fuente de verdad principal: Firestore, usando el número de orden que
+      // viene en la URL (confiable, no depende de que el navegador haya
+      // conservado el localStorage durante el viaje de ida y vuelta a Webpay).
+      let orderData = null;
+
+      if (numeroOrdenUrl) {
+        try {
+          const snap = await getDoc(doc(db, 'ordenes', numeroOrdenUrl));
+          if (snap.exists()) {
+            orderData = snap.data();
+            console.log('✅ Orden recuperada desde Firestore:', orderData);
+          } else {
+            console.warn('⚠️ No existe la orden', numeroOrdenUrl, 'en Firestore.');
+          }
+        } catch (errFirestore) {
+          console.warn('⚠️ No se pudo leer la orden desde Firestore:', errFirestore);
+        }
+      }
+
+      // Respaldo: si no hay número de orden en la URL, o falló la lectura,
+      // intenta con lo que haya quedado guardado en el navegador.
+      if (!orderData) {
+        const ordenStr = localStorage.getItem('gravecare_datos_completos') ||
+                         sessionStorage.getItem('gravecare_registro_datos') ||
+                         localStorage.getItem('gravecare_last_order') ||
+                         sessionStorage.getItem('gravecare_order_for_registro');
+        if (ordenStr) {
+          try {
+            orderData = JSON.parse(ordenStr);
+            console.log('✅ Orden recuperada desde almacenamiento del navegador:', orderData);
+          } catch (errParse) {
+            console.warn('⚠️ No se pudo interpretar la orden guardada en el navegador:', errParse);
+          }
+        }
+      }
+
+      if (!orderData) {
+        console.warn('⚠️ No se encontraron datos de la orden ni en Firestore ni en el navegador.');
         document.getElementById('conf-plan-name').textContent = 'Plan Estándar';
         document.getElementById('conf-deceased-name').textContent = 'Ser Querido';
         document.getElementById('conf-cemetery-name').textContent = 'Cementerio por confirmar';
@@ -223,11 +274,8 @@
       }
 
       try {
-        const orderData = JSON.parse(ordenStr);
-        console.log('✅ Datos de la orden recuperados:', orderData);
-
         // 1. Número de Orden
-        const numOrden = orderData.numeroOrden || ('GC-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+        const numOrden = orderData.numeroOrden || numeroOrdenUrl || ('GC-' + Math.random().toString(36).substring(2, 8).toUpperCase());
         const orderBadge = document.getElementById('conf-order-badge');
         if (orderBadge) {
           orderBadge.textContent = `Nº DE ORDEN: ${numOrden}`;
