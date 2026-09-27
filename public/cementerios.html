@@ -114,7 +114,7 @@
     <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
       <div class="flex items-center gap-2">
         <a href="index.html" class="flex items-center gap-2">
-          <img src="./assets/Logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain">
+          <img src="./assets/logo.webp" alt="GraveCare Logo" class="h-14 w-auto object-contain">
         </a>
       </div>
 
@@ -209,7 +209,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-card-gap px-gutter py-section-padding-desktop max-w-container-max-width mx-auto border-b border-primary-container">
       <!-- Brand -->
       <div class="col-span-1 md:col-span-1">
-        <img src="./assets/Logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain mb-4">
+        <img src="./assets/logo.webp" alt="GraveCare Logo" class="h-14 w-auto object-contain mb-4">
         <div class="text-headline-md font-headline-md font-bold text-surface-container-lowest mb-4">GRAVECARE</div>
         <p class="font-body-md text-body-md text-on-primary/80 mb-6">
           Brindando tranquilidad y respeto continuo a través del cuidado profesional de sepulturas.
@@ -292,37 +292,51 @@
     }
   </script>
 
-  <!-- Listado de cementerios (misma lista usada en suscribirme-Plan.html / suscribirme-Spot.html) -->
+  <!-- Listado de cementerios (misma lista usada en suscribirme-Plan.html /
+       suscribirme-Spot.html). Cada uno incluye lat/lng — la ubicación
+       satelital de referencia del cementerio en general (no de una
+       sepultura puntual), para que el operador sepa hacia dónde dirigirse
+       antes de llegar. Coordenadas obtenidas de Google Maps en septiembre
+       2026; revisar si algún predio cambia de dirección con el tiempo.
+       NOTA: "Parque del Recuerdo Rancagua" y "Parque Sendero Rancagua"
+       arrojaron la misma dirección en la búsqueda (Av. Libertador Bernardo
+       O'Higgins 71) — parecen ser el mismo predio bajo dos nombres
+       comerciales. Si en la práctica son ubicaciones distintas, hay que
+       corregir una de las dos coordenadas abajo. -->
   <script>
     const CEMENTERIOS = [
-      "Parque del Recuerdo Américo Vespucio",
-      "Cementerio General de Santiago",
-      "Cementerio Católico de Recoleta",
-      "Cementerio Parque del Santiago",
-      "Parque Canaán",
-      "Cementerio Metropolitano",
-      "Parque del Recuerdo Cordillera",
-      "Parque del Prado",
-      "Parque Sendero San Bernardo",
-      "Parque Sendero Maipú",
-      "Parque El Manantial",
-      "Cementerio Católico de Maipú",
-      "Parque del Recuerdo Padre Hurtado",
-      "Parque del Recuerdo Rancagua",
-      "Parque Sendero Rancagua",
-      "Cementerio Municipal N° 1 de Rancagua",
-      "Cementerio Municipal N° 2 (Baquedano)",
-      "Parque Jardín Rancagua",
-      "Parque Jardín Las Flores",
+      { nombre: "Parque del Recuerdo Américo Vespucio", lat: -33.3838805, lng: -70.6345455 },
+      { nombre: "Cementerio General de Santiago", lat: -33.4176636, lng: -70.6500999 },
+      { nombre: "Cementerio Católico de Recoleta", lat: -33.4134151, lng: -70.6422611 },
+      { nombre: "Cementerio Parque del Santiago", lat: -33.3908378, lng: -70.6106419 },
+      { nombre: "Parque Canaán", lat: -33.4428260, lng: -70.8013175 },
+      { nombre: "Cementerio Metropolitano", lat: -33.5304473, lng: -70.6832700 },
+      { nombre: "Parque del Recuerdo Cordillera", lat: -33.5549429, lng: -70.5441600 },
+      { nombre: "Parque del Prado", lat: -33.5548133, lng: -70.5598832 },
+      { nombre: "Parque Sendero San Bernardo", lat: -33.6095850, lng: -70.7187710 },
+      { nombre: "Parque Sendero Maipú", lat: -33.4654272, lng: -70.7671207 },
+      { nombre: "Parque El Manantial", lat: -33.4728208, lng: -70.7607300 },
+      { nombre: "Cementerio Católico de Maipú", lat: -33.5078387, lng: -70.7698562 },
+      { nombre: "Parque del Recuerdo Padre Hurtado", lat: -33.6094158, lng: -70.8356870 },
+      { nombre: "Parque del Recuerdo Rancagua", lat: -34.1604909, lng: -70.7563741 },
+      { nombre: "Parque Sendero Rancagua", lat: -34.1604909, lng: -70.7563741 },
+      { nombre: "Cementerio Municipal N° 1 de Rancagua", lat: -34.1646880, lng: -70.7472616 },
+      { nombre: "Cementerio Municipal N° 2 (Baquedano)", lat: -34.1655658, lng: -70.7670607 },
+      { nombre: "Parque Jardín Rancagua", lat: -34.1623360, lng: -70.7975146 },
+      { nombre: "Parque Jardín Las Flores", lat: -34.1797461, lng: -70.6908177 },
     ];
 
     const grid = document.getElementById('gridCementerios');
-    CEMENTERIOS.forEach((nombre) => {
+    CEMENTERIOS.forEach((cementerio) => {
+      const urlMapa = `https://www.google.com/maps/search/?api=1&query=${cementerio.lat},${cementerio.lng}`;
       const card = document.createElement('div');
       card.className = 'bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/40 shadow-sm flex items-start gap-3 hover:shadow-md hover:border-primary/40 transition-all';
       card.innerHTML = `
         <span class="material-symbols-outlined text-primary flex-shrink-0">location_on</span>
-        <span class="font-body-md text-body-md text-on-surface font-semibold">${nombre}</span>
+        <div class="flex flex-col gap-1">
+          <span class="font-body-md text-body-md text-on-surface font-semibold">${cementerio.nombre}</span>
+          <a href="${urlMapa}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-primary hover:underline">Ver ubicación en el mapa</a>
+        </div>
       `;
       grid.appendChild(card);
     });
