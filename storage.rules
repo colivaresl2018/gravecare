@@ -1,29 +1,76 @@
+// ⚠️ SINCRONIZADO CON gravecare-operaciones/storage.rules
+// Ambos repos apuntan al mismo proyecto Firebase (gravecare-2e8d2) y
+// comparten el mismo bucket de Storage, por lo que deben tener EXACTAMENTE
+// las mismas reglas. Si editas este archivo, replica el cambio también en
+// gravecare-operaciones/storage.rules (y viceversa).
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // Verifica si el usuario autenticado es staff activo, sin depender de
+    // firestore.get()/firestore.exists() (reglas cruzadas Storage↔Firestore):
+    // esa sintaxis falla de forma intermitente tanto en el Simulador de
+    // reglas como en producción real, con /databases/(default)/documents/...
+    // devolviendo "no existe" aunque el documento sí exista (bug conocido
+    // de Firebase, sin fecha de arreglo — github.com/firebase/firebase-tools
+    // issues #5251 y #2067). En su lugar, la Cloud Function onStaffEscrito
+    // (functions/staffClaims.js) mantiene sincronizado el Custom Claim
+    // staffActivo en el propio token del usuario cada vez que su documento
+    // staff/{uid} cambia, así que aquí basta con leer el token — sin
+    // ninguna consulta adicional ni el bug de reglas cruzadas.
+    function esStaffActivo() {
+      return request.auth != null && request.auth.token.staffActivo == true;
+    }
+
     // Fotos de reportes (antes/después de cada trabajo).
     //
-    // ⚠️ La ruta real que sube informe-captura.html es
-    // informes/{ordenId}/{archivo} (no "reportes/{numeroOrden}/..."). La
-    // regla decía "reportes" y nunca coincidía con ninguna subida real, así
-    // que todo caía al bloqueo por defecto de más abajo (allow: if false) y
-    // las fotos fallaban en silencio con error de permisos. Se corrigió el
-    // nombre de la ruta para que coincida con el código — si algún día se
-    // renombra la carpeta en el código, hay que replicar el cambio aquí.
+    // La ruta real que sube informe-captura.html es
+    // informes/{ordenId}/{archivo} (no "reportes/{numeroOrden}/..."). Si
+    // algún día se renombra la carpeta en el código, hay que replicar el
+    // cambio aquí.
     match /informes/{ordenId}/{archivo} {
       // Lectura: cualquiera con el link puede VER la foto (así las URLs
       // funcionan directo en el dashboard del cliente sin pedir token).
       // Nadie puede "listar" el contenido de la carpeta sin el link exacto.
       allow read: if true;
 
-      // Escritura: solo staff activo (Operador, Supervisor o Administrador),
-      // verificado contra la colección "staff" en Firestore.
-      allow write: if request.auth != null &&
-        firestore.exists(/databases/(default)/documents/staff/$(request.auth.uid)) &&
-        firestore.get(/databases/(default)/documents/staff/$(request.auth.uid)).data.activo == true &&
+      // Escritura: solo staff activo (Operador, Supervisor o Administrador).
+      allow write: if esStaffActivo() &&
         request.resource.size < 15 * 1024 * 1024 &&
         request.resource.contentType.matches('image/.*');
+    }
+
+    // Contratos generados en PDF (contratoGravecare.js, gravecare.cl).
+    // Aún no está conectado a ningún flujo activo (ningún HTML lo importa
+    // todavía), pero se deja la regla lista para cuando se active — sin
+    // esto, la primera subida real habría fallado con el mismo error de
+    // permisos que tuvieron las fotos por caer al bloqueo por defecto.
+    match /contratos/{numeroOrden}/{archivo} {
+      // Lectura abierta con el link exacto, igual que informes/: el
+      // cliente necesita poder abrir/descargar su propio contrato sin
+      // pedir token, y nadie puede listar la carpeta sin el link.
+      allow read: if true;
+
+      allow write: if esStaffActivo() &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.contentType == 'application/pdf';
+    }
+
+    // Facturas adjuntas al registrar un movimiento contable
+    // (gastos-ingresos.html → js/gastosIngresos.js). Esta sí está activa
+    // en producción: sin esta regla, cualquier factura que se intente
+    // adjuntar falla con storage/unauthorized igual que las fotos.
+    match /facturas_auditoria/{anioMes}/{archivo} {
+      // Solo staff puede leer o escribir — son documentos contables
+      // internos, no algo que el cliente final deba poder ver.
+      // request.resource solo existe en escrituras, por eso read y write
+      // van separados (a diferencia de informes/ y contratos/, que solo
+      // necesitan la condición de tamaño/tipo en el write).
+      allow read: if esStaffActivo();
+      allow write: if esStaffActivo() &&
+        request.resource.size < 15 * 1024 * 1024 &&
+        (request.resource.contentType.matches('image/.*') ||
+         request.resource.contentType == 'application/pdf');
     }
 
     // Bloqueo por defecto para cualquier otra ruta

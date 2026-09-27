@@ -52,3 +52,7 @@ exports.cobrarSuscripcionesOneclick = oneclick.cobrarSuscripcionesOneclick;
 
 const contacto = require("./contacto");
 exports.enviarContacto = contacto.enviarContacto;
+
+const staffClaims = require("./staffClaims");
+exports.onStaffEscrito = staffClaims.onStaffEscrito;
+exports.sincronizarStaffExistente = staffClaims.sincronizarStaffExistente;
