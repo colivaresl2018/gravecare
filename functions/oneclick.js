@@ -160,7 +160,7 @@ exports.confirmarInscripcionOneclick = onRequest(
       if (!token) {
         // El usuario canceló la inscripción antes de completarla — sin
         // token no hay forma de identificar la orden ni su origenSitio.
-        return res.redirect(302, `${SITE_URL_POR_DEFECTO}/suscribirme-Plan.html?estado=inscripcion_cancelada`);
+        return res.redirect(302, '${SITE_URL_POR_DEFECTO}/confirmacion.html?estado=inscripcion_cancelada');
       }
 
       // ordenId fue enviado como "username" en el start() — lo recuperamos
@@ -191,7 +191,7 @@ exports.confirmarInscripcionOneclick = onRequest(
 
         if (response.response_code !== 0) {
           await ordenRef.update({oneclickEstado: "inscripcion_rechazada"});
-          return res.redirect(302, `${siteUrl}/suscribirme-Plan.html?estado=inscripcion_rechazada`);
+          return res.redirect(302, '${siteUrl}/confirmacion.html?estado=inscripcion_rechazada');
         }
 
         await ordenRef.update({
@@ -213,7 +213,7 @@ exports.confirmarInscripcionOneclick = onRequest(
       } catch (err) {
         console.error("[confirmarInscripcionOneclick] Error confirmando:", err);
         await ordenRef.update({oneclickEstado: "error_confirmacion"});
-        return res.redirect(302, `${siteUrl}/suscribirme-Plan.html?estado=error`);
+        return res.redirect(302, '${siteUrl}/confirmacion.html?estado=error');
       }
     },
 );
