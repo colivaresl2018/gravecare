@@ -200,6 +200,12 @@
     </footer>
 
     <script type="module">
+        import {
+            obtenerDatosTitularPrevios,
+            rellenarCamposTitular,
+            mostrarAvisoDatosPrevios
+        } from "./js/datosTitularPrevios.js";
+
         let datosDelPlanGlobal = {};
 
         const regionesComunas = {
@@ -354,6 +360,17 @@
         });
 
         cargarDatosPrevios();
+
+        // Cliente que ya tiene cuenta y contrata otro servicio para otra
+        // sepultura: precarga sus datos personales de la última orden
+        // (solo el titular, nunca la tumba/difunto — esos cambian cada vez).
+        // Todos los campos quedan editables. Si no está logueado o no tiene
+        // órdenes previas, el formulario queda vacío como siempre.
+        obtenerDatosTitularPrevios().then((titular) => {
+            if (!titular) return;
+            rellenarCamposTitular(titular);
+            mostrarAvisoDatosPrevios();
+        });
     </script>
 </body>
 </html>
