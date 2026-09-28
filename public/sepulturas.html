@@ -40,7 +40,7 @@
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/Logo.jpg" onerror="this.onerror=null; this.src='Logo.jpg';">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.webp" onerror="this.onerror=null; this.src='assets/logo.webp';">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -254,6 +254,25 @@
                            estado.toLowerCase().includes("pagado");
           const badgeColor = esActivo ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
 
+          // 7. Contrato (lo genera el servidor al confirmarse el pago; ver
+          // functions/contrato.js). Solo se acepta un link de Firebase Storage:
+          // la orden es editable por su dueño y no debe poder inyectar otro esquema.
+          const urlContrato = (typeof sep.contratoUrl === "string" &&
+            sep.contratoUrl.startsWith("https://firebasestorage.googleapis.com/")) ? sep.contratoUrl : "";
+          let contratoHtml = "";
+          if (urlContrato) {
+            contratoHtml = `
+              <a href="${urlContrato}" target="_blank" rel="noopener noreferrer"
+                 class="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-full bg-primary text-white text-xs font-bold hover:opacity-90 transition-opacity">
+                <span class="material-symbols-outlined text-sm">description</span> Descargar contrato (PDF)
+              </a>`;
+          } else if (sep.contratoEstado === "error") {
+            contratoHtml = `<p class="mt-3 text-center text-xs text-gray-500">No pudimos generar tu contrato automáticamente. Escríbenos por WhatsApp y te lo enviamos.</p>`;
+          } else if (sep.contratoVersion) {
+            // Aceptó el contrato al pagar y el PDF aún no está listo.
+            contratoHtml = `<p class="mt-3 text-center text-xs text-gray-500">Tu contrato se está preparando. Aparecerá aquí en unos minutos.</p>`;
+          }
+
           const numOrden = sep.numeroOrden || sep.id || `ORD-${index + 1}`;
           const msgWa = encodeURIComponent(`Hola GraveCare, quisiera consultar sobre la mantención de la sepultura de ${difuntoNombre} (Orden #${numOrden}).`);
 
@@ -298,10 +317,11 @@
                 <a href="fotos.html?ordenId=${sep.id}" class="flex-1 py-2.5 text-center rounded-full bg-gray-100 text-primary text-xs font-bold hover:bg-gray-200 transition-colors">
                   Ver Fotos
                 </a>
-                <a href="https://wa.me/56998280501?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 text-center rounded-full border border-primary text-primary text-xs font-bold hover:bg-gray-50 transition-colors">
+                <a href="https://wa.me/56982566719?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 text-center rounded-full border border-primary text-primary text-xs font-bold hover:bg-gray-50 transition-colors">
                   Coordinar Visita
                 </a>
               </div>
+              ${contratoHtml}
             </div>
           `;
         }).join("");

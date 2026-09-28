@@ -40,20 +40,21 @@ service firebase.storage {
         request.resource.contentType.matches('image/.*');
     }
 
-    // Contratos generados en PDF (contratoGravecare.js, gravecare.cl).
-    // Aún no está conectado a ningún flujo activo (ningún HTML lo importa
-    // todavía), pero se deja la regla lista para cuando se active — sin
-    // esto, la primera subida real habría fallado con el mismo error de
-    // permisos que tuvieron las fotos por caer al bloqueo por defecto.
-    match /contratos/{numeroOrden}/{archivo} {
-      // Lectura abierta con el link exacto, igual que informes/: el
-      // cliente necesita poder abrir/descargar su propio contrato sin
-      // pedir token, y nadie puede listar la carpeta sin el link.
-      allow read: if true;
-
-      allow write: if esStaffActivo() &&
-        request.resource.size < 10 * 1024 * 1024 &&
-        request.resource.contentType == 'application/pdf';
+    // Contratos de cada cliente en PDF (functions/contrato.js, Cloud
+    // Function generarContratoAlPagar).
+    //
+    // Los escribe SOLO el servidor con el Admin SDK, que no pasa por estas
+    // reglas: por eso write es false — ningún navegador (cliente ni staff)
+    // sube contratos.
+    //
+    // El PDF trae RUT, dirección, correo y teléfono del cliente, y la ruta
+    // usa el número de orden (ORD-<timestamp>, adivinable), así que la
+    // lectura NO es pública. El cliente lo descarga con el link con token
+    // aleatorio que queda en su orden (contratoUrl); ese link no depende de
+    // estas reglas. Aquí solo se permite leer al staff activo.
+    match /contratos/{ordenId}/{archivo} {
+      allow read: if esStaffActivo();
+      allow write: if false;
     }
 
     // Facturas adjuntas al registrar un movimiento contable

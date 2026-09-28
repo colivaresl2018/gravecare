@@ -1,31 +1,58 @@
 /**
- * contratoGravecare.js (navegador)
+ * CONTRATO — generación server-side del PDF del contrato de cada cliente
  *
- * Arma el texto del Contrato de Prestación de Servicios y Mandato de
- * GraveCare, relleno con los datos reales de la orden. Se muestra en
- * resumen-pago.html ANTES de pagar, para que el cliente lo lea y lo acepte.
+ * Cloud Function generarContratoAlPagar: cuando una orden pasa a estado
+ * "pagado" (lo marca transbank.js o oneclick.js tras confirmar el pago con
+ * Transbank), arma el Contrato de Prestación de Servicios y Mandato con los
+ * datos de esa orden, lo guarda como PDF en Storage y deja el link de
+ * descarga en la orden (contratoUrl) para que el cliente lo baje desde
+ * sepulturas.html.
  *
- * El PDF NO se genera aquí: lo genera el servidor (functions/contrato.js,
- * Cloud Function generarContratoAlPagar) cuando la orden pasa a "pagado",
- * con esta misma redacción. Así solo existe contrato de órdenes realmente
- * pagadas y no hace falta abrir Storage a escrituras de clientes anónimos.
+ * Por qué en el servidor y no en el navegador:
+ *  - El checkout permite comprar como invitado. Para que un invitado
+ *    pudiera subir el PDF habría que dejar Storage abierto a escrituras
+ *    anónimas. Con el Admin SDK las reglas de Storage no aplican y las
+ *    de contratos/ quedan cerradas (write: false).
+ *  - Solo existe contrato de órdenes realmente pagadas, y se genera aunque
+ *    el cliente cierre la pestaña justo después de pagar.
  *
- * ⚠️ El texto vive en DOS archivos que deben ser idénticos:
- *    - este (lo que el cliente lee antes de pagar)
- *    - functions/contrato.js (lo que queda en el PDF)
- * Si cambias una cláusula, cámbiala en ambos y sube CONTRATO_VERSION.
+ * Por qué la descarga usa un link con token y no una regla de lectura:
+ * el PDF trae RUT, dirección, correo y teléfono del cliente. El número de
+ * orden es ORD-<timestamp>, así que una ruta abierta sería adivinable. El
+ * token es aleatorio y solo lo ve quien puede leer la orden (dueño o staff,
+ * según las reglas de Firestore).
  *
- * Datos legales de GraveCare SpA (RUT y dirección) tomados del E-RUT
- * emitido por el SII el 11/09/2026. Si la empresa cambia de domicilio,
- * actualiza EMPRESA_DIRECCION abajo.
+ * ⚠️ El texto del contrato debe ser IDÉNTICO al de
+ * public/js/contratoGravecare.js (lo que el cliente lee antes de pagar).
+ * El bloque de abajo está copiado de ese archivo.
+ *
+ * ⚠️ Cuidado con los bucles: esta función escribe en la misma orden que la
+ * dispara. Por eso solo actúa si la orden está pagada, no tiene contrato y
+ * no está en error ni en curso. Un fallo deja contratoEstado "error" y NO
+ * reintenta solo — reintentar en cada escritura dispararía la función en
+ * bucle. Para reintentar a mano, borra el campo contratoEstado de la orden.
  */
 
+const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+const admin = require("firebase-admin");
+const crypto = require("crypto");
+
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+// Nombre explícito: el bucket por defecto que resuelve el SDK puede ser el
+// antiguo .appspot.com, que en este proyecto no existe.
+const BUCKET = "gravecare-2e8d2.firebasestorage.app";
+const MINUTOS_EN_CURSO = 5;
+
+// ===== Texto del contrato (copiado de public/js/contratoGravecare.js) =====
 const EMPRESA_RUT = "78.498.653-5";
 const EMPRESA_DIRECCION = "Av. El Carmen 1397, Of. 301, Edificio Portezuelo, Huechuraba";
 const EMPRESA_CIUDAD = "Santiago";
 
 /** Identifica qué redacción aceptó el cliente. Se guarda en la orden. */
-export const CONTRATO_VERSION = "2026-09-v1";
+const CONTRATO_VERSION = "2026-09-v1";
 
 // La fecha del contrato siempre en hora de Chile: el servidor corre en UTC
 // y un pago hecho a las 22:00 en Santiago cambiaría de día.
@@ -40,7 +67,7 @@ function formatearCLP(numero) {
 }
 
 /** Arma el texto plano del contrato, reemplazando cada dato real de la orden. */
-export function generarContratoTexto(orden, fecha = new Date()) {
+function generarContratoTexto(orden, fecha = new Date()) {
   const titular = orden.titular || {};
   const difunto = orden.difunto || {};
   const ubicacion = orden.ubicacionSepultura || {};
@@ -144,3 +171,144 @@ EL PRESTADOR (GraveCare SpA)
 Nombre: GraveCare SpA
 RUT: ${EMPRESA_RUT}`;
 }
+
+// ===== Fin del texto compartido =====
+
+/** Fecha que figura en el contrato: la de aceptación, en la orden. */
+function fechaDelContrato(orden) {
+  if (orden.terminosAceptadosEn) {
+    const d = new Date(orden.terminosAceptadosEn);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  const c = orden.createdAt || orden.creadoEl;
+  if (c && typeof c.toDate === "function") return c.toDate();
+  return new Date();
+}
+
+/** Arma el PDF (jsPDF, misma versión y maquetación que usó el navegador). */
+function generarPdfBuffer(texto) {
+  // require perezoso: jsPDF es pesado y las funciones se cargan todas juntas
+  // al desplegar; cargarlo aquí evita alargar ese análisis inicial.
+  const {jsPDF} = require("jspdf");
+  const doc = new jsPDF({unit: "pt", format: "letter"});
+
+  const margen = 56;
+  const anchoUtil = doc.internal.pageSize.getWidth() - margen * 2;
+  const altoPagina = doc.internal.pageSize.getHeight();
+  let y = margen;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
+
+  for (const parrafo of texto.split("\n")) {
+    if (parrafo.trim() === "") {
+      y += 10;
+      continue;
+    }
+    const esTitulo = parrafo === parrafo.toUpperCase() && parrafo.length > 3 && parrafo.length < 90;
+    doc.setFont("helvetica", esTitulo ? "bold" : "normal");
+    doc.setFontSize(esTitulo ? 11.5 : 10.5);
+
+    for (const linea of doc.splitTextToSize(parrafo, anchoUtil)) {
+      if (y > altoPagina - margen) {
+        doc.addPage();
+        y = margen;
+      }
+      doc.text(linea, margen, y);
+      y += esTitulo ? 16 : 14;
+    }
+    y += esTitulo ? 6 : 4;
+  }
+
+  return Buffer.from(doc.output("arraybuffer"));
+}
+
+/** ¿Esta orden necesita contrato ahora? (chequeo barato, sin leer Firestore) */
+function necesitaContrato(orden) {
+  if (!orden || orden.estado !== "pagado") return false;
+  if (orden.contratoPath) return false;
+  if (orden.contratoEstado === "error") return false;
+  if (orden.contratoEstado === "generando") {
+    const desde = orden.contratoGenerandoDesde?.toMillis?.() || 0;
+    if (Date.now() - desde < MINUTOS_EN_CURSO * 60 * 1000) return false;
+  }
+  return true;
+}
+
+async function generarContratoParaOrden(ordenId) {
+  const db = admin.firestore();
+  const ref = db.doc(`ordenes/${ordenId}`);
+
+  // "Reclamar" la orden en una transacción: si dos eventos de la misma
+  // orden llegan casi juntos, solo uno genera el contrato (si generaran
+  // los dos, el link guardado podría no coincidir con el token del archivo).
+  const orden = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.data();
+    if (!necesitaContrato(d)) return null;
+    tx.update(ref, {
+      contratoEstado: "generando",
+      contratoGenerandoDesde: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return d;
+  });
+  if (!orden) return {omitido: true};
+
+  try {
+    const numero = String(orden.numeroOrden || ordenId).replace(/[^A-Za-z0-9_-]/g, "");
+    const texto = generarContratoTexto(orden, fechaDelContrato(orden));
+    const pdf = generarPdfBuffer(texto);
+
+    const ruta = `contratos/${ordenId}/contrato.pdf`;
+    const token = crypto.randomUUID();
+    await admin.storage().bucket(BUCKET).file(ruta).save(pdf, {
+      contentType: "application/pdf",
+      resumable: false,
+      metadata: {
+        contentDisposition: `attachment; filename="Contrato-GraveCare-${numero}.pdf"`,
+        metadata: {firebaseStorageDownloadTokens: token},
+      },
+    });
+
+    const url = `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(ruta)}?alt=media&token=${token}`;
+    await ref.update({
+      contratoPath: ruta,
+      contratoUrl: url,
+      // Versión del texto con que se armó el PDF. La versión que el cliente
+      // vio y aceptó la guarda el navegador en contratoVersion; si algún día
+      // difieren, se nota comparando ambos campos.
+      contratoPdfVersion: CONTRATO_VERSION,
+      // Huella del PDF: permite demostrar después que no fue alterado.
+      contratoSha256: crypto.createHash("sha256").update(pdf).digest("hex"),
+      contratoEstado: "listo",
+      contratoGeneradoEn: admin.firestore.FieldValue.serverTimestamp(),
+      contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
+    });
+
+    console.log(`[generarContratoAlPagar] OK ${ordenId} (${pdf.length} bytes)`);
+    return {omitido: false, ruta};
+  } catch (err) {
+    console.error(`[generarContratoAlPagar] Error en ${ordenId}:`, err);
+    await ref.update({
+      contratoEstado: "error",
+      contratoError: String(err && err.message ? err.message : err).slice(0, 300),
+      contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
+    });
+    return {omitido: false, error: true};
+  }
+}
+
+exports.generarContratoAlPagar = onDocumentWritten("ordenes/{ordenId}", async (event) => {
+  const despues = event.data?.after?.data();
+  // Corte barato: la mayoría de los eventos (crear la orden, cambios de
+  // estado de visita, etc.) terminan aquí sin leer nada.
+  if (!necesitaContrato(despues)) return;
+  await generarContratoParaOrden(event.params.ordenId);
+});
+
+// Para pruebas locales (no forman parte de la API de la función).
+exports._generarContratoTexto = generarContratoTexto;
+exports._generarPdfBuffer = generarPdfBuffer;
+exports._necesitaContrato = necesitaContrato;
+exports._generarContratoParaOrden = generarContratoParaOrden;
+exports._CONTRATO_VERSION = CONTRATO_VERSION;
