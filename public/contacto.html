@@ -37,25 +37,28 @@
 </head>
 <body class="bg-[#f7f9f8] text-[#191c1b] min-h-screen flex flex-col">
 
-  <!-- Navbar -->
+<!-- Navbar -->
   <nav class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
     <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
-      <a href="index.html" class="flex items-center gap-2">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/Logo.jpg" onerror="this.onerror=null; this.src='Logo.jpg';"/>
+      <a href="index.html" class="flex items-center h-full py-2">
+        <img 
+          alt="GraveCare Logo" 
+          class="h-full w-auto max-h-full object-contain" 
+          src="assets/logo.webp" 
+          onerror="this.onerror=null; this.src='assets/Logo.jpg';"
+        />
       </a>
       <div class="hidden md:flex items-center gap-8">
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="index.html">Inicio</a>
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="quienes-somos.html">Quiénes Somos</a>
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="servicios.html">Servicios</a>
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="planes.html">Planes y Precios</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="cementerios.html">Cementerios</a>
         <a class="text-[#002d1a] font-bold border-b-2 border-[#002d1a] pb-1 text-sm" href="contacto.html">Contacto y Preguntas Frecuentes</a>
       </div>
-      <div class="hidden md:flex items-center gap-3">
+<div class="hidden md:flex items-center gap-3">
         <a href="login.html" class="border border-[#002d1a] text-[#002d1a] hover:bg-gray-50 transition-all rounded-full px-5 py-2 font-semibold text-sm">
           Ingreso Sesión
-        </a>
-        <a href="planes.html" class="bg-[#002d1a] text-white hover:bg-[#1a432f] transition-all rounded-full px-6 py-2 font-semibold text-sm">
-          Suscribirme
         </a>
       </div>
     </div>
