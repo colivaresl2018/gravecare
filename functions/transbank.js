@@ -109,10 +109,14 @@ exports.crearTransaccionWebpay = onRequest(
       }
 
       try {
-        const {ordenId} = req.body;
+        const {ordenId, cuotas} = req.body;
         if (!ordenId) {
           return res.status(400).json({error: "Falta ordenId"});
         }
+        
+        // cuotas: número específico (1, 3, 6, 12) o undefined (todas las cuotas que el banco ofrezca)
+        // Si viene indefinido, null permite que Transbank ofrezca todas.
+        const instalments = cuotas ? [cuotas] : null;
 
         // El monto SIEMPRE se lee desde Firestore, nunca del request.
         const ordenRef = db.collection("ordenes").doc(ordenId);
@@ -134,7 +138,11 @@ exports.crearTransaccionWebpay = onRequest(
         const returnUrl = `${req.protocol}://${req.get("host")}/confirmarTransaccionWebpay`;
 
         const tx = new WebpayPlus.Transaction(obtenerOptions());
-        const response = await tx.create(buyOrder, sessionId, amount, returnUrl);
+        // Parámetro de cuotas:
+        // - Si cuotas viene desde el cliente: [cuotas] (ej: [3] para 3 cuotas)
+        // - Si no viene o es 1: null (permite que Transbank ofrezca todas las opciones)
+        // El cliente puede cambiar las cuotas en la pantalla de Transbank.
+        const response = await tx.create(buyOrder, sessionId, amount, returnUrl, instalments);
 
         // Guarda el token en la orden para poder cruzarlo cuando Transbank
         // redirija de vuelta.

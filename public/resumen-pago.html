@@ -95,6 +95,22 @@
                         </label>
                     </div>
 
+                    <!-- SELECTOR DE CUOTAS (solo para pagos con tarjeta) -->
+                    <div class="form-group" id="grupoSelectCuotas" style="display: none; margin: 1.5rem 0;">
+                        <label class="form-label" for="selectCuotas">
+                            Pagar en cuotas (opcional)
+                        </label>
+                        <select id="selectCuotas" class="form-input" style="cursor: pointer; appearance: auto;">
+                            <option value="1">Pago único (sin intereses)</option>
+                            <option value="3">3 cuotas sin interés</option>
+                            <option value="6">6 cuotas</option>
+                            <option value="12">12 cuotas</option>
+                        </select>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem;">
+                            Las cuotas pueden variar según tu banco. Podrás cambiar en Transbank.
+                        </div>
+                    </div>
+
                     <div style="background-color: #f0fdf4; border-left: 4px solid var(--success-color); padding: 1rem; border-radius: var(--radius-sm); text-align: center; margin: 1.5rem 0;">
                         <div style="font-weight: 700; color: var(--success-color); font-size: 0.95rem;">🔒 Tu información está segura</div>
                         <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Usamos encriptación SSL</div>
@@ -156,6 +172,10 @@
             try {
                 ordenCompleta = JSON.parse(raw);
                 const esPlan = (ordenCompleta.tipoServicio === 'PLAN' || ordenCompleta.tipoSuscripcion === 'PLAN');
+                const esSpot = !esPlan; // Si no es plan, es Spot (visita única)
+                
+                // Mostrar selector de cuotas solo para pagos Spot
+                document.getElementById('grupoSelectCuotas').style.display = esSpot ? 'block' : 'none';
 
                 const nombrePlan = ordenCompleta.servicio?.planNombre || ordenCompleta.planNombre || (esPlan ? 'Plan Mensual' : 'Visita Spot');
                 const frecuencia = ordenCompleta.servicio?.frecuencia || ordenCompleta.frecuencia || (esPlan ? '1 visita al mes' : 'Visita Única');
@@ -202,6 +222,9 @@
 
             const numOrden = ordenCompleta.numeroOrden || ('ORD-' + Date.now());
             const esSpot = ordenCompleta.plan === 'spot' || ordenCompleta.tipoSuscripcion === 'SPOT';
+            
+            // Leer el número de cuotas seleccionadas (solo aplica a Spot)
+            const cuotasSeleccionadas = esSpot ? parseInt(document.getElementById('selectCuotas').value) : 1;
 
             const ordenFinalFirebase = {
                 ...ordenCompleta,
@@ -243,7 +266,10 @@
                     const resp = await fetch(`${FUNCTIONS_BASE}/crearTransaccionWebpay`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ordenId: numOrden })
+                        body: JSON.stringify({ 
+                            ordenId: numOrden,
+                            cuotas: cuotasSeleccionadas
+                        })
                     });
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
