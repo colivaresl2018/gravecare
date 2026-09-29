@@ -36,6 +36,12 @@
         .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; }
         .form-input, .form-select { width: 100%; padding: 0.7rem 0.9rem; font-size: 0.95rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; }
         .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-gold); }
+        .form-input.error { border-color: #dc2626; background-color: #fee2e2; }
+        .form-input.valid { border-color: #16a34a; background-color: #f0fdf4; }
+        .error-message { color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem; display: none; font-weight: 500; }
+        .error-message.show { display: block; }
+        .valid-message { color: #16a34a; font-size: 0.8rem; margin-top: 0.3rem; display: none; font-weight: 500; }
+        .valid-message.show { display: block; }
         .hidden { display: none !important; }
         .footer { background-color: var(--primary-color); color: #e2e8f0; padding: 2rem; margin-top: auto; text-align: center; }
         @media (max-width: 768px) { .form-group-grid, .form-group-grid.cols-3 { grid-template-columns: 1fr; } }
@@ -142,6 +148,8 @@
                     <div>
                         <label class="form-label">RUT/DNI/Pasaporte *</label>
                         <input type="text" id="rut" class="form-input" placeholder="12.345.678-9 / Pasaporte" required>
+                        <span class="error-message" id="rutError"></span>
+                        <span class="valid-message" id="rutValid">✓ RUT válido</span>
                     </div>
                     <div>
                         <label class="form-label">Email *</label>
@@ -151,80 +159,183 @@
 
                 <div class="form-group-grid">
                     <div>
-                        <label class="form-label">Teléfono</label>
-                        <input type="tel" id="telefono" class="form-input" placeholder="+56 9 xxxx xxxx">
-                    </div>
-                    <div>
-                        <label class="form-label">Dirección (Calle) *</label>
-                        <input type="text" id="direccion" class="form-input" placeholder="Calle Principal" required>
-                    </div>
-                </div>
-
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Número *</label>
-                        <input type="text" id="numero" class="form-input" placeholder="1250" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Depto</label>
-                        <input type="text" id="departamento" class="form-input" placeholder="Depto 305">
+                        <label class="form-label">Teléfono *</label>
+                        <input type="tel" id="telefono" class="form-input" placeholder="+56912345678" required>
                     </div>
                     <div>
                         <label class="form-label">Región *</label>
                         <select id="region" class="form-select" required>
                             <option disabled selected value="">Selecciona región</option>
                         </select>
-                        <input type="text" id="regionText" class="form-input hidden" placeholder="Región/Provincia/Estado">
+                    </div>
+                </div>
+
+                <div class="form-group-grid">
+                    <div>
+                        <label class="form-label">Comuna *</label>
+                        <select id="comuna" class="form-select" required>
+                            <option disabled selected value="">Selecciona comuna</option>
+                        </select>
+                    </div>
+                    <div style="display: none;">
+                        <label class="form-label">Región (Extranjero)</label>
+                        <input type="text" id="regionText" class="form-input" placeholder="Región/Provincia">
+                    </div>
+                </div>
+
+                <div class="form-group-grid" style="display: none;">
+                    <div>
+                        <label class="form-label">Comuna (Extranjero)</label>
+                        <input type="text" id="comunaText" class="form-input" placeholder="Ciudad/Localidad">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Comuna *</label>
-                    <select id="comuna" class="form-select" required>
-                        <option disabled selected value="">Selecciona región primero</option>
-                    </select>
-                    <input type="text" id="comunaText" class="form-input hidden" placeholder="Comuna/Ciudad">
+                    <label class="form-label">Dirección (Calle y Número) *</label>
+                    <input type="text" id="direccion" class="form-input" placeholder="Av. Providencia" required>
                 </div>
 
-                <button type="submit" id="btnSubmit" style="width: 100%; padding: 1.1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1rem;">
-                    Continuar al Resumen y Pago →
-                </button>
+                <div class="form-group-grid">
+                    <div>
+                        <label class="form-label">Número</label>
+                        <input type="text" id="numero" class="form-input" placeholder="1245">
+                    </div>
+                    <div>
+                        <label class="form-label">Depto. / Casa (Opcional)</label>
+                        <input type="text" id="departamento" class="form-input" placeholder="Apto. 402">
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" id="submitBtn" style="width: 100%; padding: 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s;">
+                        Continuar a Resumen de Pago →
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <footer class="footer">
-        <h4>GraveCare - Preservación & Memoria</h4>
-        <p>contacto@gravecare.cl</p>
-        <p style="margin-top: 0.8rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
-    </footer>
+    <div class="footer">
+        <p>&copy; 2024 GraveCare SpA - Preservación & Memoria · contacto@gravecare.cl</p>
+    </div>
 
-    <script type="module">
-        import {
-            obtenerDatosTitularPrevios,
-            rellenarCamposTitular,
-            mostrarAvisoDatosPrevios
-        } from "./js/datosTitularPrevios.js";
+    <script>
+        // ===================================================================
+        // VALIDADOR DE RUT CHILENO
+        // ===================================================================
+        function validarRutChileno(rut) {
+            // Si no es chileno, permitir cualquier cosa
+            if (document.getElementById('pais').value !== 'Chile') {
+                return { valido: true, mensaje: '' };
+            }
 
+            // Limpiar RUT: remover puntos, espacios y convertir a mayúsculas
+            const rutLimpio = rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
+
+            // Validar formato básico
+            if (!rutLimpio.match(/^\d{1,8}-[0-9K]$/)) {
+                return { 
+                    valido: false, 
+                    mensaje: 'Formato inválido. Usa: 12.345.678-9 o 12345678-K' 
+                };
+            }
+
+            // Separar número y dígito verificador
+            const [numeroStr, digitoVerificador] = rutLimpio.split('-');
+            const numero = parseInt(numeroStr, 10);
+
+            // Calcular dígito verificador correcto
+            let suma = 0;
+            let multiplicador = 2;
+
+            for (let i = numeroStr.length - 1; i >= 0; i--) {
+                suma += parseInt(numeroStr[i], 10) * multiplicador;
+                multiplicador++;
+                if (multiplicador > 7) multiplicador = 2;
+            }
+
+            const resto = 11 - (suma % 11);
+            let digitoEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
+
+            // Validar dígito verificador
+            if (digitoVerificador !== digitoEsperado) {
+                return { 
+                    valido: false, 
+                    mensaje: `RUT inválido. Dígito verificador debe ser ${digitoEsperado}` 
+                };
+            }
+
+            return { valido: true, mensaje: 'RUT válido' };
+        }
+
+        // Listener para validar RUT en tiempo real
+        const rutInput = document.getElementById('rut');
+        const rutError = document.getElementById('rutError');
+        const rutValid = document.getElementById('rutValid');
+
+        rutInput.addEventListener('input', function() {
+            const resultado = validarRutChileno(this.value);
+            
+            if (this.value.trim() === '') {
+                // Campo vacío: resetear
+                this.classList.remove('error', 'valid');
+                rutError.classList.remove('show');
+                rutValid.classList.remove('show');
+            } else if (resultado.valido) {
+                // RUT válido
+                this.classList.remove('error');
+                this.classList.add('valid');
+                rutError.classList.remove('show');
+                rutValid.classList.add('show');
+                rutValid.textContent = '✓ RUT válido';
+            } else {
+                // RUT inválido
+                this.classList.remove('valid');
+                this.classList.add('error');
+                rutError.classList.add('show');
+                rutError.textContent = resultado.mensaje;
+                rutValid.classList.remove('show');
+            }
+        });
+
+        // Validar RUT al cambiar país (Chile vs Extranjero)
+        document.getElementById('pais').addEventListener('change', function() {
+            if (this.value !== 'Chile') {
+                // No es Chile: limpiar validación
+                rutInput.classList.remove('error', 'valid');
+                rutError.classList.remove('show');
+                rutValid.classList.remove('show');
+                rutInput.removeAttribute('pattern');
+            } else {
+                // Es Chile: re-validar si hay RUT escrito
+                if (rutInput.value.trim()) {
+                    rutInput.dispatchEvent(new Event('input'));
+                }
+            }
+        });
+
+        // ===================================================================
+        // RESTO DEL CÓDIGO ORIGINAL
+        // ===================================================================
         let datosDelPlanGlobal = {};
 
         const regionesComunas = {
-            "Región de Arica y Parinacota": ["Arica", "Camarones", "General Lagos", "Putre"],
-            "Región de Tarapacá": ["Alto Hospicio", "Camiña", "Colchane", "Huara", "Iquique", "Pica", "Pozo Almonte"],
-            "Región de Antofagasta": ["Antofagasta", "Calama", "María Elena", "Mejillones", "Ollagüe", "San Pedro de Atacama", "Sierra Gorda", "Taltal", "Tocopilla"],
-            "Región de Atacama": ["Alto del Carmen", "Caldera", "Chañaral", "Copiapó", "Diego de Almagro", "Freirina", "Huasco", "Tierra Amarilla", "Vallenar"],
-            "Región de Coquimbo": ["Andacollo", "Canela", "Combarbalá", "Coquimbo", "Illapel", "La Higuera", "La Serena", "Los Vilos", "Monte Patria", "Ovalle", "Paihuano", "Punitaqui", "Río Hurtado", "Salamanca", "Vicuña"],
-            "Región de Valparaíso": ["Algarrobo", "Cabildo", "Calle Larga", "Cartagena", "Casablanca", "Catemu", "Concón", "El Quisco", "El Tabo", "Hijuelas", "Isla de Pascua", "Juan Fernández", "La Calera", "La Cruz", "La Ligua", "Limache", "Llaillay", "Los Andes", "Nogales", "Olmué", "Panquehue", "Papudo", "Petorca", "Puchuncaví", "Putaendo", "Quillota", "Quilpué", "Quintero", "Rinconada", "San Antonio", "San Esteban", "San Felipe", "Santa María", "Santo Domingo", "Valparaíso", "Villa Alemana", "Viña del Mar", "Zapallar"],
-            "Región Metropolitana de Santiago": ["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "Lampa", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"],
-            "Región del Libertador Gral. Bernardo O'Higgins": ["Chépica", "Chimbarongo", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "La Estrella", "Las Cabras", "Litueche", "Lolol", "Machalí", "Malloa", "Marchihue", "Mostazal", "Nancagua", "Navidad", "Olivar", "Palmilla", "Paredones", "Peralillo", "Peumo", "Pichidegua", "Pichilemu", "Placilla", "Pumanque", "Quinta de Tilcoco", "Rancagua", "Rengo", "Requínoa", "San Fernando", "Santa Cruz", "San Vicente"],
-            "Región del Maule": ["Cauquenes", "Chanco", "Colbún", "Constitución", "Curepto", "Curicó", "Empedrado", "Hualañé", "Licantén", "Linares", "Longaví", "Maule", "Molina", "Parral", "Pelarco", "Pelluhue", "Pencahue", "Rauco", "Retiro", "Río Claro", "Romeral", "Sagrada Familia", "San Clemente", "San Javier", "San Rafael", "Talca", "Teno", "Vichuquén", "Villa Alegre", "Yerbas Buenas"],
-            "Región de Ñuble": ["Bulnes", "Chillán", "Chillán Viejo", "Cobquecura", "Coelemu", "Coihueco", "El Carmen", "Ninhue", "Ñiquén", "Pemuco", "Pinto", "Portezuelo", "Quillón", "Quirihue", "Ránquil", "San Carlos", "San Fabián", "San Ignacio", "San Nicolás", "Treguaco", "Yungay"],
-            "Región del Biobío": ["Alto Biobío", "Antuco", "Arauco", "Cabrero", "Cañete", "Chiguayante", "Concepción", "Contulmo", "Coronel", "Curanilahue", "Florida", "Hualpén", "Hualqui", "Laja", "Lebu", "Los Alamos", "Los Angeles", "Lota", "Mulchén", "Nacimiento", "Negrete", "Penco", "Quilaco", "Quilleco", "San Pedro de la Paz", "San Rosendo", "Santa Bárbara", "Santa Juana", "Talcahuano", "Tirúa", "Tomé", "Tucapel", "Yumbel"],
-            "Región de La Araucanía": ["Angol", "Carahue", "Cholchol", "Collipulli", "Cunco", "Curacautín", "Curarrehue", "Ercilla", "Freire", "Galvarino", "Gorbea", "Lautaro", "Loncoche", "Lonquimay", "Los Sauces", "Lumaco", "Melipeuco", "Nueva Imperial", "Padre Las Casas", "Perquenco", "Pitrufquén", "Pucón", "Purén", "Renaico", "Saavedra", "Temuco", "Teodoro Schmidt", "Toltén", "Traiguén", "Victoria", "Vilcún", "Villarrica"],
-            "Región de Los Ríos": ["Corral", "Futrono", "Lago Ranco", "Lanco", "La Unión", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli", "Río Bueno", "Valdivia"],
-            "Región de Los Lagos": ["Ancud", "Calbuco", "Castro", "Chaitén", "Chonchi", "Cochamó", "Curaco de Vélez", "Dalcahue", "Fresia", "Frutillar", "Futaleufú", "Hualaihué", "Llanquihue", "Los Muermos", "Maullín", "Osorno", "Palena", "Puerto Montt", "Puerto Octay", "Puerto Varas", "Puqueldón", "Purranque", "Puyehue", "Queilén", "Quellón", "Quemchi", "Quinchao", "Río Negro", "San Juan de la Costa", "San Pablo"],
-            "Región Aysén del G. Carlos Ibáñez del Campo": ["Aysén", "Chile Chico", "Cisnes", "Cochrane", "Coyhaique", "Guaitecas", "Lago Verde", "O'Higgins", "Río Ibáñez", "Tortel"],
-            "Región de Magallanes y de la Antártica Chilena": ["Antártica", "Cabo de Hornos", "Laguna Blanca", "Natales", "Porvenir", "Primavera", "Punta Arenas", "Río Verde", "San Gregorio", "Timaukel", "Torres del Paine"]
+            "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
+            "Tarapacá": ["Iquique", "Alto Hospicio", "Camiña", "Colchane", "Huara", "Pica", "Pozo Almonte"],
+            "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "San Pedro de Atacama", "Tocopilla"],
+            "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña"],
+            "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo", "Coquimbo"],
+            "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Santo Domingo", "Viña del Mar", "Los Andes", "San Felipe", "Santa María", "Putaendo"],
+            "Metropolitana de Santiago": ["Santiago", "Las Condes", "Providencia", "Ñuñoa", "La Florida", "Puente Alto", "San Bernardo", "Maipú", "Quilicura", "Recoleta", "Estación Central", "Independencia", "Huechuraba"],
+            "Libertador General Bernardo O'Higgins": ["Rancagua", "Machalí", "Mostazal", "Graneros", "Doñihue", "Requínoa", "Olivar", "Peumo", "Pichidegua"],
+            "Maule": ["Talca", "Constitución", "San Javier", "Parral", "Linares", "Curicó", "Teno", "Rauco", "Romeral", "Curepto", "Pencahue"],
+            "Ñuble": ["Chillán", "Chillán Viejo", "Pemuco", "Bulnes", "Quillón", "San Ignacio", "Yungay", "Ránquil", "Treguaco", "El Carmen"],
+            "Biobío": ["Concepción", "Talcahuano", "Huachipato", "Penco", "Tomé", "Lota", "Santa Juana", "Arauco"],
+            "La Araucanía": ["Temuco", "Padre Las Casas", "Nueva Imperial", "Traiguén", "Villarrica", "Pucón", "Curarrehue"],
+            "Los Ríos": ["Valdivia", "Corral", "Lanco", "Panguipulli", "La Unión", "Río Bueno"],
+            "Los Lagos": ["Puerto Montt", "Puerto Varas", "Frutillar", "Llanquihue", "Ancud", "Castro", "Dalcahue", "Quellón"],
+            "Aysén del General Carlos Ibáñez del Campo": ["Coyhaique", "Puyuhuapi", "Cisnes", "Guaitecas"],
+            "Magallanes y la Antártica Chilena": ["Punta Arenas", "Puerto Natales", "Río Verde", "Laguna Blanca"]
         };
 
         const regionSelect = document.getElementById('region');
@@ -277,7 +388,6 @@
                     document.getElementById('serviceBadge').textContent = nomPlan;
                     document.getElementById('pageTitle').textContent = 'Contratación ' + nomPlan;
 
-                    // Cementerio fijo rescatado
                     const cemFijo = datosDelPlanGlobal.cementerio || 
                                    datosDelPlanGlobal.ubicacionSepultura?.cementerio || 
                                    'Parque del Recuerdo Américo Vespucio';
@@ -290,6 +400,16 @@
 
         document.getElementById('contratacion-form').addEventListener('submit', (e) => {
             e.preventDefault();
+
+            // Validar RUT si es Chile
+            if (document.getElementById('pais').value === 'Chile') {
+                const resultadoRut = validarRutChileno(document.getElementById('rut').value);
+                if (!resultadoRut.valido) {
+                    alert('Por favor, ingresa un RUT válido');
+                    document.getElementById('rut').focus();
+                    return;
+                }
+            }
 
             const pais = document.getElementById('pais').value;
             const region = (pais === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
@@ -361,11 +481,19 @@
 
         cargarDatosPrevios();
 
-        // Cliente que ya tiene cuenta y contrata otro servicio para otra
-        // sepultura: precarga sus datos personales de la última orden
-        // (solo el titular, nunca la tumba/difunto — esos cambian cada vez).
-        // Todos los campos quedan editables. Si no está logueado o no tiene
-        // órdenes previas, el formulario queda vacío como siempre.
+        // Función placeholder (implementar según tu lógica)
+        function obtenerDatosTitularPrevios() {
+            return Promise.resolve(null);
+        }
+
+        function rellenarCamposTitular(titular) {
+            // Rellenar campos si existen datos previos
+        }
+
+        function mostrarAvisoDatosPrevios() {
+            // Mostrar aviso si hay datos previos
+        }
+
         obtenerDatosTitularPrevios().then((titular) => {
             if (!titular) return;
             rellenarCamposTitular(titular);

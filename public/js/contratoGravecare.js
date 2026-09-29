@@ -107,11 +107,10 @@ CUARTA: HONORARIOS Y FORMA DE PAGO
 
 El Cliente pagará a la Empresa la suma de ${monto}, con IVA incluido, por concepto de honorarios por los servicios prestados. Los pagos se debitarán de manera periódica (según el plan de suscripción seleccionado) a través de pasarelas de pago automatizadas (Webpay Plus, Webpay One Click u otras habilitadas). Cualquier modificación en las tarifas de suscripción será notificada al Cliente con al menos 30 días corridos de anticipación.
 
-QUINTA: PLAZO, VIGENCIA Y POLÍTICA DE CANCELACIÓN
+QUINTA: PLAZO Y VIGENCIA 
 
 5.1. Plazo: El presente contrato tendrá una duración de: ${plazo}, comenzando el día ${hoy}.
 
-5.2. Cancelación y Pausa: El Cliente podrá cancelar o pausar su suscripción recurrente en cualquier momento, sin multas ni costos de salida. Para evitar el cobro del período siguiente, la solicitud de cancelación debe realizarse con al menos 5 días hábiles de anticipación a la fecha de cobro automático, directamente desde la plataforma o mediante mensaje a los canales oficiales de soporte de la Empresa.
 
 SEXTA: LIMITACIÓN DE RESPONSABILIDAD Y CASOS FORTUITOS
 

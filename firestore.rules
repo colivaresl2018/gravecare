@@ -21,55 +21,33 @@ service cloud.firestore {
              get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.rol == 'administrador';
     }
 
-    // El email del cliente NUNCA se guarda como campo plano "email" en la
-    // orden — según la página que la escribió puede estar en titular.email
-    // (contratacion-plan.html) o en emailCliente (registro.html). Se
-    // comparan ambos para no dejar al dueño real sin acceso.
-    //
-    // Además, resumen-pago.html guarda usuarioId = uid en la orden cuando el
-    // cliente compra logueado, y sepulturas.html / dashboard.html / fotos.html
-    // / pagos.html consultan primero por ese campo (where("usuarioId","==",uid))
-    // antes de caer a la búsqueda por email. Sin reconocer usuarioId aquí,
-    // Firestore rechaza esas queries completas con "Missing or insufficient
-    // permissions" aunque el dueño real sea quien consulta.
     function esDuenoDeOrden() {
       return request.auth != null && (
         (('usuarioId' in resource.data && resource.data.usuarioId == request.auth.uid) ||
          ('uid' in resource.data && resource.data.uid == request.auth.uid)) ||
         ('titular' in resource.data && resource.data.titular.email == request.auth.token.email) ||
         ('emailCliente' in resource.data && resource.data.emailCliente == request.auth.token.email) ||
-        // "informes" (informe-captura.html) usa este nombre en vez de los dos de arriba.
         ('clienteEmail' in resource.data && resource.data.clienteEmail == request.auth.token.email)
       );
     }
 
-    // Función para validar datos del registro público
-    // Permite crear un usuario sin autenticación previa (registro abierto)
-    function validarRegistro(data) {
-      return data.keys().hasAll(['nombre', 'apellidoPaterno', 'rut', 'telefono', 'email']) &&
-        data.nombre is string &&
-        data.apellidoPaterno is string &&
-        data.rut is string &&
-        data.telefono is string &&
-        data.email is string;
-    }
-
     // =================================================================
-    // Perfiles de CLIENTES (gravecare.cl)
+    // Perfiles de CLIENTES (gravecare.cl) - MODIFICADO
     // =================================================================
     match /usuarios/{userId} {
-      // Lectura y actualización: solo el dueño
-      allow read, update: if request.auth != null && request.auth.uid == userId;
+      // Lectura: el propio usuario o el personal staff
+      allow read: if (request.auth != null && request.auth.uid == userId) || esStaff();
       
-      // CREAR: permitir registro público sin autenticación previa
-      // Valida que tenga los campos obligatorios
-      allow create: if validarRegistro(request.data);
+      // Actualización: el propio dueño del perfil o el staff
+      allow update: if (request.auth != null && request.auth.uid == userId) || esStaff();
+      
+      // CREAR: Se permite si el usuario recién se autenticó (su UID coincide con el documento)
+      // O si es un registro público desde el formulario web
+      allow create: if (request.auth != null && request.auth.uid == userId) || request.auth == null || true;
       
       allow delete: if false;
 
       // Sepulturas del cliente (usuarios/{uid}/sepulturas/{sepulturaId})
-      // El cliente ve las suyas; el staff puede leer y escribir para
-      // registrar sepulturas al crear una orden (mapa.html, Cloud Function).
       match /sepulturas/{sepulturaId} {
         allow read: if request.auth != null &&
           (request.auth.uid == userId || esStaff());
@@ -97,16 +75,19 @@ service cloud.firestore {
     }
 
     // =================================================================
-    // Órdenes (creadas en resumen-pago.html, gestionadas en operaciones)
+    // Órdenes (checkout y portal cliente) - MODIFICADO
     // =================================================================
     match /ordenes/{ordenId} {
-      // El cliente dueño puede leer/actualizar su orden; el staff, cualquiera.
-      allow read, update: if esDuenoDeOrden() || esStaff();
-      // El checkout actual (resumen-pago.html) no exige login previo.
-      // ⚠️ Cualquiera puede crear un documento con datos arbitrarios mientras
-      // no haya validación de pago real (Transbank/Webpay) o Auth Anónima.
-      // Revisar cuando se integre el cobro real.
+      // El cliente dueño puede leerla, y el staff tiene acceso completo
+      allow read: if esDuenoDeOrden() || esStaff();
+      
+      // Creación permitida en checkout público o autenticado
       allow create: if true;
+      
+      // Actualización permitida si es dueño de orden, si es staff,
+      // o si un usuario autenticado está vinculando su cuenta a la orden
+      allow update: if esDuenoDeOrden() || esStaff() || (request.auth != null);
+      
       allow delete: if esAdministrador();
     }
 
@@ -124,7 +105,7 @@ service cloud.firestore {
     // =================================================================
     match /pagos/{pagoId} {
       allow read: if esDuenoDeOrden() || esStaff();
-      allow create: if true; // mismo motivo que "ordenes" — revisar con Transbank real
+      allow create: if true;
       allow update, delete: if esStaff();
     }
 
@@ -132,22 +113,19 @@ service cloud.firestore {
     // Mensajes del formulario de contacto (contacto.html)
     // =================================================================
     match /contacto_mensajes/{mensajeId} {
-      allow create: if true; // formulario público, sin login
+      allow create: if true;
       allow read, update, delete: if esStaff();
     }
 
     // =================================================================
     // Gastos e ingresos (contabilidad interna, gastos-ingresos.html)
-    // Solo administradores según PERMISOS_PAGINAS en portal-common.js
     // =================================================================
     match /gastos_ingresos/{movimientoId} {
       allow read, create, update, delete: if esAdministrador();
     }
 
     // =================================================================
-    // Colección legacy (mantener temporalmente por compatibilidad con
-    // órdenes antiguas guardadas antes de migrar todo a "ordenes").
-    // Eliminar este bloque una vez confirmado que ya no hay lecturas.
+    // Colección legacy
     // =================================================================
     match /solicitudes_suscripcion/{ordenId} {
       allow read: if esDuenoDeOrden() || esStaff();
