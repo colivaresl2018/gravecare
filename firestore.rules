@@ -43,12 +43,28 @@ service cloud.firestore {
       );
     }
 
+    // Función para validar datos del registro público
+    // Permite crear un usuario sin autenticación previa (registro abierto)
+    function validarRegistro(data) {
+      return data.keys().hasAll(['nombre', 'apellidoPaterno', 'rut', 'telefono', 'email']) &&
+        data.nombre is string &&
+        data.apellidoPaterno is string &&
+        data.rut is string &&
+        data.telefono is string &&
+        data.email is string;
+    }
+
     // =================================================================
     // Perfiles de CLIENTES (gravecare.cl)
     // =================================================================
     match /usuarios/{userId} {
+      // Lectura y actualización: solo el dueño
       allow read, update: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // CREAR: permitir registro público sin autenticación previa
+      // Valida que tenga los campos obligatorios
+      allow create: if validarRegistro(request.data);
+      
       allow delete: if false;
 
       // Sepulturas del cliente (usuarios/{uid}/sepulturas/{sepulturaId})
