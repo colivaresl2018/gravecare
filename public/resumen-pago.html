@@ -172,10 +172,9 @@
             try {
                 ordenCompleta = JSON.parse(raw);
                 const esPlan = (ordenCompleta.tipoServicio === 'PLAN' || ordenCompleta.tipoSuscripcion === 'PLAN');
-                const esSpot = !esPlan; // Si no es plan, es Spot (visita única)
                 
-                // Mostrar selector de cuotas solo para pagos Spot
-                document.getElementById('grupoSelectCuotas').style.display = esSpot ? 'block' : 'none';
+                // Mostrar selector de cuotas para TODOS los servicios (Planes y Spot)
+                document.getElementById('grupoSelectCuotas').style.display = 'block';
 
                 const nombrePlan = ordenCompleta.servicio?.planNombre || ordenCompleta.planNombre || (esPlan ? 'Plan Mensual' : 'Visita Spot');
                 const frecuencia = ordenCompleta.servicio?.frecuencia || ordenCompleta.frecuencia || (esPlan ? '1 visita al mes' : 'Visita Única');
@@ -223,8 +222,8 @@
             const numOrden = ordenCompleta.numeroOrden || ('ORD-' + Date.now());
             const esSpot = ordenCompleta.plan === 'spot' || ordenCompleta.tipoSuscripcion === 'SPOT';
             
-            // Leer el número de cuotas seleccionadas (solo aplica a Spot)
-            const cuotasSeleccionadas = esSpot ? parseInt(document.getElementById('selectCuotas').value) : 1;
+            // Leer el número de cuotas seleccionadas (aplica a TODOS los servicios)
+            const cuotasSeleccionadas = parseInt(document.getElementById('selectCuotas').value);
 
             const ordenFinalFirebase = {
                 ...ordenCompleta,
@@ -279,7 +278,10 @@
                     const resp = await fetch(`${FUNCTIONS_BASE}/iniciarInscripcionOneclick`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ordenId: numOrden })
+                        body: JSON.stringify({ 
+                            ordenId: numOrden,
+                            cuotas: cuotasSeleccionadas
+                        })
                     });
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.error || 'No se pudo iniciar la inscripción');

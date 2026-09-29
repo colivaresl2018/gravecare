@@ -87,7 +87,7 @@ function setCors(req, res) {
 
 // ============================================================================
 // 1) INICIAR INSCRIPCIÓN
-// POST { ordenId: string }  ->  { token, url_webpay }
+// POST { ordenId: string, cuotas: number }  ->  { token, url_webpay }
 // ============================================================================
 exports.iniciarInscripcionOneclick = onRequest(
     {secrets: [TBK_COMMERCE_CODE, TBK_API_KEY]},
@@ -99,7 +99,7 @@ exports.iniciarInscripcionOneclick = onRequest(
       }
 
       try {
-        const {ordenId} = req.body;
+        const {ordenId, cuotas} = req.body;
         if (!ordenId) {
           return res.status(400).json({error: "Falta ordenId"});
         }
@@ -134,6 +134,8 @@ exports.iniciarInscripcionOneclick = onRequest(
           oneclickToken: response.token,
           oneclickEstado: "inscripcion_iniciada",
           origenSitio: origenPermitido,
+          // Guardar cuotas solicitadas para logging/auditoría
+          oneclickCuotasSolicitadas: cuotas || 1,
         });
 
         return res.status(200).json({
