@@ -3,301 +3,556 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraveCare - Resumen y Pago Online</title>
+    <title>Resumen de Pago - GraveCare</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
-        :root {
-          --primary-color: #002d1a;
-          --primary-hover: #1a432f;
-          --secondary-color: #40534c;
-          --bg-light: #f7f9f8;
-          --surface-color: #ffffff;
-          --text-main: #191c1b;
-          --text-muted: #666666;
-          --border-color: #dcdfdc;
-          --success-color: #276749;
-          --radius-sm: 6px;
-          --radius-md: 10px;
-          --radius-lg: 16px;
-          --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-          --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        .resumen-card {
+            background-color: var(--surface-color);
+            border-radius: var(--radius-lg);
+            padding: 2.2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: var(--font-family); background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
-        .main-container { flex: 1; padding: 2.5rem 1.5rem; display: flex; justify-content: center; align-items: flex-start; }
-        .checkout-container { width: 100%; max-width: 900px; }
-        .checkout-card { background-color: var(--surface-color); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
-        .section-title { font-size: 0.95rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1.2rem; }
-        .summary-box { background-color: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; margin-bottom: 2.5rem; }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eeeeee; font-size: 0.95rem; }
-        .summary-row:last-child { border-bottom: none; }
-        .summary-label { color: var(--text-muted); font-weight: 500; }
-        .summary-value { color: var(--text-main); font-weight: 600; }
-        .summary-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; margin-top: 0.5rem; font-weight: 800; font-size: 1.15rem; color: var(--text-main); }
-        .form-group { margin-bottom: 1.25rem; }
-        .form-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.4rem; }
-        .form-input { width: 100%; padding: 0.75rem 0.9rem; font-size: 0.95rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; }
-        .form-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,45,26, 0.1); }
-        .footer { background-color: var(--primary-color); color: #e2e8f0; padding: 2rem; margin-top: auto; text-align: center; }
-        @media (max-width: 768px) { .checkout-card { padding: 1.5rem; } .form-group-grid { grid-template-columns: 1fr; } }
+        .service-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 0.4rem 1.1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-subhead {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .detalles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            background-color: #f0f8f6;
+            border: 1px solid #d2e4dd;
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metodos-pago-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 15px 0 25px 0;
+        }
+
+        .metodo-pago {
+            padding: 18px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            background-color: var(--surface-color);
+            position: relative;
+        }
+
+        .metodo-pago:hover:not(.deshabilitado) {
+            border-color: var(--accent-gold);
+            background-color: #fbf9f4;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metodo-pago.activo {
+            border-color: var(--primary-color);
+            background-color: #f0f8f6;
+            box-shadow: 0 4px 12px rgba(26, 54, 54, 0.12);
+        }
+
+        .metodo-pago.deshabilitado {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background-color: #fafafa;
+        }
+
+        .metodo-pago h4 {
+            margin: 8px 0 4px 0;
+            font-size: 15px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .metodo-pago p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .badge-disponible {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .badge-proximo {
+            display: inline-block;
+            background-color: #e2e8f0;
+            color: #64748b;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .check-icon {
+            display: none;
+            color: var(--accent-gold);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .metodo-pago.activo .check-icon {
+            display: block;
+        }
+
+        .cuotas-container {
+            display: none;
+            margin-top: 20px;
+            padding: 1.25rem;
+            background-color: #faf8f5;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--accent-gold);
+        }
+
+        .cuotas-container.visible {
+            display: block;
+        }
+
+        .resumen-cuotas {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #ffffff;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .resumen-cuotas.visible {
+            display: block;
+        }
+
+        .monto-cuota-destacado {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .contrato-box {
+            border: 1.5px solid var(--border-color);
+            padding: 1.2rem;
+            background-color: #fafafa;
+            max-height: 280px;
+            overflow-y: auto;
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: #333333;
+            font-family: monospace, Courier, sans-serif;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
 
-    <main class="main-container">
-        <div class="checkout-container">
-            <div class="checkout-card">
-                <!-- RESUMEN -->
-                <h2 class="section-title">RESUMEN</h2>
-                <div class="summary-box">
-                    <div class="summary-row">
-                        <span class="summary-label">Plan</span>
-                        <span class="summary-value" id="resumenPlan">Plan Bimestral</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Frecuencia</span>
-                        <span class="summary-value" id="resumenFrecuencia">1 visita cada 2 meses</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Nivel</span>
-                        <span class="summary-value" id="resumenNivel">Premium</span>
-                    </div>
-                    <div class="summary-total-row">
-                        <span>TOTAL A PAGAR</span>
-                        <span id="resumenTotal">$51.990</span>
-                    </div>
+    <!-- Header institucional con Logo oficial -->
+<!-- Header institucional con Logo centrado -->
+    <header class="navbar" style="justify-content: center; position: relative;">
+        <div style="position: absolute; right: 2rem; font-size: 0.85rem; font-weight: 600; color: var(--secondary-color); display: none; @media(min-width: 768px){display: block;}">
+            🔒 Transacción Segura
+        </div>
+        <a href="index.html" class="nav-brand" style="margin: 0 auto;">
+            <img src="assets/logo.png" alt="GraveCare - Preservación & Memoria" style="height: 54px; width: auto; object-fit: contain;">
+        </a>
+    </header>
+
+    <div class="main-container" style="display: block;">
+        <div class="resumen-card">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <span class="service-badge" id="badgeTipo">Resumen de Contratación</span>
+                <h1 style="color: var(--primary-color); font-size: 1.85rem; margin-top: 0.2rem;">Confirmación de Plan y Pago</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Revisa los datos de tu servicio y confirma las condiciones para continuar</p>
+            </div>
+
+            <!-- 1. Información de la Orden -->
+            <div class="section-subhead">1. Detalle del Servicio Contratado</div>
+            <div id="detallesOrden" class="detalles-grid">
+                <p style="color: var(--text-muted);">Cargando información del plan...</p>
+            </div>
+
+            <!-- 2. Términos y Condiciones (Contrato) -->
+            <div class="section-subhead">2. Contrato y Condiciones del Servicio</div>
+            <div id="contratoSection" style="margin-bottom: 1.5rem;">
+                <div id="textoContrato" class="contrato-box">Generando texto legal del contrato...</div>
+                <div style="margin-top: 1rem; display: flex; align-items: flex-start; gap: 0.6rem;">
+                    <input type="checkbox" id="aceptoTerminos" style="accent-color: var(--primary-color); width: 19px; height: 19px; margin-top: 2px; cursor: pointer;" required>
+                    <label for="aceptoTerminos" style="font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer;">
+                        He leído íntegramente y acepto el contrato de prestación de servicios de GraveCare SpA.
+                    </label>
+                </div>
+            </div>
+
+            <!-- 3. Selección de Método de Pago -->
+            <div class="section-subhead">3. Selección de Medio de Pago</div>
+            <div class="alert alert-info" style="display: block;">
+                💡 Selecciona la pasarela deseada. Tus pagos se procesan de forma cifrada mediante Webpay (Transbank).
+            </div>
+
+            <div class="metodos-pago-container">
+                <!-- Webpay Plus -->
+                <div class="metodo-pago" data-metodo="webpay-plus">
+                    <div class="check-icon">✓</div>
+                    <h4>Webpay Plus</h4>
+                    <p>Tarjetas de Crédito y Débito (Redcompra)</p>
+                    <span class="badge-disponible">Disponible</span>
                 </div>
 
-                <!-- PAGO CON WEBPAY -->
-                <h2 class="section-title">MÉTODO DE PAGO</h2>
-                <form id="payment-form">
-                    <div style="display:flex; align-items:center; gap:0.9rem; padding: 1rem 1.1rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 1rem;">
-                        <img src="https://www.transbankdevelopers.cl/public/library/img/logo-webpay.svg" alt="Webpay Plus" style="height: 28px;" onerror="this.style.display='none'">
-                        <div>
-                            <div style="font-weight:700; font-size:0.95rem;">Pago seguro con Webpay</div>
-                            <div style="font-size:0.82rem; color: var(--text-muted);">Al continuar, vas a ser redirigido al sitio de Transbank para ingresar los datos de tu tarjeta. GraveCare nunca ve ni guarda tu número de tarjeta.</div>
-                        </div>
-                    </div>
+                <!-- Webpay Oneclick -->
+                <div class="metodo-pago" data-metodo="webpay-oneclick">
+                    <div class="check-icon">✓</div>
+                    <h4>Webpay Oneclick</h4>
+                    <p>Inscripción y cobro automático mensual</p>
+                    <span class="badge-disponible">Disponible</span>
+                </div>
 
-                    <div class="form-group" style="margin-top: 1.2rem;">
-                        <div style="font-weight:700; font-size:0.95rem; margin-bottom:0.4rem;">Contrato de prestación de servicios</div>
-                        <div style="font-size:0.82rem; color: var(--text-muted); margin-bottom:0.5rem;">Léelo antes de pagar. Al confirmar el pago recibirás una copia en PDF, disponible también en «Mis Sepulturas».</div>
-                        <div id="contratoTexto" tabindex="0" aria-label="Texto del contrato"
-                             style="max-height: 260px; overflow-y: auto; white-space: pre-wrap; font-size: 0.8rem; line-height: 1.5; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.9rem; background: #fafafa;">Cargando contrato…</div>
-                    </div>
+                <!-- Opciones secundarias -->
+                <div class="metodo-pago deshabilitado">
+                    <h4>MACH</h4>
+                    <p>Billetera virtual</p>
+                    <span class="badge-proximo">Próximamente</span>
+                </div>
 
-                    <div class="form-group" style="margin-top: 0.8rem;">
-                        <label style="display: flex; align-items: flex-start; gap: 0.8rem; cursor: pointer; font-size: 0.95rem;">
-                            <input type="checkbox" id="aceptoTerminos" style="width: 18px; height: 18px; cursor: pointer; margin-top: 0.2rem; flex-shrink: 0;" required>
-                            <span>He leído y acepto el contrato de prestación de servicios y mandato, y los términos de pago</span>
-                        </label>
-                    </div>
+                <div class="metodo-pago deshabilitado">
+                    <h4>Transferencia Bci</h4>
+                    <p>Transferencia bancaria en línea</p>
+                    <span class="badge-proximo">Próximamente</span>
+                </div>
+            </div>
 
-                    <!-- SELECTOR DE CUOTAS (solo para pagos con tarjeta) -->
-                    <div class="form-group" id="grupoSelectCuotas" style="display: none; margin: 1.5rem 0;">
-                        <label class="form-label" for="selectCuotas">
-                            Pagar en cuotas (opcional)
-                        </label>
-                        <select id="selectCuotas" class="form-input" style="cursor: pointer; appearance: auto;">
-                            <option value="1">Pago único (sin intereses)</option>
-                            <option value="3">3 cuotas sin interés</option>
-                            <option value="6">6 cuotas</option>
-                            <option value="12">12 cuotas</option>
-                        </select>
-                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem;">
-                            Las cuotas pueden variar según tu banco. Podrás cambiar en Transbank.
-                        </div>
-                    </div>
+            <!-- Selector de Cuotas -->
+            <div class="cuotas-container" id="cuotasSection">
+                <label class="form-label" for="selectCuotas">Selecciona cantidad de cuotas:</label>
+                <select id="selectCuotas" class="form-input" style="max-width: 260px;">
+                    <option value="1">1 cuota (Sin intereses)</option>
+                    <option value="3">3 cuotas</option>
+                    <option value="6">6 cuotas</option>
+                    <option value="12">12 cuotas</option>
+                </select>
 
-                    <div style="background-color: #f0fdf4; border-left: 4px solid var(--success-color); padding: 1rem; border-radius: var(--radius-sm); text-align: center; margin: 1.5rem 0;">
-                        <div style="font-weight: 700; color: var(--success-color); font-size: 0.95rem;">🔒 Tu información está segura</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Usamos encriptación SSL</div>
-                    </div>
+                <div class="resumen-cuotas" id="resumenCuotas">
+                    <p style="color: var(--text-muted);">Monto Total: <strong id="montoTotal" style="color: var(--primary-color);">$0</strong></p>
+                    <p style="color: var(--text-muted); margin-top: 4px;">Pagarás: <strong id="numeroCuotas">1</strong> cuota(s) de <span class="monto-cuota-destacado" id="montoCuota">$0</span></p>
+                </div>
+            </div>
 
-                    <button type="submit" id="btnPagar" style="width: 100%; padding: 1.1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1.05rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">
-                        ✓ CONTINUAR AL PAGO →
-                    </button>
-                </form>
+            <!-- Botones de Acción -->
+            <div id="botonesSeccion" style="display: none; margin-top: 2rem;">
+                <button class="btn btn-primary" id="btnWebpay" style="display: none; padding: 1.1rem; font-size: 1.05rem;">
+                    Ir a pagar con Webpay Plus →
+                </button>
+                <button class="btn btn-gold" id="btnOneclick" style="display: none; padding: 1.1rem; font-size: 1.05rem;">
+                    Inscribir tarjeta con Oneclick →
+                </button>
             </div>
         </div>
-    </main>
+    </div>
 
+    <!-- Footer Institucional -->
     <footer class="footer">
-        <h4>GraveCare - Preservación & Memoria</h4>
-        <p>contacto@gravecare.cl</p>
-        <p style="margin-top: 0.8rem; font-size: 0.8rem;">Todos los derechos reservados © 2026</p>
+        <p>&copy; 2026 GraveCare SpA - Preservación & Memoria · Todos los derechos reservados.</p>
+        <p style="margin-top: 4px;">Contacto: <a href="tel:+56982560501">+56 9 8256 6719</a> | <a href="mailto:contacto@gravecare.cl">contacto@gravecare.cl</a></p>
     </footer>
 
+    <!-- Lógica de Datos y Conexión Firebase -->
     <script type="module">
-        import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-        import { auth, db } from "./js/firebaseConfig.js";
-        import { generarContratoTexto, CONTRATO_VERSION } from "./js/contratoGravecare.js";
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { CONTRATO_VERSION, generarContratoTexto } from "./js/contratoGravecare.js";
 
-        let ordenCompleta = {};
-        let usuarioActual = null;
+        const firebaseConfig = {
+            apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+            authDomain: "gravecare-2e8d2.firebaseapp.com",
+            projectId: "gravecare-2e8d2",
+            storageBucket: "gravecare-2e8d2.firebasestorage.app",
+            messagingSenderId: "160012946248",
+            appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+        };
 
-        // URL base de las Cloud Functions de pago (transbank.js / oneclick.js).
-        const FUNCTIONS_BASE = 'https://us-central1-gravecare-2e8d2.cloudfunctions.net';
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+        const db = getFirestore(app);
 
-        // Redirige el navegador con un POST real (Transbank lo exige así,
-        // no acepta un simple window.location).
-        function redirigirConPost(url, campos) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = url;
-            for (const [nombre, valor] of Object.entries(campos)) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = nombre;
-                input.value = valor;
-                form.appendChild(input);
-            }
-            document.body.appendChild(form);
-            form.submit();
-        }
+        let ordenActual = null;
+        let metodoPagoSeleccionado = null;
+        let ordenId = null;
 
-        function cargarResumen() {
-            const raw = localStorage.getItem('gravecare_datos_completos') ||
-                        localStorage.getItem('gravecare_last_order');
+        async function inicializarPagina() {
+            const urlParams = new URLSearchParams(window.location.search);
+            ordenId = urlParams.get('id');
 
-            if (!raw) {
-                alert('No se encontraron datos de la orden. Por favor vuelve a seleccionar un servicio.');
-                window.location.href = 'planes.html';
-                return;
-            }
+            const rawStorage = localStorage.getItem('gravecare_datos_completos') || 
+                               localStorage.getItem('gravecare_last_order');
 
-            try {
-                ordenCompleta = JSON.parse(raw);
-                const esPlan = (ordenCompleta.tipoServicio === 'PLAN' || ordenCompleta.tipoSuscripcion === 'PLAN');
-                
-                // Mostrar selector de cuotas para TODOS los servicios (Planes y Spot)
-                document.getElementById('grupoSelectCuotas').style.display = 'block';
-
-                const nombrePlan = ordenCompleta.servicio?.planNombre || ordenCompleta.planNombre || (esPlan ? 'Plan Mensual' : 'Visita Spot');
-                const frecuencia = ordenCompleta.servicio?.frecuencia || ordenCompleta.frecuencia || (esPlan ? '1 visita al mes' : 'Visita Única');
-                const nivel = ordenCompleta.servicio?.nivel || ordenCompleta.nivel || 'Standard';
-
-                let totalNum = 34990;
-                if (ordenCompleta.valores?.total) totalNum = Number(ordenCompleta.valores.total);
-                else if (ordenCompleta.precioNumerico) totalNum = Number(ordenCompleta.precioNumerico);
-                else if (ordenCompleta.precioBase) totalNum = Number(ordenCompleta.precioBase) + (Number(ordenCompleta.adicional) || 0);
-
-                document.getElementById('resumenPlan').textContent = nombrePlan;
-                document.getElementById('resumenFrecuencia').textContent = frecuencia;
-                document.getElementById('resumenNivel').textContent = nivel;
-                document.getElementById('resumenTotal').textContent = '$' + totalNum.toLocaleString('es-CL');
-
-                ordenCompleta.valores = { moneda: 'CLP', total: totalNum };
-                ordenCompleta.precio = '$' + totalNum.toLocaleString('es-CL');
-                ordenCompleta.precioNumerico = totalNum;
-
-                // textContent (no innerHTML): el contrato incluye nombres y
-                // direcciones que escribió el cliente.
-                document.getElementById('contratoTexto').textContent = generarContratoTexto(ordenCompleta);
-
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            usuarioActual = user;
-        });
-
-        document.getElementById('payment-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!document.getElementById('aceptoTerminos').checked) {
-                alert('Por favor, acepta los términos y condiciones de pago.');
-                return;
-            }
-
-            const btn = document.getElementById('btnPagar');
-            btn.disabled = true;
-            btn.textContent = 'Conectando con Webpay...';
-
-            const numOrden = ordenCompleta.numeroOrden || ('ORD-' + Date.now());
-            const esSpot = ordenCompleta.plan === 'spot' || ordenCompleta.tipoSuscripcion === 'SPOT';
-            
-            // Leer el número de cuotas seleccionadas (aplica a TODOS los servicios)
-            const cuotasSeleccionadas = parseInt(document.getElementById('selectCuotas').value);
-
-            const ordenFinalFirebase = {
-                ...ordenCompleta,
-                numeroOrden: numOrden,
-                creadoEl: serverTimestamp(),
-                createdAt: new Date(),
-                // "pendiente_pago", NO "pagado" — el pago recién se confirma
-                // del lado del servidor cuando Transbank responde (ver
-                // confirmarTransaccionWebpay / confirmarInscripcionOneclick).
-                estado: 'pendiente_pago',
-                terminosAceptados: true,
-                // Constancia de la aceptación: cuándo, y qué redacción del
-                // contrato se mostró. La fecha del PDF sale de aquí.
-                terminosAceptadosEn: new Date().toISOString(),
-                contratoVersion: CONTRATO_VERSION
-            };
-
-            if (usuarioActual) {
-                ordenFinalFirebase.usuarioId = usuarioActual.uid;
-                ordenFinalFirebase.emailCliente = usuarioActual.email;
-            }
-
-            try {
-                await setDoc(doc(db, 'ordenes', numOrden), ordenFinalFirebase, { merge: true });
-            } catch (errDb) {
-                console.error('No se pudo guardar la orden:', errDb);
-                alert('Ocurrió un error al preparar tu pago. Por favor intenta nuevamente.');
-                btn.disabled = false;
-                btn.textContent = '✓ CONTINUAR AL PAGO →';
-                return;
-            }
-
-            localStorage.setItem('gravecare_last_order', JSON.stringify(ordenFinalFirebase));
-            localStorage.setItem('gravecare_datos_completos', JSON.stringify(ordenFinalFirebase));
-
-            try {
-                if (esSpot) {
-                    // Visita única -> Webpay Plus (pago único, financiable en cuotas por el banco)
-                    const resp = await fetch(`${FUNCTIONS_BASE}/crearTransaccionWebpay`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            ordenId: numOrden,
-                            cuotas: cuotasSeleccionadas
-                        })
-                    });
-                    const data = await resp.json();
-                    if (!resp.ok) throw new Error(data.error || 'No se pudo iniciar el pago');
-                    redirigirConPost(data.url, { token_ws: data.token });
-                } else {
-                    // Plan 12/6/4 -> Oneclick Mall (inscribe la tarjeta, cobro recurrente automático)
-                    const resp = await fetch(`${FUNCTIONS_BASE}/iniciarInscripcionOneclick`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            ordenId: numOrden,
-                            cuotas: cuotasSeleccionadas
-                        })
-                    });
-                    const data = await resp.json();
-                    if (!resp.ok) throw new Error(data.error || 'No se pudo iniciar la inscripción');
-                    redirigirConPost(data.url_webpay, { TBK_TOKEN: data.token });
+            if (rawStorage) {
+                try {
+                    ordenActual = JSON.parse(rawStorage);
+                    ordenId = ordenId || ordenActual.numeroOrden || ('ORD-' + Date.now());
+                    ordenActual.id = ordenId;
+                } catch(e) {
+                    console.error("Error al parsear localStorage:", e);
                 }
-                // A partir de aquí el navegador ya salió hacia Transbank —
-                // no hay más código que ejecutar en esta página.
-            } catch (err) {
-                console.error(err);
-                alert('No se pudo conectar con Webpay: ' + err.message + '\nPor favor intenta nuevamente.');
-                btn.disabled = false;
-                btn.textContent = '✓ CONTINUAR AL PAGO →';
             }
-        });
 
-        cargarResumen();
+            if (!ordenActual && ordenId) {
+                try {
+                    const docSnap = await getDoc(doc(db, "ordenes", ordenId));
+                    if (docSnap.exists()) {
+                        ordenActual = { id: docSnap.id, ...docSnap.data() };
+                    }
+                } catch (err) {
+                    console.error("Error al consultar orden en Firestore:", err);
+                }
+            }
+
+            if (!ordenActual) {
+                document.getElementById('detallesOrden').innerHTML = `
+                    <div style="grid-column: 1/-1; color: var(--danger-color); text-align: center; padding: 1rem;">
+                        No se encontró información de la contratación. Regresa al formulario anterior.
+                    </div>`;
+                return;
+            }
+
+            // Normalización de campos para el contrato y el panel
+            ordenActual.nombreTitular = ordenActual.titular?.nombre || ordenActual.nombreTitular || 'Titular';
+            ordenActual.nombreDifunto = ordenActual.difunto?.nombre || ordenActual.nombreDifunto || 'Ser Querido';
+            ordenActual.cementerio = ordenActual.ubicacionSepultura?.cementerio || ordenActual.cementerio || 'Parque del Recuerdo';
+            ordenActual.tipo = ordenActual.tipoServicio || ordenActual.tipo || 'Plan';
+            ordenActual.montoTotal = Number(ordenActual.montoTotal || ordenActual.monto || ordenActual.precioNumerico || 0);
+
+            // Sincronizar en Firestore
+            try {
+                await setDoc(doc(db, "ordenes", ordenId), {
+                    ...ordenActual,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (errDb) {
+                console.warn("Aviso al sincronizar orden en Firestore:", errDb);
+            }
+
+            mostrarDetallesOrden();
+            cargarContrato();
+            configurarEventListeners();
+        }
+
+        function mostrarDetallesOrden() {
+            if (!ordenActual) return;
+            
+            const tipo = ordenActual.planNombre || ordenActual.tipoServicio || (ordenActual.servicio?.planNombre) || 'Plan Regular';
+            const difunto = ordenActual.nombreDifunto;
+            const cem = ordenActual.cementerio;
+            const sector = ordenActual.ubicacionSepultura?.sector || '-';
+            const sepultura = ordenActual.ubicacionSepultura?.numeroSepultura || ordenActual.ubicacionSepultura?.numero || '-';
+            const titular = ordenActual.nombreTitular;
+            const monto = ordenActual.montoTotal;
+
+            const badgeTipo = document.getElementById('badgeTipo');
+            if (badgeTipo) badgeTipo.textContent = tipo;
+
+            const detalles = `
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">N° de Orden</span>
+                    <strong style="color: var(--primary-color); font-family: monospace; font-size: 1rem;">${ordenId}</strong>
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Titular</span>
+                    <strong style="color: var(--primary-color);">${titular}</strong>
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Ser Querido (Difunto)</span>
+                    <strong style="color: var(--primary-color);">${difunto}</strong>
+                </div>
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Cementerio & Ubicación</span>
+                    <strong style="color: var(--primary-color);">${cem} (Sec: ${sector}, Sep: ${sepultura})</strong>
+                </div>
+                <div style="grid-column: 1 / -1; border-top: 1px solid #d2e4dd; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--primary-color);">Total a Pagar:</span>
+                    <strong style="color: var(--primary-color); font-size: 1.35rem;">$ ${Number(monto).toLocaleString('es-CL')}</strong>
+                </div>
+            `;
+            
+            const detallesOrden = document.getElementById('detallesOrden');
+            if (detallesOrden) detallesOrden.innerHTML = detalles;
+
+            const montoTotalEl = document.getElementById('montoTotal');
+            if (montoTotalEl) montoTotalEl.innerText = `$ ${Number(monto).toLocaleString('es-CL')}`;
+        }
+
+        function cargarContrato() {
+            if (!ordenActual) return;
+            try {
+                if (typeof generarContratoTexto === "function") {
+                    // Se pasa un objeto Date válido requerido por contratoGravecare.js
+                    const texto = generarContratoTexto(ordenActual, new Date());
+                    const textoContratoEl = document.getElementById('textoContrato');
+                    if (textoContratoEl) textoContratoEl.innerText = texto;
+                }
+            } catch (e) {
+                console.error("Error al generar el contrato:", e);
+                const textoContratoEl = document.getElementById('textoContrato');
+                if (textoContratoEl) textoContratoEl.innerText = "Contrato de Prestación de Servicios GraveCare SpA disponible para su revisión.";
+            }
+        }
+
+        function configurarEventListeners() {
+            const metodosDisponibles = document.querySelectorAll('.metodo-pago:not(.deshabilitado)');
+            metodosDisponibles.forEach(metodo => {
+                metodo.addEventListener('click', function() {
+                    document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('activo'));
+                    this.classList.add('activo');
+                    metodoPagoSeleccionado = this.dataset.metodo;
+                    
+                    const cuotasSection = document.getElementById('cuotasSection');
+                    const botonesSeccion = document.getElementById('botonesSeccion');
+                    const btnWebpay = document.getElementById('btnWebpay');
+                    const btnOneclick = document.getElementById('btnOneclick');
+                    
+                    if (cuotasSection) cuotasSection.classList.add('visible');
+                    if (botonesSeccion) botonesSeccion.style.display = 'block';
+                    
+                    if (metodoPagoSeleccionado === 'webpay-plus') {
+                        if (btnWebpay) btnWebpay.style.display = 'block';
+                        if (btnOneclick) btnOneclick.style.display = 'none';
+                    } else if (metodoPagoSeleccionado === 'webpay-oneclick') {
+                        if (btnWebpay) btnWebpay.style.display = 'none';
+                        if (btnOneclick) btnOneclick.style.display = 'block';
+                    }
+                    
+                    actualizarResumenCuotas();
+                });
+            });
+
+            const selectCuotas = document.getElementById('selectCuotas');
+            if (selectCuotas) {
+                selectCuotas.addEventListener('change', actualizarResumenCuotas);
+            }
+
+            const btnWebpay = document.getElementById('btnWebpay');
+            if (btnWebpay) {
+                btnWebpay.addEventListener('click', async function() {
+                    const aceptoTerminos = document.getElementById('aceptoTerminos');
+                    if (!aceptoTerminos || !aceptoTerminos.checked) {
+                        alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
+                        aceptoTerminos.focus();
+                        return;
+                    }
+
+                    const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
+                    
+                    try {
+                        const response = await fetch('/crear-transaccion-webpay', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ordenId, cuotas })
+                        });
+
+                        const data = await response.json();
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            alert('Error: ' + (data.error || 'No se pudo iniciar la transacción con Webpay'));
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al conectar con la pasarela de pago. Por favor intenta de nuevo.');
+                    }
+                });
+            }
+
+            const btnOneclick = document.getElementById('btnOneclick');
+            if (btnOneclick) {
+                btnOneclick.addEventListener('click', async function() {
+                    const aceptoTerminos = document.getElementById('aceptoTerminos');
+                    if (!aceptoTerminos || !aceptoTerminos.checked) {
+                        alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
+                        aceptoTerminos.focus();
+                        return;
+                    }
+
+                    const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
+                    
+                    try {
+                        const response = await fetch('/iniciar-inscripcion-oneclick', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ordenId, cuotas })
+                        });
+
+                        const data = await response.json();
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            alert('Error: ' + (data.error || 'No se pudo iniciar la inscripción con Oneclick'));
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error al procesar la solicitud con Oneclick. Por favor intenta de nuevo.');
+                    }
+                });
+            }
+        }
+
+        function actualizarResumenCuotas() {
+            if (!ordenActual) return;
+            const selectCuotas = document.getElementById('selectCuotas');
+            const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
+            const montoTotal = Number(ordenActual.montoTotal || 0);
+            const montoCuota = Math.ceil(montoTotal / cuotas);
+            
+            const montoTotalEl = document.getElementById('montoTotal');
+            const numeroCuotasEl = document.getElementById('numeroCuotas');
+            const montoCuotaEl = document.getElementById('montoCuota');
+            const resumenCuotasEl = document.getElementById('resumenCuotas');
+            
+            if (montoTotalEl) montoTotalEl.innerText = `$ ${montoTotal.toLocaleString('es-CL')}`;
+            if (numeroCuotasEl) numeroCuotasEl.innerText = cuotas;
+            if (montoCuotaEl) montoCuotaEl.innerText = `$ ${montoCuota.toLocaleString('es-CL')}`;
+            if (resumenCuotasEl) resumenCuotasEl.classList.add('visible');
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarPagina);
+        } else {
+            inicializarPagina();
+        }
     </script>
 </body>
 </html>

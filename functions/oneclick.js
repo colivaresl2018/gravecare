@@ -1,301 +1,270 @@
-// build: 20260925222714
-/**
- * INTEGRACIÓN TRANSBANK ONECLICK MALL - GraveCare
- * Cobro recurrente para Planes 12 / 6 / 4 (Spot usa Webpay Plus, ver transbank.js)
- *
- * Flujo de INSCRIPCIÓN (una sola vez, al contratar el plan):
- * 1. Navegador llama a iniciarInscripcionOneclick con { ordenId }
- * 2. Esta función llama a Oneclick.MallInscription.start() y devuelve
- *    { token, url_webpay }
- * 3. Navegador redirige (POST) a url_webpay con TBK_TOKEN = token
- * 4. Transbank redirige de vuelta a confirmarInscripcionOneclick
- * 5. Esta función llama a inscription.finish(token), guarda tbk_user en la
- *    orden, y hace el PRIMER cobro inmediatamente (la primera visita)
- *
- * Flujo de COBROS SIGUIENTES (automático, sin que el cliente haga nada):
- * 6. cobrarSuscripcionesOneclick corre todos los días (Cloud Scheduler) y
- *    cobra a quienes les corresponda visita ese día, según la frecuencia
- *    de su plan (Plan 12 = cada mes, Plan 6 = cada 2 meses, Plan 4 = cada
- *    3 meses — 12 visitas repartidas en el año).
- */
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
 
-const {onRequest} = require("firebase-functions/v2/https");
-const {onSchedule} = require("firebase-functions/v2/scheduler");
-const {defineSecret} = require("firebase-functions/params");
-const admin = require("firebase-admin");
-const {
-  Oneclick,
-  Options,
-  IntegrationCommerceCodes,
-  IntegrationApiKeys,
-  Environment,
-  TransactionDetail,
-} = require("transbank-sdk");
+// Importar correctamente transbank-sdk v6.0.0
+const { WebpayOneClick, Environment } = require('transbank-sdk');
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
 const db = admin.firestore();
 
-// ============================================================================
-// CONFIGURACIÓN (misma lógica que transbank.js — ver ese archivo para el
-// paso a producción con TBK_COMMERCE_CODE / TBK_API_KEY).
-// ============================================================================
-const USE_INTEGRACION = true;
-const TBK_COMMERCE_CODE = defineSecret("TBK_COMMERCE_CODE");
-const TBK_API_KEY = defineSecret("TBK_API_KEY");
+// Credenciales Transbank (desde variables de entorno)
+const COMMERCE_CODE = process.env.TRANSBANK_ONECLICK_COMMERCE || "597055555532";
+const API_KEY = process.env.TRANSBANK_API_KEY || "579B532A7440BB0C9079DED94D31EA1615BACEB7";
+const ENVIRONMENT = Environment.Integration;
 
-function obtenerOptions() {
-  if (USE_INTEGRACION) {
-    return new Options(
-        IntegrationCommerceCodes.ONECLICK_MALL,
-        IntegrationApiKeys.WEBPAY,
-        Environment.Integration,
-    );
-  }
-  return new Options(
-      TBK_COMMERCE_CODE.value(),
-      TBK_API_KEY.value(),
-      Environment.Production,
-  );
-}
+exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-const ALLOWED_ORIGINS = [
-  "https://gravecare.cl",
-  "https://www.gravecare.cl",
-  "https://gravecare-2e8d2.web.app",
-  "https://gravecare-2e8d2.firebaseapp.com",
-];
-const SITE_URL_POR_DEFECTO = "https://gravecare.cl";
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+    }
 
-function resolverSiteUrl(orden) {
-  return orden && ALLOWED_ORIGINS.includes(orden.origenSitio) ?
-    orden.origenSitio : SITE_URL_POR_DEFECTO;
-}
+    try {
+        const { ordenId, cuotas } = req.body;
 
-// Meses entre cada cobro, según el plan (12 visitas al año repartidas).
-const MESES_ENTRE_COBROS = {"12": 1, "6": 2, "4": 3};
-
-function setCors(req, res) {
-  const origin = req.headers.origin;
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    res.set("Access-Control-Allow-Origin", origin);
-  }
-  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-}
-
-// ============================================================================
-// 1) INICIAR INSCRIPCIÓN
-// POST { ordenId: string, cuotas: number }  ->  { token, url_webpay }
-// ============================================================================
-exports.iniciarInscripcionOneclick = onRequest(
-    {secrets: [TBK_COMMERCE_CODE, TBK_API_KEY]},
-    async (req, res) => {
-      setCors(req, res);
-      if (req.method === "OPTIONS") return res.status(204).send("");
-      if (req.method !== "POST") {
-        return res.status(405).json({error: "Método no permitido"});
-      }
-
-      try {
-        const {ordenId, cuotas} = req.body;
         if (!ordenId) {
-          return res.status(400).json({error: "Falta ordenId"});
+            return res.status(400).json({ error: 'ordenId es requerido' });
         }
 
-        const ordenRef = db.collection("ordenes").doc(ordenId);
+        // Obtener orden de Firestore
+        const ordenRef = db.collection('ordenes').doc(ordenId);
         const ordenSnap = await ordenRef.get();
+
         if (!ordenSnap.exists) {
-          return res.status(404).json({error: "Orden no encontrada"});
+            return res.status(404).json({ error: 'Orden no encontrada' });
         }
+
         const orden = ordenSnap.data();
+        const username = `GC-${ordenId}`;
+        const email = orden.email || 'cliente@gravecare.cl';
+        const responseUrl = `${process.env.FIREBASE_PUBLIC_URL || 'https://gravecare.cl'}/confirmar-oneclick?orden=${ordenId}`;
 
-        if (!MESES_ENTRE_COBROS[orden.plan]) {
-          return res.status(400).json({
-            error: "Esta orden no corresponde a un plan recurrente (12/6/4)",
-          });
-        }
-        // El email del cliente se guarda anidado en titular.email
-        // (contratacion-plan.html), nunca como campo plano "orden.email".
-        const emailCliente = orden.titular?.email || orden.emailCliente || orden.email;
-        if (!emailCliente) {
-          return res.status(400).json({error: "La orden no tiene email"});
-        }
+        console.log(`Iniciando inscripción Oneclick: username=${username}, email=${email}`);
 
-        const responseUrl = `${req.protocol}://${req.get("host")}/confirmarInscripcionOneclick`;
-        const inscription = new Oneclick.MallInscription(obtenerOptions());
-        const response = await inscription.start(ordenId, emailCliente, responseUrl);
+        // Iniciar inscripción en Webpay Oneclick usando API v6.0.0
+        const response = await WebpayOneClick.Inscription.start(
+            COMMERCE_CODE,
+            API_KEY,
+            ENVIRONMENT,
+            username,
+            email,
+            responseUrl
+        );
 
-        const origenPermitido = ALLOWED_ORIGINS.includes(req.headers.origin) ?
-          req.headers.origin : SITE_URL_POR_DEFECTO;
+        console.log('Respuesta de inscripción Oneclick:', response);
 
-        await ordenRef.update({
-          oneclickToken: response.token,
-          oneclickEstado: "inscripcion_iniciada",
-          origenSitio: origenPermitido,
-          // Guardar cuotas solicitadas para logging/auditoría
-          oneclickCuotasSolicitadas: cuotas || 1,
+        // Guardar datos de inscripción en Firestore
+        await db.collection('ordenes').doc(ordenId).update({
+            oneclickInscripcion: {
+                username,
+                email,
+                estado: 'inscripcion_iniciada',
+                tokenWpm: response.token,
+                url: response.url,
+                fechaCreacion: admin.firestore.FieldValue.serverTimestamp(),
+                cuotasSolicitadas: cuotas || 1
+            }
         });
 
-        return res.status(200).json({
-          token: response.token,
-          url_webpay: response.url_webpay,
-        });
-      } catch (err) {
-        console.error("[iniciarInscripcionOneclick] Error:", err);
-        return res.status(500).json({error: "No se pudo iniciar la inscripción"});
-      }
-    },
-);
-
-// ============================================================================
-// 2) CONFIRMAR INSCRIPCIÓN (responseUrl de Transbank)
-// Transbank redirige aquí por POST con TBK_TOKEN.
-// Al confirmar, se guarda tbk_user y se hace el PRIMER cobro (primera visita).
-// ============================================================================
-exports.confirmarInscripcionOneclick = onRequest(
-    {secrets: [TBK_COMMERCE_CODE, TBK_API_KEY]},
-    async (req, res) => {
-      const token = req.body.TBK_TOKEN || req.query.TBK_TOKEN;
-
-      if (!token) {
-        // El usuario canceló la inscripción antes de completarla — sin
-        // token no hay forma de identificar la orden ni su origenSitio.
-        return res.redirect(302, `${SITE_URL_POR_DEFECTO}/confirmacion.html?estado=inscripcion_cancelada`);
-      }
-
-      // ordenId fue enviado como "username" en el start() — lo recuperamos
-      // buscando la orden que tenga este token guardado.
-      let ordenRef;
-      let ordenId;
-      try {
-        const ordenSnap = await db
-            .collection("ordenes")
-            .where("oneclickToken", "==", token)
-            .limit(1)
-            .get();
-        if (ordenSnap.empty) {
-          return res.status(404).send("Orden no encontrada para este token");
-        }
-        ordenRef = ordenSnap.docs[0].ref;
-        ordenId = ordenSnap.docs[0].id;
-      } catch (err) {
-        console.error("[confirmarInscripcionOneclick] Error buscando orden:", err);
-        return res.status(500).send("Error interno");
-      }
-
-      const siteUrl = resolverSiteUrl((await ordenRef.get()).data());
-
-      try {
-        const inscription = new Oneclick.MallInscription(obtenerOptions());
-        const response = await inscription.finish(token);
-
-        if (response.response_code !== 0) {
-          await ordenRef.update({oneclickEstado: "inscripcion_rechazada"});
-          return res.redirect(302, `${siteUrl}/confirmacion.html?estado=inscripcion_rechazada`);
-        }
-
-        await ordenRef.update({
-          // "estado" es el campo que leen ordenes.html, sepulturas.html y
-          // onOrdenEscrita (sepulturas.js) — debe reflejar el pago real,
-          // no solo el campo específico de Oneclick.
-          estado: "pagado",
-          oneclickEstado: "inscrito",
-          oneclickTbkUser: response.tbk_user,
-          oneclickCardType: response.card_type,
-          oneclickCardNumber: response.card_number,
-          oneclickInscritoAt: admin.firestore.FieldValue.serverTimestamp(),
+        return res.json({
+            success: true,
+            redirect_url: response.url,
+            token: response.token
         });
 
-        // Primer cobro inmediato (primera visita) + agenda el próximo.
-        await cobrarUnaVisita(ordenId, ordenRef);
+    } catch (error) {
+        console.error('Error en iniciarInscripcionOneclick:', error);
+        return res.status(500).json({
+            error: 'Error al iniciar inscripción Oneclick',
+            details: error.message
+        });
+    }
+});
 
-        return res.redirect(302, `${siteUrl}/confirmacion.html?orden=${ordenId}&suscripcion=activa`);
-      } catch (err) {
-        console.error("[confirmarInscripcionOneclick] Error confirmando:", err);
-        await ordenRef.update({oneclickEstado: "error_confirmacion"});
-        return res.redirect(302, `${siteUrl}/confirmacion.html?estado=error`);
-      }
-    },
-);
+exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-// ============================================================================
-// FUNCIÓN COMPARTIDA: cobra UNA visita de una orden ya inscrita y agenda
-// la fecha del próximo cobro según la frecuencia del plan.
-// ============================================================================
-async function cobrarUnaVisita(ordenId, ordenRef) {
-  const ordenSnap = await ordenRef.get();
-  const orden = ordenSnap.data();
+    try {
+        const { token } = req.query;
+        const { ordenId } = req.query;
 
-  // ⚠️ precioUnitario debe ser el valor POR VISITA (ej. $38.990), NO el
-  // total del año (ej. $467.880). Si tu resumen-pago.html hoy solo guarda
-  // el total ya multiplicado, hay que agregar este campo aparte al crear
-  // la orden.
-  const precioUnitario = orden.precioUnitario;
-  const precioExtra = orden.precioRamoAdicional || 0;
-  const extras = orden.cantidadRamosAdicionales || 0;
-  const montoVisita = precioUnitario + (extras * precioExtra);
-
-  const buyOrder = `${ordenId}-${Date.now()}`.slice(0, 26);
-  const details = [
-    new TransactionDetail(montoVisita, TBK_COMMERCE_CODE.value() || IntegrationCommerceCodes.ONECLICK_MALL, buyOrder),
-  ];
-
-  const transaction = new Oneclick.MallTransaction(obtenerOptions());
-  const response = await transaction.authorize(
-      ordenId, // username, el mismo usado en inscription.start()
-      orden.oneclickTbkUser,
-      buyOrder,
-      details,
-  );
-
-  const detalle = response.details && response.details[0];
-  const aprobado = detalle && detalle.response_code === 0;
-
-  const mesesSiguiente = MESES_ENTRE_COBROS[orden.plan] || 1;
-  const proximoCobro = new Date();
-  proximoCobro.setMonth(proximoCobro.getMonth() + mesesSiguiente);
-
-  await ordenRef.update({
-    ultimoCobroEstado: aprobado ? "aprobado" : "rechazado",
-    ultimoCobroResponseCode: detalle ? detalle.response_code : null,
-    ultimoCobroFecha: admin.firestore.FieldValue.serverTimestamp(),
-    ultimoCobroMonto: montoVisita,
-    visitasCobradas: admin.firestore.FieldValue.increment(1),
-    proximoCobroFecha: admin.firestore.Timestamp.fromDate(proximoCobro),
-  });
-
-  return aprobado;
-}
-
-// ============================================================================
-// 3) COBRO PROGRAMADO — corre todos los días a las 09:00 (America/Santiago)
-// Cobra a todas las órdenes inscritas cuya proximoCobroFecha ya llegó.
-// ============================================================================
-exports.cobrarSuscripcionesOneclick = onSchedule(
-    {
-      schedule: "0 9 * * *",
-      timeZone: "America/Santiago",
-      secrets: [TBK_COMMERCE_CODE, TBK_API_KEY],
-    },
-    async () => {
-      const ahora = admin.firestore.Timestamp.now();
-      const pendientes = await db
-          .collection("ordenes")
-          .where("oneclickEstado", "==", "inscrito")
-          .where("proximoCobroFecha", "<=", ahora)
-          .get();
-
-      console.log(`[cobrarSuscripcionesOneclick] ${pendientes.size} cobro(s) pendiente(s)`);
-
-      for (const doc of pendientes.docs) {
-        try {
-          await cobrarUnaVisita(doc.id, doc.ref);
-        } catch (err) {
-          console.error(`[cobrarSuscripcionesOneclick] Error cobrando orden ${doc.id}:`, err);
-          await doc.ref.update({ultimoCobroEstado: "error", ultimoCobroError: String(err)});
+        if (!token) {
+            return res.status(400).json({ error: 'Token no proporcionado' });
         }
-      }
-    },
-);
+
+        console.log('Confirmando inscripción Oneclick con token:', token);
+
+        // Confirmar inscripción en Transbank usando API v6.0.0
+        const response = await WebpayOneClick.Inscription.finish(
+            COMMERCE_CODE,
+            API_KEY,
+            ENVIRONMENT,
+            token
+        );
+
+        console.log('Respuesta de confirmación Oneclick:', response);
+
+        // Actualizar orden en Firestore
+        if (ordenId) {
+            await db.collection('ordenes').doc(ordenId).update({
+                oneclickInscripcion: {
+                    estado: 'inscripcion_completada',
+                    tbk_user: response.tbk_user,
+                    responseCode: response.response_code,
+                    authorizationCode: response.authorization_code,
+                    cardNumber: response.card_number,
+                    fechaConfirmacion: admin.firestore.FieldValue.serverTimestamp()
+                },
+                estado: 'oneclick_inscrito'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Inscripción completada correctamente',
+            tbk_user: response.tbk_user,
+            card_number: response.card_number
+        });
+
+    } catch (error) {
+        console.error('Error en confirmarInscripcionOneclick:', error);
+        return res.status(500).json({
+            error: 'Error al confirmar inscripción Oneclick',
+            details: error.message
+        });
+    }
+});
+
+exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+    }
+
+    try {
+        const { ordenId, cuotas } = req.body;
+
+        if (!ordenId) {
+            return res.status(400).json({ error: 'ordenId es requerido' });
+        }
+
+        // Obtener orden de Firestore
+        const ordenRef = db.collection('ordenes').doc(ordenId);
+        const ordenSnap = await ordenRef.get();
+
+        if (!ordenSnap.exists) {
+            return res.status(404).json({ error: 'Orden no encontrada' });
+        }
+
+        const orden = ordenSnap.data();
+        
+        if (!orden.oneclickInscripcion || orden.oneclickInscripcion.estado !== 'inscripcion_completada') {
+            return res.status(400).json({ error: 'La tarjeta no está inscrita en Oneclick' });
+        }
+
+        const montoTotal = orden.montoTotal;
+        if (!montoTotal || montoTotal <= 0) {
+            return res.status(400).json({ error: 'Monto total inválido' });
+        }
+
+        // Generar ID de compra
+        const buyOrder = `GC-ONECLICK-${ordenId}-${Date.now()}`;
+        const tbkUser = orden.oneclickInscripcion.tbk_user;
+        const installmentsNumber = (cuotas && cuotas > 1) ? cuotas : null;
+
+        console.log(`Realizando cargo Oneclick: buyOrder=${buyOrder}, monto=${montoTotal}, cuotas=${installmentsNumber || 1}`);
+
+        // Realizar cargo con Oneclick usando API v6.0.0
+        const response = await WebpayOneClick.Transaction.authorize(
+            COMMERCE_CODE,
+            API_KEY,
+            ENVIRONMENT,
+            buyOrder,
+            tbkUser,
+            montoTotal,
+            installmentsNumber
+        );
+
+        console.log('Respuesta de cargo Oneclick:', response);
+
+        // Guardar transacción en Firestore
+        await db.collection('ordenes').doc(ordenId).update({
+            oneclickCargo: {
+                buyOrder,
+                montoTotal,
+                cuotas: installmentsNumber || 1,
+                codigoAutorizacion: response.authorization_code,
+                codigoTransaccion: response.transaction_date,
+                estado: 'completado',
+                fechaCargo: admin.firestore.FieldValue.serverTimestamp(),
+                detalles: response
+            },
+            estado: 'pagado'
+        });
+
+        return res.json({
+            success: true,
+            message: 'Cargo realizado exitosamente',
+            buyOrder: buyOrder,
+            codigoAutorizacion: response.authorization_code
+        });
+
+    } catch (error) {
+        console.error('Error en cargarOneclick:', error);
+        return res.status(500).json({
+            error: 'Error al realizar el cargo',
+            details: error.message
+        });
+    }
+});
+
+exports.reversarOneclick = functions.https.onRequest(async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    try {
+        const { buyOrder } = req.body;
+
+        if (!buyOrder) {
+            return res.status(400).json({ error: 'buyOrder es requerido' });
+        }
+
+        console.log(`Reversando transacción Oneclick: buyOrder=${buyOrder}`);
+
+        // Reversar transacción usando API v6.0.0
+        const response = await WebpayOneClick.Transaction.reverse(
+            COMMERCE_CODE,
+            API_KEY,
+            ENVIRONMENT,
+            buyOrder
+        );
+
+        console.log('Respuesta de reversa:', response);
+
+        return res.json({
+            success: true,
+            message: 'Reversa realizada exitosamente',
+            detalles: response
+        });
+
+    } catch (error) {
+        console.error('Error en reversarOneclick:', error);
+        return res.status(500).json({
+            error: 'Error al reversar la transacción',
+            details: error.message
+        });
+    }
+});
