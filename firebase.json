@@ -13,7 +13,15 @@
         "function": "crearTransaccionWebpay"
       },
       {
+        "source": "/crear-transaccion-webpay",
+        "function": "crearTransaccionWebpay"
+      },
+      {
         "source": "/confirmarTransaccionWebpay",
+        "function": "confirmarTransaccionWebpay"
+      },
+      {
+        "source": "/confirmar-transaccion-webpay",
         "function": "confirmarTransaccionWebpay"
       },
       {
@@ -21,12 +29,24 @@
         "function": "iniciarInscripcionOneclick"
       },
       {
+        "source": "/iniciar-inscripcion-oneclick",
+        "function": "iniciarInscripcionOneclick"
+      },
+      {
         "source": "/confirmarInscripcionOneclick",
+        "function": "confirmarInscripcionOneclick"
+      },
+      {
+        "source": "/confirmar-inscripcion-oneclick",
         "function": "confirmarInscripcionOneclick"
       },
       {
         "source": "/enviarContacto",
         "function": "enviarContacto"
+      },
+      {
+        "source": "/confirmar-pago.html",
+        "destination": "/confirmacion.html"
       },
       {
         "source": "**",

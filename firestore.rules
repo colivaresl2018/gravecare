@@ -58,11 +58,9 @@ service cloud.firestore {
     }
 
     // Índice público de resolución de RUT a Correo (login con RUT)
-    match /rut_lookup/{rut} {
+	match /rut_lookup/{rut} {
       allow read: if true;
-      allow create, update: if request.auth != null &&
-        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
-        rut == get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rut;
+      allow create, update: if request.auth != null;
       allow delete: if false;
     }
 

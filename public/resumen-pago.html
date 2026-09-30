@@ -1,438 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resumen de Pago - GraveCare</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    <style>
-        .resumen-card {
-            background-color: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: 2.2rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .service-badge {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: #fff;
-            padding: 0.4rem 1.1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 0.8rem;
-        }
-
-        .section-subhead {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--secondary-color);
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            margin-top: 1.5rem;
-            letter-spacing: 0.5px;
-        }
-
-        .detalles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.25rem;
-            background-color: #f0f8f6;
-            border: 1px solid #d2e4dd;
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .metodos-pago-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin: 15px 0 25px 0;
-        }
-
-        .metodo-pago {
-            padding: 18px 14px;
-            border: 1.5px solid var(--border-color);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-align: center;
-            background-color: var(--surface-color);
-            position: relative;
-        }
-
-        .metodo-pago:hover:not(.deshabilitado) {
-            border-color: var(--accent-gold);
-            background-color: #fbf9f4;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .metodo-pago.activo {
-            border-color: var(--primary-color);
-            background-color: #f0f8f6;
-            box-shadow: 0 4px 12px rgba(26, 54, 54, 0.12);
-        }
-
-        .metodo-pago.deshabilitado {
-            opacity: 0.45;
-            cursor: not-allowed;
-            background-color: #fafafa;
-        }
-
-        .metodo-pago h4 {
-            margin: 8px 0 4px 0;
-            font-size: 15px;
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .metodo-pago p {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .badge-disponible {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: var(--radius-sm);
-            font-size: 10px;
-            font-weight: 700;
-            margin-top: 10px;
-            text-transform: uppercase;
-        }
-
-        .badge-proximo {
-            display: inline-block;
-            background-color: #e2e8f0;
-            color: #64748b;
-            padding: 3px 8px;
-            border-radius: var(--radius-sm);
-            font-size: 10px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .check-icon {
-            display: none;
-            color: var(--accent-gold);
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .metodo-pago.activo .check-icon {
-            display: block;
-        }
-
-        .cuotas-container {
-            display: none;
-            margin-top: 20px;
-            padding: 1.25rem;
-            background-color: #faf8f5;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--accent-gold);
-        }
-
-        .cuotas-container.visible {
-            display: block;
-        }
-
-        .resumen-cuotas {
-            margin-top: 15px;
-            padding: 12px;
-            background-color: #ffffff;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-            display: none;
-        }
-
-        .resumen-cuotas.visible {
-            display: block;
-        }
-
-        .monto-cuota-destacado {
-            font-weight: 700;
-            color: var(--primary-color);
-            font-size: 18px;
-        }
-
-        .contrato-box {
-            border: 1.5px solid var(--border-color);
-            padding: 1.2rem;
-            background-color: #fafafa;
-            max-height: 280px;
-            overflow-y: auto;
-            border-radius: var(--radius-sm);
-            font-size: 12.5px;
-            line-height: 1.6;
-            color: #333333;
-            font-family: monospace, Courier, sans-serif;
-            white-space: pre-wrap;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Header institucional con Logo oficial -->
-<!-- Header institucional con Logo centrado -->
-    <header class="navbar" style="justify-content: center; position: relative;">
-        <div style="position: absolute; right: 2rem; font-size: 0.85rem; font-weight: 600; color: var(--secondary-color); display: none; @media(min-width: 768px){display: block;}">
-            🔒 Transacción Segura
-        </div>
-        <a href="index.html" class="nav-brand" style="margin: 0 auto;">
-            <img src="assets/logo.png" alt="GraveCare - Preservación & Memoria" style="height: 54px; width: auto; object-fit: contain;">
-        </a>
-    </header>
-
-    <div class="main-container" style="display: block;">
-        <div class="resumen-card">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <span class="service-badge" id="badgeTipo">Resumen de Contratación</span>
-                <h1 style="color: var(--primary-color); font-size: 1.85rem; margin-top: 0.2rem;">Confirmación de Plan y Pago</h1>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Revisa los datos de tu servicio y confirma las condiciones para continuar</p>
-            </div>
-
-            <!-- 1. Información de la Orden -->
-            <div class="section-subhead">1. Detalle del Servicio Contratado</div>
-            <div id="detallesOrden" class="detalles-grid">
-                <p style="color: var(--text-muted);">Cargando información del plan...</p>
-            </div>
-
-            <!-- 2. Términos y Condiciones (Contrato) -->
-            <div class="section-subhead">2. Contrato y Condiciones del Servicio</div>
-            <div id="contratoSection" style="margin-bottom: 1.5rem;">
-                <div id="textoContrato" class="contrato-box">Generando texto legal del contrato...</div>
-                <div style="margin-top: 1rem; display: flex; align-items: flex-start; gap: 0.6rem;">
-                    <input type="checkbox" id="aceptoTerminos" style="accent-color: var(--primary-color); width: 19px; height: 19px; margin-top: 2px; cursor: pointer;" required>
-                    <label for="aceptoTerminos" style="font-size: 0.9rem; color: var(--text-main); font-weight: 600; cursor: pointer;">
-                        He leído íntegramente y acepto el contrato de prestación de servicios de GraveCare SpA.
-                    </label>
-                </div>
-            </div>
-
-            <!-- 3. Selección de Método de Pago -->
-            <div class="section-subhead">3. Selección de Medio de Pago</div>
-            <div class="alert alert-info" style="display: block;">
-                💡 Selecciona la pasarela deseada. Tus pagos se procesan de forma cifrada mediante Webpay (Transbank).
-            </div>
-
-            <div class="metodos-pago-container">
-                <!-- Webpay Plus -->
-                <div class="metodo-pago" data-metodo="webpay-plus">
-                    <div class="check-icon">✓</div>
-                    <h4>Webpay Plus</h4>
-                    <p>Tarjetas de Crédito y Débito (Redcompra)</p>
-                    <span class="badge-disponible">Disponible</span>
-                </div>
-
-                <!-- Webpay Oneclick -->
-                <div class="metodo-pago" data-metodo="webpay-oneclick">
-                    <div class="check-icon">✓</div>
-                    <h4>Webpay Oneclick</h4>
-                    <p>Inscripción y cobro automático mensual</p>
-                    <span class="badge-disponible">Disponible</span>
-                </div>
-
-                <!-- Opciones secundarias -->
-                <div class="metodo-pago deshabilitado">
-                    <h4>MACH</h4>
-                    <p>Billetera virtual</p>
-                    <span class="badge-proximo">Próximamente</span>
-                </div>
-
-                <div class="metodo-pago deshabilitado">
-                    <h4>Transferencia Bci</h4>
-                    <p>Transferencia bancaria en línea</p>
-                    <span class="badge-proximo">Próximamente</span>
-                </div>
-            </div>
-
-            <!-- Selector de Cuotas -->
-            <div class="cuotas-container" id="cuotasSection">
-                <label class="form-label" for="selectCuotas">Selecciona cantidad de cuotas:</label>
-                <select id="selectCuotas" class="form-input" style="max-width: 260px;">
-                    <option value="1">1 cuota (Sin intereses)</option>
-                    <option value="3">3 cuotas</option>
-                    <option value="6">6 cuotas</option>
-                    <option value="12">12 cuotas</option>
-                </select>
-
-                <div class="resumen-cuotas" id="resumenCuotas">
-                    <p style="color: var(--text-muted);">Monto Total: <strong id="montoTotal" style="color: var(--primary-color);">$0</strong></p>
-                    <p style="color: var(--text-muted); margin-top: 4px;">Pagarás: <strong id="numeroCuotas">1</strong> cuota(s) de <span class="monto-cuota-destacado" id="montoCuota">$0</span></p>
-                </div>
-            </div>
-
-            <!-- Botones de Acción -->
-            <div id="botonesSeccion" style="display: none; margin-top: 2rem;">
-                <button class="btn btn-primary" id="btnWebpay" style="display: none; padding: 1.1rem; font-size: 1.05rem;">
-                    Ir a pagar con Webpay Plus →
-                </button>
-                <button class="btn btn-gold" id="btnOneclick" style="display: none; padding: 1.1rem; font-size: 1.05rem;">
-                    Inscribir tarjeta con Oneclick →
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer Institucional -->
-    <footer class="footer">
-        <p>&copy; 2026 GraveCare SpA - Preservación & Memoria · Todos los derechos reservados.</p>
-        <p style="margin-top: 4px;">Contacto: <a href="tel:+56982560501">+56 9 8256 6719</a> | <a href="mailto:contacto@gravecare.cl">contacto@gravecare.cl</a></p>
-    </footer>
-
-    <!-- Lógica de Datos y Conexión Firebase -->
-    <script type="module">
-        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-        import { CONTRATO_VERSION, generarContratoTexto } from "./js/contratoGravecare.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
-            authDomain: "gravecare-2e8d2.firebaseapp.com",
-            projectId: "gravecare-2e8d2",
-            storageBucket: "gravecare-2e8d2.firebasestorage.app",
-            messagingSenderId: "160012946248",
-            appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
-        };
-
-        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-        const db = getFirestore(app);
-
-        let ordenActual = null;
-        let metodoPagoSeleccionado = null;
-        let ordenId = null;
-
-        async function inicializarPagina() {
-            const urlParams = new URLSearchParams(window.location.search);
-            ordenId = urlParams.get('id');
-
-            const rawStorage = localStorage.getItem('gravecare_datos_completos') || 
-                               localStorage.getItem('gravecare_last_order');
-
-            if (rawStorage) {
-                try {
-                    ordenActual = JSON.parse(rawStorage);
-                    ordenId = ordenId || ordenActual.numeroOrden || ('ORD-' + Date.now());
-                    ordenActual.id = ordenId;
-                } catch(e) {
-                    console.error("Error al parsear localStorage:", e);
-                }
-            }
-
-            if (!ordenActual && ordenId) {
-                try {
-                    const docSnap = await getDoc(doc(db, "ordenes", ordenId));
-                    if (docSnap.exists()) {
-                        ordenActual = { id: docSnap.id, ...docSnap.data() };
-                    }
-                } catch (err) {
-                    console.error("Error al consultar orden en Firestore:", err);
-                }
-            }
-
-            if (!ordenActual) {
-                document.getElementById('detallesOrden').innerHTML = `
-                    <div style="grid-column: 1/-1; color: var(--danger-color); text-align: center; padding: 1rem;">
-                        No se encontró información de la contratación. Regresa al formulario anterior.
-                    </div>`;
-                return;
-            }
-
-            // Normalización de campos para el contrato y el panel
-            ordenActual.nombreTitular = ordenActual.titular?.nombre || ordenActual.nombreTitular || 'Titular';
-            ordenActual.nombreDifunto = ordenActual.difunto?.nombre || ordenActual.nombreDifunto || 'Ser Querido';
-            ordenActual.cementerio = ordenActual.ubicacionSepultura?.cementerio || ordenActual.cementerio || 'Parque del Recuerdo';
-            ordenActual.tipo = ordenActual.tipoServicio || ordenActual.tipo || 'Plan';
-            ordenActual.montoTotal = Number(ordenActual.montoTotal || ordenActual.monto || ordenActual.precioNumerico || 0);
-
-            // Sincronizar en Firestore
-            try {
-                await setDoc(doc(db, "ordenes", ordenId), {
-                    ...ordenActual,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-            } catch (errDb) {
-                console.warn("Aviso al sincronizar orden en Firestore:", errDb);
-            }
-
-            mostrarDetallesOrden();
-            cargarContrato();
-            configurarEventListeners();
-        }
-
-        function mostrarDetallesOrden() {
-            if (!ordenActual) return;
-            
-            const tipo = ordenActual.planNombre || ordenActual.tipoServicio || (ordenActual.servicio?.planNombre) || 'Plan Regular';
-            const difunto = ordenActual.nombreDifunto;
-            const cem = ordenActual.cementerio;
-            const sector = ordenActual.ubicacionSepultura?.sector || '-';
-            const sepultura = ordenActual.ubicacionSepultura?.numeroSepultura || ordenActual.ubicacionSepultura?.numero || '-';
-            const titular = ordenActual.nombreTitular;
-            const monto = ordenActual.montoTotal;
-
-            const badgeTipo = document.getElementById('badgeTipo');
-            if (badgeTipo) badgeTipo.textContent = tipo;
-
-            const detalles = `
-                <div>
-                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">N° de Orden</span>
-                    <strong style="color: var(--primary-color); font-family: monospace; font-size: 1rem;">${ordenId}</strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Titular</span>
-                    <strong style="color: var(--primary-color);">${titular}</strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Ser Querido (Difunto)</span>
-                    <strong style="color: var(--primary-color);">${difunto}</strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Cementerio & Ubicación</span>
-                    <strong style="color: var(--primary-color);">${cem} (Sec: ${sector}, Sep: ${sepultura})</strong>
-                </div>
-                <div style="grid-column: 1 / -1; border-top: 1px solid #d2e4dd; padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--primary-color);">Total a Pagar:</span>
-                    <strong style="color: var(--primary-color); font-size: 1.35rem;">$ ${Number(monto).toLocaleString('es-CL')}</strong>
-                </div>
-            `;
-            
-            const detallesOrden = document.getElementById('detallesOrden');
-            if (detallesOrden) detallesOrden.innerHTML = detalles;
-
-            const montoTotalEl = document.getElementById('montoTotal');
-            if (montoTotalEl) montoTotalEl.innerText = `$ ${Number(monto).toLocaleString('es-CL')}`;
-        }
-
-        function cargarContrato() {
-            if (!ordenActual) return;
-            try {
-                if (typeof generarContratoTexto === "function") {
-                    // Se pasa un objeto Date válido requerido por contratoGravecare.js
-                    const texto = generarContratoTexto(ordenActual, new Date());
-                    const textoContratoEl = document.getElementById('textoContrato');
-                    if (textoContratoEl) textoContratoEl.innerText = texto;
-                }
-            } catch (e) {
-                console.error("Error al generar el contrato:", e);
-                const textoContratoEl = document.getElementById('textoContrato');
-                if (textoContratoEl) textoContratoEl.innerText = "Contrato de Prestación de Servicios GraveCare SpA disponible para su revisión.";
-            }
-        }
-
-        function configurarEventListeners() {
+function configurarEventListeners() {
             const metodosDisponibles = document.querySelectorAll('.metodo-pago:not(.deshabilitado)');
             metodosDisponibles.forEach(metodo => {
                 metodo.addEventListener('click', function() {
@@ -440,12 +6,10 @@
                     this.classList.add('activo');
                     metodoPagoSeleccionado = this.dataset.metodo;
                     
-                    const cuotasSection = document.getElementById('cuotasSection');
                     const botonesSeccion = document.getElementById('botonesSeccion');
                     const btnWebpay = document.getElementById('btnWebpay');
                     const btnOneclick = document.getElementById('btnOneclick');
                     
-                    if (cuotasSection) cuotasSection.classList.add('visible');
                     if (botonesSeccion) botonesSeccion.style.display = 'block';
                     
                     if (metodoPagoSeleccionado === 'webpay-plus') {
@@ -455,16 +19,10 @@
                         if (btnWebpay) btnWebpay.style.display = 'none';
                         if (btnOneclick) btnOneclick.style.display = 'block';
                     }
-                    
-                    actualizarResumenCuotas();
                 });
             });
 
-            const selectCuotas = document.getElementById('selectCuotas');
-            if (selectCuotas) {
-                selectCuotas.addEventListener('change', actualizarResumenCuotas);
-            }
-
+            // Botón Webpay Plus
             const btnWebpay = document.getElementById('btnWebpay');
             if (btnWebpay) {
                 btnWebpay.addEventListener('click', async function() {
@@ -475,13 +33,11 @@
                         return;
                     }
 
-                    const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
-                    
                     try {
-                        const response = await fetch('/crear-transaccion-webpay', {
+                        const response = await fetch('https://creartransaccionwebpay-f4mre7bfoa-uc.a.run.app', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ordenId, cuotas })
+                            body: JSON.stringify({ ordenId })
                         });
 
                         const data = await response.json();
@@ -497,6 +53,7 @@
                 });
             }
 
+            // Botón Oneclick
             const btnOneclick = document.getElementById('btnOneclick');
             if (btnOneclick) {
                 btnOneclick.addEventListener('click', async function() {
@@ -507,13 +64,11 @@
                         return;
                     }
 
-                    const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
-                    
                     try {
-                        const response = await fetch('/iniciar-inscripcion-oneclick', {
+                        const response = await fetch('https://iniciarinscripciononeclick-f4mre7bfoa-uc.a.run.app', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ordenId, cuotas })
+                            body: JSON.stringify({ ordenId })
                         });
 
                         const data = await response.json();
@@ -529,30 +84,3 @@
                 });
             }
         }
-
-        function actualizarResumenCuotas() {
-            if (!ordenActual) return;
-            const selectCuotas = document.getElementById('selectCuotas');
-            const cuotas = selectCuotas ? parseInt(selectCuotas.value) : 1;
-            const montoTotal = Number(ordenActual.montoTotal || 0);
-            const montoCuota = Math.ceil(montoTotal / cuotas);
-            
-            const montoTotalEl = document.getElementById('montoTotal');
-            const numeroCuotasEl = document.getElementById('numeroCuotas');
-            const montoCuotaEl = document.getElementById('montoCuota');
-            const resumenCuotasEl = document.getElementById('resumenCuotas');
-            
-            if (montoTotalEl) montoTotalEl.innerText = `$ ${montoTotal.toLocaleString('es-CL')}`;
-            if (numeroCuotasEl) numeroCuotasEl.innerText = cuotas;
-            if (montoCuotaEl) montoCuotaEl.innerText = `$ ${montoCuota.toLocaleString('es-CL')}`;
-            if (resumenCuotasEl) resumenCuotasEl.classList.add('visible');
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', inicializarPagina);
-        } else {
-            inicializarPagina();
-        }
-    </script>
-</body>
-</html>
