@@ -1,48 +1,22 @@
-/**
- * ENDPOINT: enviarContacto - GraveCare
- *
- * Referenciada como rewrite en firebase.json (/enviarContacto), pero antes
- * no existía como Cloud Function: el formulario contacto.html funcionaba
- * igual porque envía el correo directo con EmailJS desde el navegador y
- * solo respalda una copia en Firestore (colección contacto_mensajes).
- *
- * Esta función queda como respaldo server-side idempotente: guarda el
- * mensaje en la misma colección "contacto_mensajes" que ya usa contacto.html,
- * para el caso en que se quiera invocar el rewrite directamente (o dejar de
- * depender de EmailJS en el futuro) sin duplicar la lógica de guardado.
- */
-
-const {onRequest} = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
+const handleCors = require("./cors");
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
 
-// CORS básico: el formulario se sirve desde el mismo dominio (gravecare.cl)
-// vía rewrite, pero se deja abierto por si se llama desde localhost en dev.
-function setCorsHeaders(res) {
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-}
-
 exports.enviarContacto = onRequest(async (req, res) => {
-  setCorsHeaders(res);
-
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
-    return;
-  }
+  if (handleCors(req, res)) return;
 
   if (req.method !== "POST") {
-    res.status(405).json({ok: false, error: "Método no permitido. Usa POST."});
+    res.status(405).json({ ok: false, error: "Método no permitido. Usa POST." });
     return;
   }
 
   try {
-    const {nombre, email, telefono, mensaje} = req.body || {};
+    const { nombre, email, telefono, mensaje } = req.body || {};
 
     if (!nombre || !email || !mensaje) {
       res.status(400).json({
@@ -62,9 +36,9 @@ exports.enviarContacto = onRequest(async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    res.status(200).json({ok: true, id: docRef.id});
+    res.status(200).json({ ok: true, id: docRef.id });
   } catch (error) {
     console.error("Error en enviarContacto:", error);
-    res.status(500).json({ok: false, error: "Error interno al guardar el mensaje."});
+    res.status(500).json({ ok: false, error: "Error interno al guardar el mensaje." });
   }
 });

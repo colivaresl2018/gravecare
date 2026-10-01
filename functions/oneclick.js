@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const handleCors = require('./cors');
 
 // Importar correctamente transbank-sdk v6.0.0
 const { WebpayOneClick, Environment } = require('transbank-sdk');
@@ -16,14 +17,7 @@ const API_KEY = process.env.TRANSBANK_API_KEY || "579B532A7440BB0C9079DED94D31EA
 const ENVIRONMENT = Environment.Integration;
 
 exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET, POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        res.status(204).send('');
-        return;
-    }
+    if (handleCors(req, res)) return;
 
     try {
         const { ordenId, cuotas } = req.body;
@@ -47,7 +41,6 @@ exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) 
 
         console.log(`Iniciando inscripción Oneclick: username=${username}, email=${email}`);
 
-        // Iniciar inscripción en Webpay Oneclick usando API v6.0.0
         const response = await WebpayOneClick.Inscription.start(
             COMMERCE_CODE,
             API_KEY,
@@ -59,7 +52,6 @@ exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) 
 
         console.log('Respuesta de inscripción Oneclick:', response);
 
-        // Guardar datos de inscripción en Firestore
         await db.collection('ordenes').doc(ordenId).update({
             oneclickInscripcion: {
                 username,
@@ -88,13 +80,10 @@ exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) 
 });
 
 exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET, POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    if (handleCors(req, res)) return;
 
     try {
-        const { token } = req.query;
-        const { ordenId } = req.query;
+        const { token, ordenId } = req.query;
 
         if (!token) {
             return res.status(400).json({ error: 'Token no proporcionado' });
@@ -102,7 +91,6 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
 
         console.log('Confirmando inscripción Oneclick con token:', token);
 
-        // Confirmar inscripción en Transbank usando API v6.0.0
         const response = await WebpayOneClick.Inscription.finish(
             COMMERCE_CODE,
             API_KEY,
@@ -112,7 +100,6 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
 
         console.log('Respuesta de confirmación Oneclick:', response);
 
-        // Actualizar orden en Firestore
         if (ordenId) {
             await db.collection('ordenes').doc(ordenId).update({
                 oneclickInscripcion: {
@@ -144,14 +131,7 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
 });
 
 exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        res.status(204).send('');
-        return;
-    }
+    if (handleCors(req, res)) return;
 
     try {
         const { ordenId, cuotas } = req.body;
@@ -160,7 +140,6 @@ exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
             return res.status(400).json({ error: 'ordenId es requerido' });
         }
 
-        // Obtener orden de Firestore
         const ordenRef = db.collection('ordenes').doc(ordenId);
         const ordenSnap = await ordenRef.get();
 
@@ -179,14 +158,12 @@ exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
             return res.status(400).json({ error: 'Monto total inválido' });
         }
 
-        // Generar ID de compra
         const buyOrder = `GC-ONECLICK-${ordenId}-${Date.now()}`;
         const tbkUser = orden.oneclickInscripcion.tbk_user;
         const installmentsNumber = (cuotas && cuotas > 1) ? cuotas : null;
 
         console.log(`Realizando cargo Oneclick: buyOrder=${buyOrder}, monto=${montoTotal}, cuotas=${installmentsNumber || 1}`);
 
-        // Realizar cargo con Oneclick usando API v6.0.0
         const response = await WebpayOneClick.Transaction.authorize(
             COMMERCE_CODE,
             API_KEY,
@@ -199,7 +176,6 @@ exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
 
         console.log('Respuesta de cargo Oneclick:', response);
 
-        // Guardar transacción en Firestore
         await db.collection('ordenes').doc(ordenId).update({
             oneclickCargo: {
                 buyOrder,
@@ -231,9 +207,7 @@ exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
 });
 
 exports.reversarOneclick = functions.https.onRequest(async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    if (handleCors(req, res)) return;
 
     try {
         const { buyOrder } = req.body;
@@ -244,7 +218,6 @@ exports.reversarOneclick = functions.https.onRequest(async (req, res) => {
 
         console.log(`Reversando transacción Oneclick: buyOrder=${buyOrder}`);
 
-        // Reversar transacción usando API v6.0.0
         const response = await WebpayOneClick.Transaction.reverse(
             COMMERCE_CODE,
             API_KEY,
