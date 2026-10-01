@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Google reCAPTCHA v2 -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
   <!-- SDK EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
@@ -56,7 +59,7 @@
         <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="cementerios.html">Cementerios</a>
         <a class="text-[#002d1a] font-bold border-b-2 border-[#002d1a] pb-1 text-sm" href="contacto.html">Contacto y Preguntas Frecuentes</a>
       </div>
-<div class="hidden md:flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-3">
         <a href="login.html" class="border border-[#002d1a] text-[#002d1a] hover:bg-gray-50 transition-all rounded-full px-5 py-2 font-semibold text-sm">
           Ingreso Sesión
         </a>
@@ -97,6 +100,15 @@
               <label class="block text-sm font-semibold text-gray-700 mb-1" for="contact-mensaje">Mensaje o Consulta *</label>
               <textarea id="contact-mensaje" required class="w-full bg-[#f2f4f2] border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#002d1a] text-gray-800 resize-none" placeholder="Escribe tu mensaje aquí..." rows="4"></textarea>
             </div>
+
+            <!-- Honeypot anti-bot invisible -->
+            <div style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true">
+              <label for="contact-website">Dejar en blanco</label>
+              <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <!-- Google reCAPTCHA v2 -->
+            <div class="g-recaptcha my-3" data-sitekey="6Lcui8stAAAAACKh93A4GAJJQ9g0E8A5_RZUzZ9M"></div>
 
             <button id="btn-enviar-contacto" class="w-full bg-[#002d1a] text-white rounded-lg py-4 font-bold hover:bg-[#1a432f] transition-all shadow-sm cursor-pointer" type="submit">
               Enviar Consulta
@@ -253,6 +265,23 @@
         feedback.classList.add('hidden');
         errorEl.classList.add('hidden');
 
+        // 1. Verificación Honeypot (campo invisible para personas)
+        const honeypot = document.getElementById('contact-website').value.trim();
+        if (honeypot !== '') {
+          console.warn('Envío descartado silenciosamente por honeypot.');
+          form.reset();
+          feedback.classList.remove('hidden');
+          return;
+        }
+
+        // 2. Verificación reCAPTCHA v2
+        const recaptchaToken = (typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
+        if (!recaptchaToken) {
+          errorEl.textContent = '❌ Por favor, marca la casilla "No soy un robot" antes de enviar.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
         const nombre = document.getElementById('contact-nombre').value.trim();
         const email = document.getElementById('contact-email').value.trim();
         const telefono = document.getElementById('contact-telefono').value.trim();
@@ -267,10 +296,11 @@
             from_name: nombre,
             from_email: email,
             teléfono: telefono,
-            mensaje: mensaje
+            mensaje: mensaje,
+            'g-recaptcha-response': recaptchaToken
           });
 
-          // 2. Respaldo en Firestore
+          // 2. Respaldo opcional en Firestore
           try {
             if (db) {
               await addDoc(collection(db, "contacto_mensajes"), {
@@ -288,10 +318,12 @@
 
           // Éxito confirmado
           form.reset();
+          if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
           feedback.classList.remove('hidden');
 
         } catch (err) {
           console.error("Error al enviar mensaje:", err);
+          if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
           errorEl.textContent = "❌ " + (err.text || err.message || "Hubo un inconveniente al enviar tu mensaje.");
           errorEl.classList.remove('hidden');
         } finally {
