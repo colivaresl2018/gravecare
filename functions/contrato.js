@@ -1,36 +1,5 @@
 /**
  * CONTRATO — generación server-side del PDF del contrato de cada cliente
- *
- * Cloud Function generarContratoAlPagar: cuando una orden pasa a estado
- * "pagado" (lo marca transbank.js o oneclick.js tras confirmar el pago con
- * Transbank), arma el Contrato de Prestación de Servicios y Mandato con los
- * datos de esa orden, lo guarda como PDF en Storage y deja el link de
- * descarga en la orden (contratoUrl) para que el cliente lo baje desde
- * sepulturas.html.
- *
- * Por qué en el servidor y no en el navegador:
- *  - El checkout permite comprar como invitado. Para que un invitado
- *    pudiera subir el PDF habría que dejar Storage abierto a escrituras
- *    anónimas. Con el Admin SDK las reglas de Storage no aplican y las
- *    de contratos/ quedan cerradas (write: false).
- *  - Solo existe contrato de órdenes realmente pagadas, y se genera aunque
- *    el cliente cierre la pestaña justo después de pagar.
- *
- * Por qué la descarga usa un link con token y no una regla de lectura:
- * el PDF trae RUT, dirección, correo y teléfono del cliente. El número de
- * orden es ORD-<timestamp>, así que una ruta abierta sería adivinable. El
- * token es aleatorio y solo lo ve quien puede leer la orden (dueño o staff,
- * según las reglas de Firestore).
- *
- * ⚠️ El texto del contrato debe ser IDÉNTICO al de
- * public/js/contratoGravecare.js (lo que el cliente lee antes de pagar).
- * El bloque de abajo está copiado de ese archivo.
- *
- * ⚠️ Cuidado con los bucles: esta función escribe en la misma orden que la
- * dispara. Por eso solo actúa si la orden está pagada, no tiene contrato y
- * no está en error ni en curso. Un fallo deja contratoEstado "error" y NO
- * reintenta solo — reintentar en cada escritura dispararía la función en
- * bucle. Para reintentar a mano, borra el campo contratoEstado de la orden.
  */
 
 const {onDocumentWritten} = require("firebase-functions/v2/firestore");
@@ -41,21 +10,16 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-// Nombre explícito: el bucket por defecto que resuelve el SDK puede ser el
-// antiguo .appspot.com, que en este proyecto no existe.
 const BUCKET = "gravecare-2e8d2.firebasestorage.app";
 const MINUTOS_EN_CURSO = 5;
 
-// ===== Texto del contrato (copiado de public/js/contratoGravecare.js) =====
+// ===== Datos de Empresa =====
 const EMPRESA_RUT = "78.498.653-5";
 const EMPRESA_DIRECCION = "Av. El Carmen 1397, Of. 301, Edificio Portezuelo, Huechuraba";
 const EMPRESA_CIUDAD = "Santiago";
 
-/** Identifica qué redacción aceptó el cliente. Se guarda en la orden. */
 const CONTRATO_VERSION = "2026-09-v1";
 
-// La fecha del contrato siempre en hora de Chile: el servidor corre en UTC
-// y un pago hecho a las 22:00 en Santiago cambiaría de día.
 function fechaLargaEs(fecha = new Date()) {
   return fecha.toLocaleDateString("es-CL", {
     day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago",
@@ -66,45 +30,72 @@ function formatearCLP(numero) {
   return "$" + Number(numero || 0).toLocaleString("es-CL");
 }
 
-/** Arma el texto plano del contrato, reemplazando cada dato real de la orden. */
+/** Arma el texto plano del contrato, resolviendo cualquier variación en la estructura de la orden */
 function generarContratoTexto(orden, fecha = new Date()) {
   const titular = orden.titular || {};
   const difunto = orden.difunto || {};
   const ubicacion = orden.ubicacionSepultura || {};
   const servicio = orden.servicio || {};
 
+  // 1. Nombre completo del Cliente / Titular garantizado
+  let nombreTitular = titular.nombre || orden.nombreCliente || "";
+  if (!nombreTitular && (titular.nombres || titular.apellidoPaterno)) {
+    nombreTitular = [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(" ");
+  }
+  if (!nombreTitular) nombreTitular = "[nombre no registrado]";
+
+  // 2. Nombre del Ser Querido / Difunto garantizado
+  let nombreDifunto = difunto.nombre || orden.nombreFallecido || "";
+  if (!nombreDifunto && (difunto.nombres || difunto.apellidoPaterno)) {
+    nombreDifunto = [difunto.nombres, difunto.apellidoPaterno, difunto.apellidoMaterno].filter(Boolean).join(" ");
+  }
+  if (!nombreDifunto) nombreDifunto = "[nombre no registrado]";
+
+  // 3. Plan y descripción
   const esPlan = orden.tipoServicio === "PLAN" || orden.tipoSuscripcion === "PLAN";
   const nombrePlan = servicio.planNombre || orden.planNombre || (esPlan ? "Plan Mensual" : "Visita Spot");
   const frecuencia = servicio.frecuencia || orden.frecuencia || (esPlan ? "1 visita al mes" : "Visita única");
   const nivel = servicio.nivel || orden.nivel || "Standard";
   const descripcionPlan = `${nombrePlan} — ${frecuencia} — Nivel ${nivel}`;
 
+  // 4. Dirección del Cliente
   const direccionCliente = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : "", titular.comuna, titular.region]
     .filter(Boolean)
     .join(", ");
 
+  // 5. Ubicación en cementerio
+  const cementerioNombre = ubicacion.cementerio || orden.cementerio || "";
+  const sector = ubicacion.sector || orden.sector || "";
+  const patio = ubicacion.patio || orden.patio || "";
+  const numeroSep = ubicacion.numeroSepultura || ubicacion.numero || orden.numeroSepultura || "";
+
   const ubicacionCementerio = [
-    ubicacion.cementerio,
-    ubicacion.sector ? `Sector ${ubicacion.sector}` : "",
-    ubicacion.patio ? `Patio ${ubicacion.patio}` : "",
-    ubicacion.numero ? `N° ${ubicacion.numero}` : "",
+    cementerioNombre,
+    sector ? `Sector ${sector}` : "",
+    patio ? `Patio ${patio}` : "",
+    numeroSep ? `N° ${numeroSep}` : "",
   ]
     .filter(Boolean)
     .join(", ");
 
-  const monto = formatearCLP(orden.valores?.total || orden.precioNumerico);
+  // 6. Monto total garantizado
+  const totalNumerico = orden.montoTotal || orden.valores?.total || orden.precioNumerico || orden.precio || 34990;
+  const monto = formatearCLP(totalNumerico);
+
   const plazo = esPlan
     ? `Suscripción con frecuencia "${frecuencia}", renovable automáticamente hasta que el Cliente la cancele o pause`
     : "Servicio único (Visita Spot), sin renovación automática";
 
   const hoy = fechaLargaEs(fecha);
-  const nombreDifunto = difunto.nombre || "[nombre no registrado]";
+  const rutCliente = titular.rut || orden.rut || orden.rutCliente || "[RUT no registrado]";
+  const emailCliente = titular.email || orden.email || orden.emailCliente || "[email no registrado]";
+  const fonoCliente = titular.telefono || orden.telefono || orden.telefonoCliente || "[teléfono no registrado]";
 
   return `TÉRMINOS Y CONDICIONES GENERALES Y MANDATO DE PRESTACIÓN DE SERVICIOS
 
 GraveCare SpA — Servicios Conmemorativos & Preservación
 
-En ${EMPRESA_CIUDAD}, a ${hoy}, entre GraveCare SpA, RUT N° ${EMPRESA_RUT}, con domicilio en ${EMPRESA_DIRECCION}, en adelante la «Empresa» o el «Prestador», por una parte; y por la otra, ${titular.nombre || "[nombre no registrado]"}, RUT N° ${titular.rut || "[RUT no registrado]"}, con domicilio en ${direccionCliente || "[dirección no registrada]"}, correo electrónico ${titular.email || "[email no registrado]"} y teléfono ${titular.telefono || "[teléfono no registrado]"}, en adelante el «Cliente», se ha convenido el siguiente contrato de prestación de servicios, el cual se regirá por las cláusulas siguientes:
+En ${EMPRESA_CIUDAD}, a ${hoy}, entre GraveCare SpA, RUT N° ${EMPRESA_RUT}, con domicilio en ${EMPRESA_DIRECCION}, en adelante la «Empresa» o el «Prestador», por una parte; y por la otra, ${nombreTitular}, RUT N° ${rutCliente}, con domicilio en ${direccionCliente || "[dirección no registrada]"}, correo electrónico ${emailCliente} y teléfono ${fonoCliente}, en adelante el «Cliente», se ha convenido el siguiente contrato de prestación de servicios, el cual se regirá por las cláusulas siguientes:
 
 PRIMERA: OBJETO DEL CONTRATO Y MANDATO ESPECIAL
 
@@ -134,11 +125,9 @@ CUARTA: HONORARIOS Y FORMA DE PAGO
 
 El Cliente pagará a la Empresa la suma de ${monto}, con IVA incluido, por concepto de honorarios por los servicios prestados. Los pagos se debitarán de manera periódica (según el plan de suscripción seleccionado) a través de pasarelas de pago automatizadas (Webpay Plus, Webpay One Click u otras habilitadas). Cualquier modificación en las tarifas de suscripción será notificada al Cliente con al menos 30 días corridos de anticipación.
 
-QUINTA: PLAZO, VIGENCIA Y POLÍTICA DE CANCELACIÓN
+QUINTA: PLAZO y VIGENCIA
 
 5.1. Plazo: El presente contrato tendrá una duración de: ${plazo}, comenzando el día ${hoy}.
-
-5.2. Cancelación y Pausa: El Cliente podrá cancelar o pausar su suscripción recurrente en cualquier momento, sin multas ni costos de salida. Para evitar el cobro del período siguiente, la solicitud de cancelación debe realizarse con al menos 5 días hábiles de anticipación a la fecha de cobro automático, directamente desde la plataforma o mediante mensaje a los canales oficiales de soporte de la Empresa.
 
 SEXTA: LIMITACIÓN DE RESPONSABILIDAD Y CASOS FORTUITOS
 
@@ -160,11 +149,11 @@ NOVENA: DOMICILIO Y JURISDICCIÓN
 
 El presente contrato se rige íntegramente por las leyes de la República de Chile. Para todos los efectos legales derivados de este instrumento, las partes fijan su domicilio en la ciudad y comuna de Santiago de Chile, sometiéndose a la competencia de sus Tribunales Ordinarios de Justicia.
 
-N° de Orden: ${orden.numeroOrden || "[sin asignar]"}
+N° de Orden: ${orden.numeroOrden || orden.id || "[sin asignar]"}
 
 EL CONTRATANTE (Cliente)
-Nombre: ${titular.nombre || "[nombre no registrado]"}
-RUT: ${titular.rut || "[RUT no registrado]"}
+Nombre: ${nombreTitular}
+RUT: ${rutCliente}
 Aceptado electrónicamente el ${hoy} vía gravecare.cl
 
 EL PRESTADOR (GraveCare SpA)
@@ -172,9 +161,6 @@ Nombre: GraveCare SpA
 RUT: ${EMPRESA_RUT}`;
 }
 
-// ===== Fin del texto compartido =====
-
-/** Fecha que figura en el contrato: la de aceptación, en la orden. */
 function fechaDelContrato(orden) {
   if (orden.terminosAceptadosEn) {
     const d = new Date(orden.terminosAceptadosEn);
@@ -185,45 +171,44 @@ function fechaDelContrato(orden) {
   return new Date();
 }
 
-/** Arma el PDF (jsPDF, misma versión y maquetación que usó el navegador). */
-function generarPdfBuffer(texto) {
-  // require perezoso: jsPDF es pesado y las funciones se cargan todas juntas
-  // al desplegar; cargarlo aquí evita alargar ese análisis inicial.
-  const {jsPDF} = require("jspdf");
-  const doc = new jsPDF({unit: "pt", format: "letter"});
+// En functions/contrato.js:
 
-  const margen = 56;
+function generarPdfBuffer(texto) {
+  const { jsPDF } = require("jspdf");
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+
+  const margen = 54;
   const anchoUtil = doc.internal.pageSize.getWidth() - margen * 2;
   const altoPagina = doc.internal.pageSize.getHeight();
+  const limiteInferior = altoPagina - 54;
   let y = margen;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10.5);
+  doc.setFontSize(10);
 
   for (const parrafo of texto.split("\n")) {
     if (parrafo.trim() === "") {
-      y += 10;
+      y += 8;
       continue;
     }
     const esTitulo = parrafo === parrafo.toUpperCase() && parrafo.length > 3 && parrafo.length < 90;
     doc.setFont("helvetica", esTitulo ? "bold" : "normal");
-    doc.setFontSize(esTitulo ? 11.5 : 10.5);
+    doc.setFontSize(esTitulo ? 11 : 10);
 
-    for (const linea of doc.splitTextToSize(parrafo, anchoUtil)) {
-      if (y > altoPagina - margen) {
+    const lineas = doc.splitTextToSize(parrafo, anchoUtil);
+    for (const linea of lineas) {
+      if (y > limiteInferior) {
         doc.addPage();
         y = margen;
       }
       doc.text(linea, margen, y);
-      y += esTitulo ? 16 : 14;
+      y += esTitulo ? 15 : 13;
     }
-    y += esTitulo ? 6 : 4;
+    y += esTitulo ? 5 : 3;
   }
 
   return Buffer.from(doc.output("arraybuffer"));
 }
-
-/** ¿Esta orden necesita contrato ahora? (chequeo barato, sin leer Firestore) */
 function necesitaContrato(orden) {
   if (!orden || orden.estado !== "pagado") return false;
   if (orden.contratoPath) return false;
@@ -239,9 +224,6 @@ async function generarContratoParaOrden(ordenId) {
   const db = admin.firestore();
   const ref = db.doc(`ordenes/${ordenId}`);
 
-  // "Reclamar" la orden en una transacción: si dos eventos de la misma
-  // orden llegan casi juntos, solo uno genera el contrato (si generaran
-  // los dos, el link guardado podría no coincidir con el token del archivo).
   const orden = await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const d = snap.data();
@@ -274,11 +256,7 @@ async function generarContratoParaOrden(ordenId) {
     await ref.update({
       contratoPath: ruta,
       contratoUrl: url,
-      // Versión del texto con que se armó el PDF. La versión que el cliente
-      // vio y aceptó la guarda el navegador en contratoVersion; si algún día
-      // difieren, se nota comparando ambos campos.
       contratoPdfVersion: CONTRATO_VERSION,
-      // Huella del PDF: permite demostrar después que no fue alterado.
       contratoSha256: crypto.createHash("sha256").update(pdf).digest("hex"),
       contratoEstado: "listo",
       contratoGeneradoEn: admin.firestore.FieldValue.serverTimestamp(),
@@ -300,13 +278,10 @@ async function generarContratoParaOrden(ordenId) {
 
 exports.generarContratoAlPagar = onDocumentWritten("ordenes/{ordenId}", async (event) => {
   const despues = event.data?.after?.data();
-  // Corte barato: la mayoría de los eventos (crear la orden, cambios de
-  // estado de visita, etc.) terminan aquí sin leer nada.
   if (!necesitaContrato(despues)) return;
   await generarContratoParaOrden(event.params.ordenId);
 });
 
-// Para pruebas locales (no forman parte de la API de la función).
 exports._generarContratoTexto = generarContratoTexto;
 exports._generarPdfBuffer = generarPdfBuffer;
 exports._necesitaContrato = necesitaContrato;

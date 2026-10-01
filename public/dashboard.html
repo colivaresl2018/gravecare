@@ -8,6 +8,10 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Librería para generar y descargar PDF directamente en el cliente -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -44,6 +48,16 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
     .sidebar-item { transition: all 0.2s ease; }
+    
+    /* Contenedor oculto formateado para la exportación a hoja PDF A4 */
+    #plantilla-contrato-pdf {
+      display: none;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: #191c1b;
+      padding: 30px;
+      line-height: 1.5;
+      background: #ffffff;
+    }
   </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
@@ -52,7 +66,7 @@
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.jpg">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.png">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -130,6 +144,24 @@
         </div>
       </div>
 
+      <!-- Sección de Descarga de Contrato en PDF -->
+      <div class="lg:col-span-12 bg-white p-5 md:p-6 rounded-xl border border-emerald-900/10 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-50/50 to-white">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container flex-shrink-0 shadow-sm">
+            <span class="material-symbols-outlined text-2xl text-emerald-200">history_edu</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-primary">Contrato de Prestación de Servicios & Mandato Especial</h3>
+            <p class="text-xs text-gray-500 mt-0.5" id="txtContratoInfo">Consultando documento legal vigente...</p>
+          </div>
+        </div>
+        <div id="btnContratoContainer" class="w-full sm:w-auto">
+          <button type="button" disabled class="opacity-50 px-5 py-2.5 rounded-lg bg-gray-200 text-gray-500 text-xs font-bold cursor-not-allowed">
+            Cargando...
+          </button>
+        </div>
+      </div>
+
       <!-- Maintenance History / Informes Oficiales -->
       <div class="lg:col-span-8 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
         <div class="flex justify-between items-center mb-6">
@@ -193,6 +225,63 @@
     </a>
   </nav>
 
+  <!-- Contenedor invisible para renderizar y exportar a PDF -->
+  <div id="plantilla-contrato-pdf">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a3636; padding-bottom: 15px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 20px; font-weight: bold; color: #1a3636; margin: 0;">GRAVECARE CHILE</h1>
+        <p style="font-size: 11px; color: #555; margin: 3px 0 0 0;">Preservación Ornamental & Cuidado de Sepulturas — SpA RUT: 78.498.653-5</p>
+      </div>
+      <div style="text-align: right;">
+        <span style="background: #edf5f2; color: #1a3636; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #c2d7ce;">DOCUMENTO LEGAL VIGENTE</span>
+        <p style="font-size: 11px; color: #555; margin-top: 5px;">Orden: <strong id="pdfNumeroOrden">---</strong></p>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; line-height: 1.6; color: #222; text-align: justify;">
+      <p style="font-weight: bold; text-align: center; font-size: 13px; color: #1a3636; margin-bottom: 15px; text-transform: uppercase;">
+        CONTRATO DE PRESTACIÓN DE SERVICIOS & MANDATO ESPECIAL DE ACCESO
+      </p>
+
+      <p>
+        En Santiago de Chile, a <span id="pdfFechaContrato" style="font-weight: bold;">---</span>, entre <strong>GraveCare SpA</strong>, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) <strong id="pdfNombreCliente">---</strong>, RUT N° <strong id="pdfRutCliente">---</strong>, con domicilio en <span id="pdfDireccionCliente">---</span>, correo <span id="pdfEmailCliente">---</span> y teléfono <span id="pdfTelefonoCliente">---</span>, en adelante el «Cliente», se ha convenido lo siguiente:
+      </p>
+
+      <p>
+        <strong>PRIMERO (Objeto y Mandato Especial):</strong> La Empresa prestará el servicio de mantención, ornamento floral y preservación conforme al plan <strong id="pdfPlanNombre">---</strong>. El Cliente declara ser titular o facultado legal respecto de la sepultura ubicada en <strong id="pdfSepulturaUbicacion">---</strong>, correspondiente al descanso de don(ña) <strong id="pdfDifuntoNombre">---</strong>, y confiere a GraveCare SpA mandato especial suficiente para ingresar y ejecutar exclusivamente las labores pactadas.
+      </p>
+
+      <p><strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de lápidas, cruces y accesorios, retiro de elementos marchitos, desmalezado y floristería fresca de temporada. Quedan excluidas intervenciones mayores de albañilería, restauración estructural profunda o alteración de restos.</p>
+
+      <p><strong>TERCERO (Verificación Digital):</strong> Cada servicio emitirá un reporte fotográfico comparativo («Antes» y «Después»), remitido formalmente dentro de las 24 horas hábiles posteriores.</p>
+
+      <p>
+        <strong>CUARTO (Honorarios y Pago):</strong> El valor pactado corresponde a <strong id="pdfMontoTotal">---</strong> (IVA incluido), cancelado por adelantado a través de los sistemas electrónicos de pago de Transbank.
+      </p>
+
+      <p><strong>QUINTO (Plazo y Vigencia):</strong> El presente contrato rige a contar de la confirmación del pago y mantendrá su vigencia durante el período correspondiente al plan contratado.</p>
+
+      <p><strong>SEXTO (Responsabilidad):</strong> La Empresa responde por la correcta prestación del servicio conforme a los estándares acordados, no respondiendo por desgaste previo de materiales, actos vandálicos de terceros en el recinto ni restricciones externas imprevistas del cementerio.</p>
+
+      <p><strong>SÉPTIMO (Protección de Datos):</strong> El tratamiento de datos personales se rige bajo la Ley N° 19.628 para fines exclusivos de la ejecución del servicio y emisión de comprobantes tributarios.</p>
+
+      <p><strong>OCTAVO (Naturaleza del Vínculo):</strong> Convenio de naturaleza civil y comercial, sin que genere relación laboral o de dependencia.</p>
+
+      <p><strong>NOVENO (Jurisdicción):</strong> Las partes se someten a la competencia de los Tribunales Ordinarios de Justicia de la ciudad de Santiago de Chile.</p>
+    </div>
+
+    <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px; font-size: 11px; color: #444; display: flex; justify-content: space-between;">
+      <div>
+        <p><strong>CLIENTE / MANDANTE:</strong> <span id="pdfFirmaCliente">---</span></p>
+        <p style="color: #666;">Aceptación electrónica certificada en portal gravecare.cl</p>
+      </div>
+      <div style="text-align: right;">
+        <p><strong>GRAVECARE SPA</strong></p>
+        <p style="color: #666;">RUT N° 78.498.653-5</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Script Firebase v10.7.0 Unificado -->
   <script type="module">
     import { observeAuthState, logoutUser } from "./js/auth.js";
@@ -205,6 +294,8 @@
       where, 
       getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    let ordenActivaParaPdf = null;
 
     async function cerrarSesion() {
       await logoutUser();
@@ -220,6 +311,68 @@
       if (isNaN(d.getTime())) return f;
       return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
     }
+
+    // Función que toma la orden, llena la plantilla invisible y descarga el archivo PDF
+    window.descargarContratoPdf = function() {
+      if (!ordenActivaParaPdf) {
+        alert("No se encontró la información del contrato.");
+        return;
+      }
+
+      const o = ordenActivaParaPdf;
+      const titular = o.titular || {};
+      const difunto = o.difunto || {};
+      const sepultura = o.ubicacionSepultura || {};
+
+      const nombreCliente = titular.nombre || [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(" ") || "Cliente Titular";
+      const rutCliente = titular.rut || titular.rutDni || "No registrado";
+      const direccionCliente = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : '', titular.comuna, titular.region].filter(Boolean).join(", ") || "Dirección registrada";
+      const emailCliente = titular.email || o.emailCliente || "No registrado";
+      const fonoCliente = titular.telefono || o.telefonoCliente || "No registrado";
+
+      const nombreDifunto = difunto.nombre || [difunto.nombres, difunto.apellidoPaterno, difunto.apellidoMaterno].filter(Boolean).join(" ") || o.nombreFallecido || "Ser Querido";
+      const cementerio = sepultura.cementerio || o.cementerio || "Cementerio";
+      const patio = sepultura.patio || "";
+      const numSep = sepultura.numero || sepultura.numeroSepultura || "";
+      const ubicacionCompleta = `${cementerio}${patio || numSep ? ` (Patio: ${patio}, N°:${numSep})` : ''}`;
+
+      const totalMonto = Number(o.precioNumerico || o.montoTotal || o.valores?.total || 34990);
+      const montoFormateado = `$${totalMonto.toLocaleString('es-CL')}`;
+
+      // Inyectar datos en el contenedor del PDF
+      document.getElementById("pdfNumeroOrden").textContent = o.numeroOrden || o.id || "ORD-GC";
+      document.getElementById("pdfFechaContrato").textContent = formatearFechaChile(o.creadoEl || o.createdAt || new Date());
+      document.getElementById("pdfNombreCliente").textContent = nombreCliente;
+      document.getElementById("pdfRutCliente").textContent = rutCliente;
+      document.getElementById("pdfDireccionCliente").textContent = direccionCliente;
+      document.getElementById("pdfEmailCliente").textContent = emailCliente;
+      document.getElementById("pdfTelefonoCliente").textContent = fonoCliente;
+      document.getElementById("pdfPlanNombre").textContent = o.servicio?.planNombre || o.planNombre || o.plan || "Plan de Mantención";
+      document.getElementById("pdfSepulturaUbicacion").textContent = ubicacionCompleta;
+      document.getElementById("pdfDifuntoNombre").textContent = nombreDifunto;
+      document.getElementById("pdfMontoTotal").textContent = montoFormateado;
+      document.getElementById("pdfFirmaCliente").textContent = `${nombreCliente} (RUT: ${rutCliente})`;
+
+      // Generar y descargar el PDF con html2pdf
+      const elemento = document.getElementById("plantilla-contrato-pdf");
+      elemento.style.display = "block"; // Habilitar visualización para renderizado
+
+      const opciones = {
+        margin: [10, 10, 10, 10],
+        filename: `Contrato_GraveCare_${o.numeroOrden || 'Servicio'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opciones).from(elemento).save().then(() => {
+        elemento.style.display = "none"; // Ocultar nuevamente
+      }).catch(err => {
+        console.error("Error al exportar PDF:", err);
+        elemento.style.display = "none";
+        alert("Ocurrió un error al generar el PDF. Por favor intenta nuevamente.");
+      });
+    };
 
     observeAuthState(async (user) => {
       if (!user) {
@@ -245,10 +398,8 @@
         let countServicios = 0;
         const fotosList = [];
         const ordenesIds = new Set();
+        let ordenEncontrada = null;
 
-        // Firestore rechaza un getDocs() sin filtro sobre toda la colección
-        // cuando las reglas son por documento (esDuenoDeOrden()), así que se
-        // consulta con where() por cada campo posible en vez de traer todo.
         const ordenesRef = collection(db, "ordenes");
         const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
         const snapUid = await getDocs(qUid);
@@ -264,23 +415,42 @@
           snapCliente.forEach(docSnap => ordenesIds.add(docSnap.id));
         }
 
-        // Traer los datos completos de cada orden encontrada (por ID, no
-        // por query masiva) para calcular próxima visita y fotos directas.
         for (const ordenId of ordenesIds) {
           const ordenSnap = await getDoc(doc(db, "ordenes", ordenId));
           if (!ordenSnap.exists()) continue;
-          const o = ordenSnap.data();
+          const o = { id: ordenSnap.id, ...ordenSnap.data() };
           if (o.proximaVisita) fechaProxima = o.proximaVisita;
           if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
           if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
+          
+          if (!ordenEncontrada) {
+            ordenEncontrada = o;
+          }
+        }
+
+        // Renderizar tarjeta y botón de Contrato
+        const btnContratoBox = document.getElementById("btnContratoContainer");
+        const txtContratoInfo = document.getElementById("txtContratoInfo");
+        
+        if (ordenEncontrada) {
+          ordenActivaParaPdf = ordenEncontrada;
+          const numOrd = ordenEncontrada.numeroOrden || ordenEncontrada.id;
+          txtContratoInfo.textContent = `Orden N° ${numOrd} — Contrato de 9 cláusulas y mandato especial vigente`;
+          btnContratoBox.innerHTML = `
+            <button type="button" onclick="window.descargarContratoPdf()" 
+                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-[#1a3636] text-white text-xs font-bold transition shadow-sm w-full sm:w-auto cursor-pointer">
+              <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+              <span>Descargar Contrato PDF</span>
+            </button>`;
+        } else {
+          txtContratoInfo.textContent = `No hay un contrato formalizado aún para esta cuenta`;
+          btnContratoBox.innerHTML = `
+            <span class="text-xs text-gray-400 font-semibold">Sin contrato</span>`;
         }
 
         document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
 
-        // 3. Consultar Informes Aprobados / Terminados.
-        //    Igual motivo: se filtra por clienteEmail en la query (coincide
-        //    con lo que permite esDuenoDeOrden() en las reglas de "informes")
-        //    en vez de traer toda la colección.
+        // 3. Consultar Informes Aprobados
         const contenedorMant = document.getElementById("contenedor-mantenimientos");
         const misInformes = [];
 
@@ -295,7 +465,6 @@
             if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
               misInformes.push(inf);
 
-              // Rescatar fotos del informe para la galería del dashboard
               const fotos = inf.fotos || {};
               if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
               if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
@@ -305,17 +474,14 @@
           });
         }
 
-        // Ordenar informes de forma descendente por fecha
         misInformes.sort((a, b) => {
           const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();
           const fb = new Date(b.fechaCaptura || b.fechaAprobacion || 0).getTime();
           return fb - fa;
         });
 
-        // Actualizar contador total de servicios
         document.getElementById("serviciosCount").textContent = misInformes.length || countServicios;
 
-        // Renderizar Historial de Mantenimientos
         if (misInformes.length === 0) {
           contenedorMant.innerHTML = `
             <div class="text-center py-6 text-on-surface-variant">
@@ -343,7 +509,7 @@
           }).join("");
         }
 
-        // 4. Vista Previa de Últimas Fotografías
+        // 4. Vista Previa de Fotografías
         const contenedorFotos = document.getElementById("contenedor-fotos-dashboard");
         const fotosUnicas = [...new Set(fotosList)].filter(Boolean);
 

@@ -1,140 +1,56 @@
-// ⚠️ SINCRONIZADO CON gravecare-operaciones/firestore.rules
-// Ambos repos apuntan al mismo proyecto Firebase (gravecare-2e8d2) y
-// comparten la misma base de datos Firestore, por lo que deben tener
-// EXACTAMENTE las mismas reglas. Si editas este archivo, replica el
-// cambio también en gravecare-operaciones/firestore.rules (y viceversa).
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // =================================================================
-    // HELPERS
-    // =================================================================
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
     function esStaff() {
-      return request.auth != null &&
-             exists(/databases/$(database)/documents/staff/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.activo == true;
+      return estaAutenticado() && 
+        (request.auth.token.staff == true || 
+         request.auth.token.admin == true ||
+         request.auth.token.email in ['contacto@gravecare.cl']); // Agrega tus correos admin
     }
 
-    function esAdministrador() {
-      return esStaff() &&
-             get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.rol == 'administrador';
+    function esDueno(userId) {
+      return estaAutenticado() && request.auth.uid == userId;
     }
 
-    function esDuenoDeOrden() {
-      return request.auth != null && (
-        (('usuarioId' in resource.data && resource.data.usuarioId == request.auth.uid) ||
-         ('uid' in resource.data && resource.data.uid == request.auth.uid)) ||
-        ('titular' in resource.data && resource.data.titular.email == request.auth.token.email) ||
-        ('emailCliente' in resource.data && resource.data.emailCliente == request.auth.token.email) ||
-        ('clienteEmail' in resource.data && resource.data.clienteEmail == request.auth.token.email)
-      );
-    }
-
-    // =================================================================
-    // Perfiles de CLIENTES (gravecare.cl) - MODIFICADO
-    // =================================================================
+    // --- USUARIOS ---
     match /usuarios/{userId} {
-      // Lectura: el propio usuario o el personal staff
-      allow read: if (request.auth != null && request.auth.uid == userId) || esStaff();
-      
-      // Actualización: el propio dueño del perfil o el staff
-      allow update: if (request.auth != null && request.auth.uid == userId) || esStaff();
-      
-      // CREAR: Se permite si el usuario recién se autenticó (su UID coincide con el documento)
-      // O si es un registro público desde el formulario web
-      allow create: if (request.auth != null && request.auth.uid == userId) || request.auth == null || true;
-      
-      allow delete: if false;
-
-      // Sepulturas del cliente (usuarios/{uid}/sepulturas/{sepulturaId})
-      match /sepulturas/{sepulturaId} {
-        allow read: if request.auth != null &&
-          (request.auth.uid == userId || esStaff());
-        allow create, update: if request.auth != null &&
-          (request.auth.uid == userId || esStaff());
-        allow delete: if esAdministrador();
-      }
+      allow read: if esDueno(userId) || esStaff();
+      allow create: if esDueno(userId);
+      allow update: if esDueno(userId) || esStaff();
+      allow delete: if esStaff();
     }
 
-    // Índice público de resolución de RUT a Correo (login con RUT)
-	match /rut_lookup/{rut} {
-      allow read: if true;
-      allow create, update: if request.auth != null;
-      allow delete: if false;
+    // --- RUT LOOKUP (Índice sensible) ---
+    match /rut_lookup/{rut} {
+      allow read: if estaAutenticado();
+      // Escritura bloqueada desde cliente: solo Cloud Functions (Admin SDK)
+      allow write: if false;
     }
 
-    // =================================================================
-    // Perfiles de STAFF (Portal de Operaciones)
-    // =================================================================
-    match /staff/{staffId} {
-      allow read: if esStaff();
-      allow create, update, delete: if esAdministrador();
-    }
-
-    // =================================================================
-    // Órdenes (checkout y portal cliente) - MODIFICADO
-    // =================================================================
+    // --- ÓRDENES ---
     match /ordenes/{ordenId} {
-      // El cliente dueño puede leerla, y el staff tiene acceso completo
-      allow read: if esDuenoDeOrden() || esStaff();
-      
-      // Creación permitida en checkout público o autenticado
-      allow create: if true;
-      
-      // Actualización permitida si es dueño de orden, si es staff,
-      // o si un usuario autenticado está vinculando su cuenta a la orden
-      allow update: if esDuenoDeOrden() || esStaff() || (request.auth != null);
-      
-      allow delete: if esAdministrador();
-    }
-
-    // =================================================================
-    // Informes de trabajo (fotos antes/después, notas, capturados en terreno)
-    // =================================================================
-    match /informes/{informeId} {
-      allow read: if esDuenoDeOrden() || esStaff();
-      allow create, update: if esStaff();
-      allow delete: if esAdministrador();
-    }
-
-    // =================================================================
-    // Pagos (histórico, si se usa como colección propia)
-    // =================================================================
-    match /pagos/{pagoId} {
-      allow read: if esDuenoDeOrden() || esStaff();
-      allow create: if true;
-      allow update, delete: if esStaff();
-    }
-
-    // =================================================================
-    // Mensajes del formulario de contacto (contacto.html)
-    // =================================================================
-    match /contacto_mensajes/{mensajeId} {
-      allow create: if true;
-      allow read, update, delete: if esStaff();
-    }
-
-    // =================================================================
-    // Gastos e ingresos (contabilidad interna, gastos-ingresos.html)
-    // =================================================================
-    match /gastos_ingresos/{movimientoId} {
-      allow read, create, update, delete: if esAdministrador();
-    }
-
-    // =================================================================
-    // Colección legacy
-    // =================================================================
-    match /solicitudes_suscripcion/{ordenId} {
-      allow read: if esDuenoDeOrden() || esStaff();
-      allow create: if true;
+      allow read: if esStaff() || (estaAutenticado() && resource.data.usuarioId == request.auth.uid);
+      allow create: if estaAutenticado() && request.resource.data.usuarioId == request.auth.uid;
       allow update: if esStaff();
-      allow delete: if esAdministrador();
+      allow delete: if esStaff();
     }
 
-    // Bloqueo por defecto
-    match /{document=**} {
-      allow read, write: if false;
+    // --- PAGOS ---
+    match /pagos/{pagoId} {
+      allow read: if esStaff() || (estaAutenticado() && resource.data.usuarioId == request.auth.uid);
+      // Los registros de pago los confirma Webpay vía Cloud Function (Admin SDK)
+      allow write: if false;
+    }
+
+    // --- TRABAJOS / OPERACIONES ---
+    match /trabajos/{trabajoId} {
+      allow read: if esStaff() || (estaAutenticado() && resource.data.clienteUid == request.auth.uid);
+      allow write: if esStaff();
     }
   }
 }

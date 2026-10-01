@@ -1,86 +1,484 @@
-function configurarEventListeners() {
-            const metodosDisponibles = document.querySelectorAll('.metodo-pago:not(.deshabilitado)');
-            metodosDisponibles.forEach(metodo => {
-                metodo.addEventListener('click', function() {
-                    document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('activo'));
-                    this.classList.add('activo');
-                    metodoPagoSeleccionado = this.dataset.metodo;
-                    
-                    const botonesSeccion = document.getElementById('botonesSeccion');
-                    const btnWebpay = document.getElementById('btnWebpay');
-                    const btnOneclick = document.getElementById('btnOneclick');
-                    
-                    if (botonesSeccion) botonesSeccion.style.display = 'block';
-                    
-                    if (metodoPagoSeleccionado === 'webpay-plus') {
-                        if (btnWebpay) btnWebpay.style.display = 'block';
-                        if (btnOneclick) btnOneclick.style.display = 'none';
-                    } else if (metodoPagoSeleccionado === 'webpay-oneclick') {
-                        if (btnWebpay) btnWebpay.style.display = 'none';
-                        if (btnOneclick) btnOneclick.style.display = 'block';
-                    }
-                });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumen de Pago y Contrato — GraveCare Chile</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDKs compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .metodo-card {
+      transition: all 0.2s ease-in-out;
+      border: 2px solid #e2e8f0;
+      cursor: pointer;
+    }
+    .metodo-card:hover:not(.deshabilitado) {
+      border-color: #1a3636;
+      background-color: #f7faf9;
+    }
+    .metodo-card.activo {
+      border-color: #1a3636;
+      background-color: #edf5f2;
+      box-shadow: 0 4px 12px rgba(26, 54, 54, 0.08);
+    }
+    .metodo-card.deshabilitado {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: #f8fafc;
+    }
+    .contrato-scroll {
+      max-height: 250px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #1a3636 #e2e8f0;
+    }
+    .contrato-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .contrato-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .contrato-scroll::-webkit-scrollbar-thumb {
+      background: #1a3636;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#f8faf8] text-[#191c1b] min-h-screen flex flex-col">
+
+  <!-- Navbar con logo centrado y enlace a la derecha -->
+  <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
+    <div class="grid grid-cols-3 items-center w-full px-6 max-w-5xl mx-auto h-20">
+      <div></div>
+      <div class="flex justify-center">
+        <a href="index.html" class="flex items-center">
+          <img src="assets/logo.png" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.webp';">
+        </a>
+      </div>
+      <div class="flex justify-end">
+        <a href="index.html" class="text-sm font-semibold text-gray-600 hover:text-[#1a3636]">Volver al Inicio</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="flex-grow flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10">
+      
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#1a3636]">Resumen y Medio de Pago</h1>
+        <p class="text-gray-500 text-sm mt-1.5">Revisa el detalle de tu contratación y formaliza el servicio</p>
+      </div>
+
+      <!-- Resumen del Servicio -->
+      <div class="bg-[#f2f6f4] rounded-2xl p-5 sm:p-6 mb-8 border border-[#d2e2db]">
+        <div class="flex justify-between items-center pb-3 border-b border-[#c2d7ce]">
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-600">Detalle de Contratación</span>
+          <span id="ordenBadge" class="text-xs font-extrabold text-[#1a3636] bg-white px-2.5 py-1 rounded-md shadow-sm">ORDEN: CARGANDO...</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm">
+          <div>
+            <p class="text-xs text-gray-500">Plan Seleccionado:</p>
+            <p id="txtPlan" class="font-bold text-[#1a3636]">Cargando plan...</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Ser Querido / Difunto:</p>
+            <p id="txtDifunto" class="font-bold text-[#191c1b]">Cargando...</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Cementerio:</p>
+            <p id="txtCementerio" class="font-semibold text-gray-800">Cargando...</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Ubicación:</p>
+            <p id="txtUbicacion" class="font-semibold text-gray-800">Cargando...</p>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-3 border-t border-[#c2d7ce] flex justify-between items-center">
+          <span class="text-sm font-bold text-gray-700">Total a Pagar (IVA inc.):</span>
+          <span id="txtMontoTotal" class="text-2xl font-extrabold text-[#1a3636]">$0</span>
+        </div>
+      </div>
+
+      <!-- Métodos de Pago -->
+      <div class="mb-8">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-gray-700 mb-3">Selecciona un medio de pago:</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Webpay Plus -->
+          <div class="metodo-card metodo-pago rounded-2xl p-4 flex items-center justify-between" data-metodo="webpay-plus">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-2xl text-[#1a3636]">credit_card</span>
+              <div>
+                <p class="text-sm font-bold text-gray-900">Webpay Plus</p>
+                <p class="text-xs text-gray-500">Débito y Crédito</p>
+              </div>
+            </div>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">DISPONIBLE</span>
+          </div>
+
+          <!-- Webpay Oneclick -->
+          <div class="metodo-card metodo-pago rounded-2xl p-4 flex items-center justify-between" data-metodo="webpay-oneclick">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-2xl text-[#1a3636]">autorenew</span>
+              <div>
+                <p class="text-sm font-bold text-gray-900">Webpay Oneclick</p>
+                <p class="text-xs text-gray-500">Suscripción y cargo mensual</p>
+              </div>
+            </div>
+            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">DISPONIBLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuadro del Contrato con los Datos Dinámicos del Cliente -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-700">Contrato de Prestación de Servicios & Mandato Especial</h2>
+          <span class="text-[11px] text-gray-500">Versión 2026-09-v1</span>
+        </div>
+
+        <div class="contrato-scroll bg-gray-50 border border-gray-300 rounded-2xl p-4 text-xs text-gray-700 leading-relaxed select-text space-y-3">
+          <p class="font-bold text-[#1a3636] uppercase">TÉRMINOS Y CONDICIONES GENERALES Y MANDATO DE PRESTACIÓN DE SERVICIOS — GRAVECARE SPA</p>
+          
+          <p>
+            En Santiago de Chile, a <span id="contratoFecha" class="font-semibold text-gray-900">...</span>, entre <strong>GraveCare SpA</strong>, RUT N° 78.498.653-5, con domicilio en Av. El Carmen 1397, Of. 301, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) <strong id="contratoClienteNombre" class="text-gray-900">[Nombre Cliente]</strong>, RUT N° <strong id="contratoClienteRut" class="text-gray-900">[RUT]</strong>, con domicilio en <span id="contratoClienteDireccion">[Dirección]</span>, correo electrónico <span id="contratoClienteEmail">[Email]</span> y teléfono <span id="contratoClienteFono">[Teléfono]</span>, en adelante el «Cliente», se ha convenido el siguiente contrato:
+          </p>
+
+          <p>
+            <strong>PRIMERO (Objeto del Servicio y Mandato Especial):</strong> La Empresa se compromete a prestar las labores de aseo, preservación ornamental y mantención de sepulturas conforme al plan seleccionado (<span id="contratoPlanNombre" class="font-semibold text-gray-900">...</span>). El Cliente declara bajo su responsabilidad ser titular o contar con las facultades legales sobre la sepultura individualizada (<span id="contratoSepulturaUbicacion" class="font-semibold text-gray-900">...</span>, sepultura de <strong id="contratoDifuntoNombre" class="text-gray-900">...</strong>) y confiere a GraveCare SpA y a su personal mandato especial y suficiente para ingresar al cementerio y ejecutar exclusivamente las labores contratadas.
+          </p>
+
+          <p><strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de placas, lápidas y cruces, retiro de flores secas, desmalezado y arreglo floral fresco. Se excluyen obras mayores de albañilería, restauración estructural profunda o movimiento de restos.</p>
+
+          <p><strong>TERCERO (Reporte y Verificación Digital):</strong> Cada intervención en terreno generará un reporte fotográfico de respaldo ("Antes" y "Después"), remitido al Cliente dentro de las 24 horas hábiles posteriores vía WhatsApp o correo electrónico.</p>
+
+          <p>
+            <strong>CUARTO (Honorarios y Forma de Pago):</strong> El Cliente pagará la suma de <strong id="contratoMonto" class="text-gray-900">$0</strong> (IVA incluido) por los servicios contratados, abonados por adelantado mediante pasarelas autorizadas (Webpay Plus o suscripción recurrente Webpay Oneclick de Transbank).
+          </p>
+
+          <p><strong>QUINTO (Plazo y Vigencia):</strong> El presente contrato rige desde el momento en que se confirme el pago de la orden y se mantendrá vigente durante la periodicidad del plan contratado.</p>
+
+          <p><strong>SEXTO (Limitación de Responsabilidad):</strong> La Empresa no asume responsabilidad por daños o deterioros preexistentes en mármoles o lápidas, hurtos cometidos por terceros dentro del parque, ni demoras debidas a eventos de fuerza mayor o restricciones del cementerio.</p>
+
+          <p><strong>SÉPTIMO (Protección de Datos y Privacidad):</strong> Los datos personales proporcionados serán tratados bajo confidencialidad conforme a la Ley N° 19.628 y utilizados únicamente para la ejecución del servicio y comprobantes tributarios.</p>
+
+          <p><strong>OCTAVO (Naturaleza del Contrato):</strong> Vínculo civil de prestación de servicios y mandato de servicio, sin relación laboral de subordinación ni dependencia.</p>
+
+          <p><strong>NOVENO (Domicilio y Jurisdicción):</strong> Las partes fijan domicilio en la ciudad y comuna de Santiago de Chile, sometiéndose a la competencia de sus Tribunales Ordinarios de Justicia.</p>
+
+          <div class="mt-4 pt-3 border-t border-gray-300 text-gray-800 space-y-1">
+            <p><strong>EL CONTRATANTE (Cliente):</strong> <span id="contratoFirmaCliente">[Nombre del Cliente]</span> — Aceptado electrónicamente al confirmar la orden y el pago vía gravecare.cl.</p>
+            <p><strong>EL PRESTADOR:</strong> GraveCare SpA — RUT N° 78.498.653-5.</p>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3.5 bg-[#edf5f2] border border-[#c2d7ce] rounded-xl">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="aceptoTerminos" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#1a3636] focus:ring-[#1a3636]">
+            <span class="text-xs text-gray-800 leading-normal font-semibold">
+              He leído detenidamente, acepto las 9 cláusulas del contrato y otorgo el mandato especial de acceso al cementerio para la ejecución del servicio.
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div id="botonesSeccion" style="display: none;">
+        <button type="button" id="btnWebpay" style="display: none;" 
+                class="w-full py-4 px-6 bg-[#1a3636] hover:bg-[#234949] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
+          <span>Ir a pagar con Webpay Plus</span>
+          <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+        </button>
+
+        <button type="button" id="btnOneclick" style="display: none;" 
+                class="w-full py-4 px-6 bg-[#1a3636] hover:bg-[#234949] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
+          <span>Inscribir y pagar con Oneclick</span>
+          <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-gray-500 py-6 border-t border-gray-200">
+    GraveCare SpA · Preservación & Memoria · 2026
+  </footer>
+
+  <script>
+    let ordenGlobal = null;
+    let ordenId = null;
+    let metodoPagoSeleccionado = null;
+    let db = null;
+
+    // Inicializar Firebase para asegurar escritura en Firestore
+    try {
+      if (!firebase.apps.length) {
+        // Carga la configuración del proyecto gravecare-2e8d2
+        firebase.initializeApp({
+          projectId: "gravecare-2e8d2"
+        });
+      }
+      db = firebase.firestore();
+    } catch (e) {
+      console.warn("Inicialización de Firebase Firestore:", e);
+    }
+
+    function obtenerDatosOrden() {
+      const datosStr = localStorage.getItem('gravecare_datos_completos') ||
+                       sessionStorage.getItem('gravecare_registro_datos') ||
+                       localStorage.getItem('gravecare_last_order');
+      if (!datosStr) return null;
+      try {
+        return JSON.parse(datosStr);
+      } catch (e) {
+        console.warn('Error al parsear orden:', e);
+        return null;
+      }
+    }
+
+    // Función que garantiza que la orden existe en Firestore antes de procesar el pago
+    async function asegurarOrdenEnFirestore(orden, id) {
+      if (!db || !id || !orden) return;
+      try {
+        const docRef = db.collection('ordenes').doc(id);
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) {
+          console.log(`Guardando orden ${id} en Firestore...`);
+          const ordenParaGuardar = {
+            ...orden,
+            numeroOrden: id,
+            estado: orden.estado || 'iniciada',
+            creadoEl: firebase.firestore.FieldValue.serverTimestamp(),
+            terminosAceptados: true
+          };
+          await docRef.set(ordenParaGuardar, { merge: true });
+          console.log(`Orden ${id} guardada exitosamente en Firestore.`);
+        }
+      } catch (err) {
+        console.error("Error al asegurar orden en Firestore:", err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      ordenGlobal = obtenerDatosOrden();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      ordenId = ordenGlobal?.numeroOrden || ordenGlobal?.id || ordenGlobal?.ordenId || localStorage.getItem('gravecare_orden_id') || urlParams.get('orden');
+
+      if (ordenGlobal) {
+        document.getElementById('ordenBadge').textContent = `ORDEN: ${ordenId || 'GC-PROV'}`;
+        
+        // 1. Plan
+        const plan = ordenGlobal.servicio?.planNombre || ordenGlobal.planNombre || ordenGlobal.plan || 'Plan Standard';
+        document.getElementById('txtPlan').textContent = plan;
+        if (document.getElementById('contratoPlanNombre')) {
+          document.getElementById('contratoPlanNombre').textContent = plan;
+        }
+
+        // 2. Difunto
+        let difunto = 'Ser Querido';
+        if (ordenGlobal.difunto) {
+          difunto = [ordenGlobal.difunto.nombres, ordenGlobal.difunto.apellidoPaterno, ordenGlobal.difunto.apellidoMaterno].filter(Boolean).join(' ');
+        } else if (ordenGlobal.nombreFallecido) {
+          difunto = ordenGlobal.nombreFallecido;
+        }
+        document.getElementById('txtDifunto').textContent = difunto;
+        if (document.getElementById('contratoDifuntoNombre')) {
+          document.getElementById('contratoDifuntoNombre').textContent = difunto;
+        }
+
+        // 3. Cementerio y Ubicación
+        const cementerio = ordenGlobal.ubicacionSepultura?.cementerio || ordenGlobal.cementerio || 'Cementerio';
+        document.getElementById('txtCementerio').textContent = cementerio;
+
+        const patio = ordenGlobal.ubicacionSepultura?.patio || ordenGlobal.patio || '';
+        const num = ordenGlobal.ubicacionSepultura?.numeroSepultura || ordenGlobal.numeroSepultura || '';
+        const ubicacionTexto = patio || num ? `Patio: ${patio} | N°: ${num}` : 'Por coordinar';
+        document.getElementById('txtUbicacion').textContent = ubicacionTexto;
+
+        if (document.getElementById('contratoSepulturaUbicacion')) {
+          document.getElementById('contratoSepulturaUbicacion').textContent = `${cementerio}, ${ubicacionTexto}`;
+        }
+
+        // 4. Monto
+        let monto = Number(ordenGlobal.montoTotal || ordenGlobal.precioNumerico || ordenGlobal.valores?.total || 34990);
+        const montoFormateado = `$${monto.toLocaleString('es-CL')}`;
+        document.getElementById('txtMontoTotal').textContent = montoFormateado;
+        if (document.getElementById('contratoMonto')) {
+          document.getElementById('contratoMonto').textContent = montoFormateado;
+        }
+
+        // 5. Datos del Cliente / Titular
+        const titular = ordenGlobal.titular || {};
+        let nombreCliente = titular.nombre || ordenGlobal.nombreCliente || '';
+        if (!nombreCliente && (titular.nombres || titular.apellidoPaterno)) {
+          nombreCliente = [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(' ');
+        }
+        if (!nombreCliente) nombreCliente = 'Cliente Titular';
+
+        const rutCliente = titular.rut || ordenGlobal.rut || ordenGlobal.rutCliente || 'No registrado';
+        const emailCliente = titular.email || ordenGlobal.email || ordenGlobal.emailCliente || 'No registrado';
+        const fonoCliente = titular.telefono || ordenGlobal.telefono || ordenGlobal.telefonoCliente || 'No registrado';
+        
+        const dir = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : '', titular.comuna, titular.region]
+          .filter(Boolean).join(', ') || 'Dirección registrada';
+
+        if (document.getElementById('contratoClienteNombre')) document.getElementById('contratoClienteNombre').textContent = nombreCliente;
+        if (document.getElementById('contratoClienteRut')) document.getElementById('contratoClienteRut').textContent = rutCliente;
+        if (document.getElementById('contratoClienteDireccion')) document.getElementById('contratoClienteDireccion').textContent = dir;
+        if (document.getElementById('contratoClienteEmail')) document.getElementById('contratoClienteEmail').textContent = emailCliente;
+        if (document.getElementById('contratoClienteFono')) document.getElementById('contratoClienteFono').textContent = fonoCliente;
+        if (document.getElementById('contratoFirmaCliente')) document.getElementById('contratoFirmaCliente').textContent = `${nombreCliente} (RUT: ${rutCliente})`;
+
+        // Fecha actual
+        if (document.getElementById('contratoFecha')) {
+          document.getElementById('contratoFecha').textContent = new Date().toLocaleDateString('es-CL', {
+            day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago'
+          });
+        }
+
+        // Asegurar que la orden quede registrada en Firestore inmediatamente al entrar
+        if (ordenId) {
+          await asegurarOrdenEnFirestore(ordenGlobal, ordenId);
+        }
+      }
+
+      configurarEventListeners();
+    });
+
+    function configurarEventListeners() {
+      const metodosDisponibles = document.querySelectorAll('.metodo-pago:not(.deshabilitado)');
+      metodosDisponibles.forEach(metodo => {
+        metodo.addEventListener('click', function() {
+          document.querySelectorAll('.metodo-pago').forEach(m => m.classList.remove('activo'));
+          this.classList.add('activo');
+          metodoPagoSeleccionado = this.dataset.metodo;
+          
+          const botonesSeccion = document.getElementById('botonesSeccion');
+          const btnWebpay = document.getElementById('btnWebpay');
+          const btnOneclick = document.getElementById('btnOneclick');
+          
+          if (botonesSeccion) botonesSeccion.style.display = 'block';
+          
+          if (metodoPagoSeleccionado === 'webpay-plus') {
+            if (btnWebpay) btnWebpay.style.display = 'flex';
+            if (btnOneclick) btnOneclick.style.display = 'none';
+          } else if (metodoPagoSeleccionado === 'webpay-oneclick') {
+            if (btnWebpay) btnWebpay.style.display = 'none';
+            if (btnOneclick) btnOneclick.style.display = 'flex';
+          }
+        });
+      });
+
+      // Botón Webpay Plus (Cloud Run Directo)
+      const btnWebpay = document.getElementById('btnWebpay');
+      if (btnWebpay) {
+        btnWebpay.addEventListener('click', async function() {
+          const aceptoTerminos = document.getElementById('aceptoTerminos');
+          if (!aceptoTerminos || !aceptoTerminos.checked) {
+            alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
+            aceptoTerminos.focus();
+            return;
+          }
+
+          const ordenActual = obtenerDatosOrden();
+          const idParaEnviar = ordenId || ordenActual?.numeroOrden || ordenActual?.id;
+
+          if (!idParaEnviar) {
+            alert('No se encontró el ID de la orden. Por favor vuelve al paso anterior.');
+            return;
+          }
+
+          btnWebpay.disabled = true;
+          btnWebpay.innerHTML = '<span>Verificando y conectando con Transbank...</span>';
+
+          try {
+            // Asegurar que exista en Firestore antes de solicitar la transacción
+            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar);
+
+            const response = await fetch('https://creartransaccionwebpay-f4mre7bfoa-uc.a.run.app', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ordenId: idParaEnviar })
             });
 
-            // Botón Webpay Plus
-            const btnWebpay = document.getElementById('btnWebpay');
-            if (btnWebpay) {
-                btnWebpay.addEventListener('click', async function() {
-                    const aceptoTerminos = document.getElementById('aceptoTerminos');
-                    if (!aceptoTerminos || !aceptoTerminos.checked) {
-                        alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
-                        aceptoTerminos.focus();
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch('https://creartransaccionwebpay-f4mre7bfoa-uc.a.run.app', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ordenId })
-                        });
-
-                        const data = await response.json();
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;
-                        } else {
-                            alert('Error: ' + (data.error || 'No se pudo iniciar la transacción con Webpay'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error al conectar con la pasarela de pago. Por favor intenta de nuevo.');
-                    }
-                });
+            const data = await response.json();
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else {
+              alert('Error: ' + (data.error || 'No se pudo iniciar la transacción con Webpay'));
+              btnWebpay.disabled = false;
+              btnWebpay.innerHTML = '<span>Ir a pagar con Webpay Plus</span><span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>';
             }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con la pasarela de pago. Por favor intenta de nuevo.');
+            btnWebpay.disabled = false;
+            btnWebpay.innerHTML = '<span>Ir a pagar con Webpay Plus</span><span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>';
+          }
+        });
+      }
 
-            // Botón Oneclick
-            const btnOneclick = document.getElementById('btnOneclick');
-            if (btnOneclick) {
-                btnOneclick.addEventListener('click', async function() {
-                    const aceptoTerminos = document.getElementById('aceptoTerminos');
-                    if (!aceptoTerminos || !aceptoTerminos.checked) {
-                        alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
-                        aceptoTerminos.focus();
-                        return;
-                    }
+      // Botón Oneclick
+      const btnOneclick = document.getElementById('btnOneclick');
+      if (btnOneclick) {
+        btnOneclick.addEventListener('click', async function() {
+          const aceptoTerminos = document.getElementById('aceptoTerminos');
+          if (!aceptoTerminos || !aceptoTerminos.checked) {
+            alert('Debes marcar la casilla aceptando los términos y condiciones del contrato para continuar.');
+            aceptoTerminos.focus();
+            return;
+          }
 
-                    try {
-                        const response = await fetch('https://iniciarinscripciononeclick-f4mre7bfoa-uc.a.run.app', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ordenId })
-                        });
+          const ordenActual = obtenerDatosOrden();
+          const idParaEnviar = ordenId || ordenActual?.numeroOrden || ordenActual?.id;
 
-                        const data = await response.json();
-                        if (data.redirect_url) {
-                            window.location.href = data.redirect_url;
-                        } else {
-                            alert('Error: ' + (data.error || 'No se pudo iniciar la inscripción con Oneclick'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error al procesar la solicitud con Oneclick. Por favor intenta de nuevo.');
-                    }
-                });
+          if (!idParaEnviar) {
+            alert('No se encontró el ID de la orden. Por favor vuelve al paso anterior.');
+            return;
+          }
+
+          btnOneclick.disabled = true;
+          btnOneclick.innerHTML = '<span>Iniciando Oneclick...</span>';
+
+          try {
+            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar);
+
+            const response = await fetch('/iniciarInscripcionOneclick', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ordenId: idParaEnviar })
+            });
+
+            const data = await response.json();
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            } else {
+              alert('Error: ' + (data.error || 'No se pudo iniciar la inscripción con Oneclick'));
+              btnOneclick.disabled = false;
+              btnOneclick.innerHTML = '<span>Inscribir y pagar con Oneclick</span><span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>';
             }
-        }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud con Oneclick. Por favor intenta de nuevo.');
+            btnOneclick.disabled = false;
+            btnOneclick.innerHTML = '<span>Inscribir y pagar con Oneclick</span><span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>';
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "target": "publico",
     "public": "public",
     "ignore": [
       "firebase.json",
@@ -45,8 +44,12 @@
         "function": "enviarContacto"
       },
       {
+        "source": "/confirmacion.html",
+        "destination": "/confirmar-pago.html"
+      },
+      {
         "source": "/confirmar-pago.html",
-        "destination": "/confirmacion.html"
+        "destination": "/confirmar-pago.html"
       },
       {
         "source": "**",
