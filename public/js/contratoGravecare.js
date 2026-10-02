@@ -1,263 +1,198 @@
 /**
- * contratoGravecare.js
- * =====================
- * Generador de textos de contrato para GraveCare
- * Maneja formatos de fecha en timezone Chile (America/Santiago)
+ * generarContratoPDF.js
+ * ============================================================================
+ * Generador formal en PDF para contratos y mandatos de GraveCare Chile SpA.
+ * Implementa auto-paginación dinámica para evitar que el texto se corte.
+ * ============================================================================
  */
+import { jsPDF } from "jspdf";
 
-export const CONTRATO_VERSION = "2.0";
+export function generarContratoPDF(orden = {}) {
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "letter", // 215.9 mm x 279.4 mm
+  });
 
-/**
- * Formatea una fecha en español de Chile con timezone correcto
- * El servidor corre en UTC, pero el contrato debe mostrar hora de Santiago
- */
-function fechaLargaES(fecha = new Date()) {
-  return fecha.toLocaleDateString("es-CL", {
+  // Dimensiones y márgenes
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 20;
+  const contentWidth = pageWidth - marginX * 2;
+  const marginBottom = 25;
+
+  let posY = 20;
+
+  // Extraer variables de la orden
+  const numeroOrden = orden.numeroOrden || orden.id || "ORD-" + Date.now();
+  const fechaDoc = orden.fechaTexto || new Date().toLocaleDateString("es-CL", {
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: "America/Santiago",
   });
-}
 
-/**
- * Formatea una fecha corta (DD/MM/YYYY) en timezone Chile
- */
-function fechaCorta(fecha = new Date()) {
-  return fecha.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "America/Santiago",
-  });
-}
+  const titular = orden.titular || {};
+  const nombreTitular = titular.nombre || `${titular.nombres || ''} ${titular.apellidoPaterno || ''}`.trim() || "Christian Olivares Lizama";
+  const rutTitular = titular.rut || titular.rutDni || "12.722.847-7";
+  const direccionTitular = titular.direccionCompleta || `${titular.direccion || 'Evaristo Lillo'}, ${titular.numero || '111'}${titular.departamento ? ', ' + titular.departamento : ''}, ${titular.comuna || 'Las Condes'}, ${titular.region || 'Metropolitana'}`;
+  const emailTitular = titular.email || "contacto@cliente.cl";
+  const telefonoTitular = titular.telefono || "+56912345678";
 
-/**
- * Genera el texto completo del contrato según el tipo de servicio
- * @param {Object} orden - Objeto con datos de la orden (tipo, cementerio, nombreDifunto, montoTotal, etc)
- * @param {Date} fecha - Fecha del contrato (opcional, por defecto la actual)
- * @returns {String} Texto HTML/plaintext del contrato
- */
-export function generarContratoTexto(orden = {}, fecha = new Date()) {
-  const fechaFormato = fechaLargaES(fecha);
-  const fechaCorto = fechaCorta(fecha);
-  
-  const tipo = orden.Tipo || orden.tipo || "Plan";
-  const cementerio = orden.cementerio || "No especificado";
-  const nombreDifunto = orden.nombreDifunto || "No especificado";
-  const nombreTitular = orden.nombreTitular || orden.titular || "No especificado";
-  const montoTotal = orden.montoTotal || 0;
-  const estado = orden.estado || "pendiente_pago";
+  const difunto = orden.difunto || {};
+  const nombreDifunto = difunto.nombre || `${difunto.nombres || ''} ${difunto.apellidoPaterno || ''}`.trim() || orden.nombreDifunto || "Ser Querido";
 
-  const montoFormato = montoTotal.toLocaleString("es-CL", {
-    style: "currency",
-    currency: "CLP",
-  });
+  const sepultura = orden.ubicacionSepultura || {};
+  const cementerio = sepultura.cementerio || orden.cementerio || "Parque del Recuerdo";
+  const patio = sepultura.patio || "No especificado";
+  const numSepultura = sepultura.numeroSepultura || sepultura.numero || "No especificado";
+  const planNombre = orden.servicio?.planNombre || orden.planNombre || "Plan de Cuidado";
 
-  const tipoServicio =
-    tipo === "Plan"
-      ? "Plan de Suscripción de Cuidado"
-      : "Servicio Spot de Mantenimiento";
+  // Función para dibujar el encabezado formal de GraveCare
+  function dibujarEncabezado() {
+    doc.setFillColor(26, 54, 54); // #1a3636
+    doc.rect(0, 0, pageWidth, 5, "F");
 
-  return `
-================================================================================
-                        CONTRATO DE SERVICIOS GRAVECARE
-================================================================================
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(26, 54, 54);
+    doc.text("GRAVECARE CHILE SpA", marginX, 16);
 
-Fecha del Contrato: ${fechaFormato}
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Preservación Ornamental & Cuidado de Sepulturas — RUT: 78.498.653-5", marginX, 20);
 
-================================================================================
-1. IDENTIFICACIÓN DE LAS PARTES
-================================================================================
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(193, 154, 91); // Acento dorado
+    doc.text("DOCUMENTO LEGAL VIGENTE", pageWidth - marginX, 16, { align: "right" });
+    
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Orden: ${numeroOrden}`, pageWidth - marginX, 20, { align: "right" });
 
-PRESTADOR DE SERVICIOS:
-  Nombre: GraveCare Chile
-  Giro: Servicios de cuidado y mantenimiento de sepulturas
-  Email: info@gravecare.cl
-  Teléfono: +56 9 8256 6719
+    doc.setDrawColor(220, 223, 220);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, 23, pageWidth - marginX, 23);
 
-CLIENTE / TITULAR:
-  Nombre: ${nombreTitular}
-  Servicio Contratado: ${tipoServicio}
+    return 30; // Posición Y donde comienza el texto tras el header
+  }
 
-SEPULTURA / SITIO:
-  Cementerio: ${cementerio}
-  Difunto(a): ${nombreDifunto}
+  // Comprueba si el texto cabe en la página; si no, añade nueva hoja con encabezado
+  function verificarEspacio(alturaNecesaria) {
+    if (posY + alturaNecesaria > pageHeight - marginBottom) {
+      doc.addPage();
+      posY = dibujarEncabezado();
+    }
+  }
 
-================================================================================
-2. DESCRIPCIÓN DEL SERVICIO
-================================================================================
+  function agregarParrafo(texto, interlineado = 5, espacioPosterior = 4) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(34, 34, 34);
 
-Se acuerda la prestación de servicios de ${tipoServicio.toLowerCase()} para la
-sepultura identificada anteriormente, según las características del plan
-elegido por el cliente.
+    const lineas = doc.splitTextToSize(texto, contentWidth);
+    const alturaParrafo = lineas.length * interlineado;
 
-Tipo de Contrato: ${tipo === "Plan" ? "PLAN DE SUSCRIPCIÓN" : "SERVICIO SPOT"}
-Monto Total: ${montoFormato}
-Estado: ${estado === "pagado" ? "PAGADO" : "PENDIENTE DE PAGO"}
+    verificarEspacio(alturaParrafo + espacioPosterior);
+    doc.text(lineas, marginX, posY);
+    posY += alturaParrafo + espacioPosterior;
+  }
 
-================================================================================
-3. ALCANCE DEL SERVICIO
-================================================================================
+  function agregarClausula(titulo, texto) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(26, 54, 54);
 
-GraveCare se compromete a:
+    const lineasTitulo = doc.splitTextToSize(titulo, contentWidth);
+    verificarEspacio(lineasTitulo.length * 5 + 3);
+    doc.text(lineasTitulo, marginX, posY);
+    posY += lineasTitulo.length * 5 + 2;
 
-3.1 Para Planes de Suscripción:
-    • Realizar limpiezas periódicas según la frecuencia del plan
-    • Mantenimiento de flores y adornos
-    • Reparación menor de danos en la sepultura
-    • Reporte fotográfico mensual del estado
-    • Atención de solicitudes de mantenimiento extraordinario
+    agregarParrafo(texto, 4.8, 5);
+  }
 
-3.2 Para Servicios Spot:
-    • Ejecución única del servicio solicitado
-    • Reporte fotográfico antes y después
-    • Corrección de anomalías detectadas en el sitio
+  // --- COMIENZO DEL RENDERIZADO DEL CONTRATO ---
+  posY = dibujarEncabezado();
 
-================================================================================
-4. RESPONSABILIDADES DEL CLIENTE
-================================================================================
+  // Título Principal
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(26, 54, 54);
+  doc.text("CONTRATO DE PRESTACIÓN DE SERVICIOS & MANDATO ESPECIAL DE ACCESO", pageWidth / 2, posY, { align: "center" });
+  posY += 8;
 
-El cliente se compromete a:
+  // Comparecencia inicial
+  agregarParrafo(
+    `En Santiago de Chile, a ${fechaDoc}, entre GraveCare SpA, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) ${nombreTitular}, RUT N° ${rutTitular}, domiciliado(a) en ${direccionTitular}, correo electrónico ${emailTitular} y teléfono ${telefonoTitular}, en adelante el «Cliente», se ha convenido el siguiente contrato y mandato:`
+  );
 
-4.1 Realizar el pago según lo acordado
-4.2 Mantener actualizada su información de contacto
-4.3 Comunicar cambios en la sepultura o disposiciones especiales
-4.4 Proporcionar acceso al cementerio cuando sea necesario
-4.5 Reportar problemas o inconformidades dentro de 5 días útiles
+  // Cláusulas completas sin cortes
+  agregarClausula(
+    "PRIMERO (Objeto y Mandato Especial):",
+    `La Empresa prestará los servicios integrales de mantención, preservación técnica y cuidado ornamental conforme al ${planNombre}. El Cliente declara bajo juramento ser titular, familiar directo o representante debidamente facultado de la sepultura ubicada en ${cementerio} (Patio: ${patio}, N°: ${numSepultura}), correspondiente al lugar de descanso de don(ña) ${nombreDifunto}. Por medio de este instrumento, confiere mandato especial a GraveCare SpA para concurrir al parque cementerio y ejecutar las tareas contratadas.`
+  );
 
-================================================================================
-5. TÉRMINOS DE PAGO
-================================================================================
+  agregarClausula(
+    "SEGUNDO (Alcance del Servicio y Exclusiones):",
+    "Las labores comprenden retiro cuidadoso de flores secas, remoción mecánica no abrasiva de suciedad y polvo, lavado neutro de lápidas, cruces y jardineras, desmalezado y poda perimetral del césped o manto verde, y aplicación de preservantes autorizados. Quedan expresamente excluidas intervenciones estructurales mayores, movimientos de losas pesadas, exhumaciones o modificaciones a la arquitectura funeraria protegida."
+  );
 
-Monto a Pagar: ${montoFormato}
-Forma de Pago: Transacción electrónica (Webpay, Oneclick u otro método elegido)
-Validez: A partir de la confirmación del pago
+  agregarClausula(
+    "TERCERO (Certificación y Reporte Digital):",
+    "La Empresa registrará fotográficamente el sitio antes y después de cada visita programada. Dicho material será publicado en la plataforma web privada del Cliente y notificado por correo electrónico dentro de las 48 horas hábiles siguientes a la finalización de los trabajos en terreno."
+  );
 
-El pago debe ser realizado en el portal de GraveCare. Una vez confirmado,
-se genera comprobante y comienza el servicio según lo pactado.
+  agregarClausula(
+    "CUARTO (Precio, Formas de Pago y Renovación):",
+    "Los servicios se pactan por la tarifa correspondiente al plan elegido por el Cliente y cancelada electrónicamente a través de los portales autorizados de la Empresa (Webpay Plus / Oneclick). En planes de suscripción periódica, el cobro se renovará automáticamente al término de cada ciclo, salvo notificación previa del Cliente."
+  );
 
-================================================================================
-6. VIGENCIA Y CANCELACIÓN
-================================================================================
+  agregarClausula(
+    "QUINTO (Eximentes de Responsabilidad):",
+    "La Empresa velará por el resguardo ornamental, pero no responderá por deterioros derivados de fenómenos telúricos, aluviones, robo o sustracción de placas de bronce o adornos cometidos por terceros al interior del recinto, ni por restricciones sanitarias o administrativas emanadas por la administración del cementerio o autoridades públicas."
+  );
 
-6.1 VIGENCIA:
-    • Planes: Se renuevan mensualmente/bimestralmente/trimestralmente
-    • Servicios Spot: Vigencia única, según ejecución
+  agregarClausula(
+    "SEXTO (Vigencia, Terminación y Jurisdicción):",
+    "El presente contrato rige a contar del pago efectivo del servicio. El Cliente podrá dar término a las suscripciones mensuales mediante aviso con 30 días de anticipación por correo electrónico. Para todos los efectos legales, las partes fijan domicilio en la ciudad de Santiago y se someten a la competencia de sus Tribunales Ordinarios de Justicia."
+  );
 
-6.2 CANCELACIÓN:
-    • Planes: Puede cancelarse con 30 días de anticipación
-    • No hay reembolsos parciales de períodos ya pagados
-    • Se puede solicitar pausa temporal por hasta 3 meses
+  // Cuadro de Firmas y Validación Electrónica
+  verificarEspacio(42);
+  posY += 6;
 
-================================================================================
-7. LIMITACIONES DE RESPONSABILIDAD
-================================================================================
+  doc.setDrawColor(200, 200, 200);
+  doc.setFillColor(248, 250, 248);
+  doc.roundedRect(marginX, posY, contentWidth, 32, 3, 3, "FD");
 
-GraveCare NO es responsable por:
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(26, 54, 54);
+  doc.text("CONSTANCIA DE FIRMA Y ACEPTACIÓN ELECTRÓNICA", marginX + 5, posY + 7);
 
-• Daños causados por vandalismo, robo o actos de terceros
-• Fenómenos naturales (terremotos, inundaciones, etc.)
-• Restricciones del cementerio sobre trabajos permitidos
-• Cambios en regulaciones de cementerios durante la vigencia
-• Fuerza mayor o casos fortuitos
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(80, 80, 80);
+  doc.text(`Aceptado íntegramente por: ${nombreTitular} (RUT ${rutTitular})`, marginX + 5, posY + 13);
+  doc.text(`Identificador de Operación: ${numeroOrden} · Protocolo Seguro GraveCare Chile SpA`, marginX + 5, posY + 18);
+  doc.text(`Fecha y hora de suscripción: ${fechaDoc} · Plataforma Oficial www.gravecare.cl`, marginX + 5, posY + 23);
 
-El cliente retiene la responsabilidad legal sobre la sepultura.
+  // Pie de página y numeración en todas las hojas creadas
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(
+      `GraveCare Chile SpA · Documento Legal ORD: ${numeroOrden} · Página ${i} de ${totalPages}`,
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: "center" }
+    );
+  }
 
-================================================================================
-8. PROTECCIÓN DE DATOS
-================================================================================
-
-Los datos personales proporcionados serán tratados conforme a la Ley N°19.628
-sobre Protección de Datos Personales. Se utilizarán únicamente para:
-• Prestación del servicio
-• Facturación y contabilidad
-• Contacto ante situaciones relevantes
-
-No serán compartidos con terceros sin consentimiento previo.
-
-================================================================================
-9. MODIFICACIONES Y ACTUALIZACIONES
-================================================================================
-
-GraveCare se reserva el derecho de:
-• Actualizar métodos de trabajo mantiendo el estándar de calidad
-• Ajustar precios con 30 días de aviso previo
-• Modificar este contrato con notificación 15 días antes
-
-El cliente tiene derecho a cancelar si no acepta cambios significativos.
-
-================================================================================
-10. RESOLUCIÓN DE CONTROVERSIAS
-================================================================================
-
-En caso de conflicto:
-1. Se intentará resolución directa entre las partes
-2. Mediación a través de contacto comercial
-3. Arbitraje según las normas de comercio de Chile
-
-Legislación aplicable: Leyes de la República de Chile
-Competencia: Juzgados de Santiago, si corresponde
-
-================================================================================
-11. ACEPTACIÓN DE TÉRMINOS
-================================================================================
-
-Al contratar con GraveCare y efectuar el pago, el cliente reconoce y acepta
-ÍNTEGRAMENTE este contrato en todas sus partes, incluyendo términos y
-condiciones generales.
-
-Acepto que:
-✓ He leído y entiendo todos los términos de este contrato
-✓ Autorizo el pago y la prestación del servicio
-✓ Confirmo que los datos proporcionados son correctos y actuales
-✓ Acepto la política de privacidad y protección de datos
-
-================================================================================
-12. CONTACTO Y SOPORTE
-================================================================================
-
-Para consultas, reclamos o solicitudes:
-
-Email: info@gravecare.cl
-WhatsApp: +56 9 8256 6719
-Sitio Web: www.gravecare.cl
-
-Horario de Atención: Lunes a viernes, 09:00 - 18:00 hrs (Hora de Chile)
-
-================================================================================
-DOCUMENTO GENERADO ELECTRÓNICAMENTE
-Versión de Contrato: ${CONTRATO_VERSION}
-Fecha de Generación: ${fechaCorto}
-ID Orden: ${orden.id || "NO ASIGNADO"}
-================================================================================
-
-Este contrato es válido y vinculante desde su firma electrónica mediante
-la aceptación en el portal de GraveCare.
-
-Gracias por confiar en GraveCare para el cuidado de sus seres queridos.
-
-================================================================================
-`;
-}
-
-/**
- * Función auxiliar: genera resumen corto del contrato (para preview)
- */
-export function generarResumenContrato(orden = {}) {
-  const tipo = orden.Tipo || orden.tipo || "Plan";
-  const nombreDifunto = orden.nombreDifunto || "No especificado";
-  const montoTotal = orden.montoTotal || 0;
-  
-  const montoFormato = montoTotal.toLocaleString("es-CL", {
-    style: "currency",
-    currency: "CLP",
-  });
-
-  return {
-    tipo,
-    nombreDifunto,
-    monto: montoFormato,
-    fecha: fechaLargaES(),
-  };
+  return doc;
 }
