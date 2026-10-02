@@ -1,8 +1,8 @@
 /**
  * generarContratoPDF.js
  * ============================================================================
- * Generador formal en PDF para contratos y mandatos de GraveCare Chile SpA.
- * Implementa auto-paginación dinámica para evitar que el texto se corte.
+ * Generador en PDF oficial de GraveCare Chile SpA (12 Cláusulas Legales).
+ * Paginación dinámica y automática para evitar desbordes o cortes de texto.
  * ============================================================================
  */
 import { jsPDF } from "jspdf";
@@ -14,16 +14,15 @@ export function generarContratoPDF(orden = {}) {
     format: "letter", // 215.9 mm x 279.4 mm
   });
 
-  // Dimensiones y márgenes
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginX = 20;
+  const marginX = 18;
   const contentWidth = pageWidth - marginX * 2;
-  const marginBottom = 25;
+  const marginBottom = 22;
 
   let posY = 20;
 
-  // Extraer variables de la orden
+  // Variables y datos de la orden
   const numeroOrden = orden.numeroOrden || orden.id || "ORD-" + Date.now();
   const fechaDoc = orden.fechaTexto || new Date().toLocaleDateString("es-CL", {
     day: "numeric",
@@ -32,54 +31,61 @@ export function generarContratoPDF(orden = {}) {
     timeZone: "America/Santiago",
   });
 
+  const tipo = orden.Tipo || orden.tipo || "Plan";
+  const tipoServicio = tipo === "Plan" ? "Plan de Suscripción de Cuidado" : "Servicio Spot de Mantenimiento";
+  const planNombre = orden.servicio?.planNombre || orden.planNombre || (tipo === "Plan" ? "Plan Mensual" : "Servicio Spot");
+
   const titular = orden.titular || {};
-  const nombreTitular = titular.nombre || `${titular.nombres || ''} ${titular.apellidoPaterno || ''}`.trim() || "Christian Olivares Lizama";
+  const nombreTitular = titular.nombre || `${titular.nombres || ''} ${titular.apellidoPaterno || ''} ${titular.apellidoMaterno || ''}`.trim() || orden.nombreTitular || "Christian Olivares Lizama";
   const rutTitular = titular.rut || titular.rutDni || "12.722.847-7";
   const direccionTitular = titular.direccionCompleta || `${titular.direccion || 'Evaristo Lillo'}, ${titular.numero || '111'}${titular.departamento ? ', ' + titular.departamento : ''}, ${titular.comuna || 'Las Condes'}, ${titular.region || 'Metropolitana'}`;
-  const emailTitular = titular.email || "contacto@cliente.cl";
-  const telefonoTitular = titular.telefono || "+56912345678";
+  const emailTitular = titular.email || "colivaresl@hotmail.com";
+  const telefonoTitular = titular.telefono || "+56991788588";
 
   const difunto = orden.difunto || {};
   const nombreDifunto = difunto.nombre || `${difunto.nombres || ''} ${difunto.apellidoPaterno || ''}`.trim() || orden.nombreDifunto || "Ser Querido";
 
   const sepultura = orden.ubicacionSepultura || {};
   const cementerio = sepultura.cementerio || orden.cementerio || "Parque del Recuerdo";
-  const patio = sepultura.patio || "No especificado";
+  const sector = sepultura.sector || orden.sector || "General";
+  const patio = sepultura.patio || orden.patio || "No especificado";
   const numSepultura = sepultura.numeroSepultura || sepultura.numero || "No especificado";
-  const planNombre = orden.servicio?.planNombre || orden.planNombre || "Plan de Cuidado";
 
-  // Función para dibujar el encabezado formal de GraveCare
+  const montoTotal = Number(orden.montoTotal || orden.valores?.total || orden.precioNumerico || 34990);
+  const montoFormato = montoTotal.toLocaleString("es-CL", { style: "currency", currency: "CLP" });
+
+  // Encabezado institucional
   function dibujarEncabezado() {
-    doc.setFillColor(26, 54, 54); // #1a3636
-    doc.rect(0, 0, pageWidth, 5, "F");
+    doc.setFillColor(26, 54, 54);
+    doc.rect(0, 0, pageWidth, 4, "F");
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
+    doc.setFontSize(11);
     doc.setTextColor(26, 54, 54);
-    doc.text("GRAVECARE CHILE SpA", marginX, 16);
+    doc.text("GRAVECARE CHILE SpA", marginX, 14);
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text("Preservación Ornamental & Cuidado de Sepulturas — RUT: 78.498.653-5", marginX, 20);
+    doc.setFontSize(7.5);
+    doc.setTextColor(90, 90, 90);
+    doc.text("Preservación Ornamental & Cuidado de Sepulturas — RUT: 78.498.653-5", marginX, 18);
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    doc.setTextColor(193, 154, 91); // Acento dorado
-    doc.text("DOCUMENTO LEGAL VIGENTE", pageWidth - marginX, 16, { align: "right" });
-    
+    doc.setTextColor(193, 154, 91);
+    doc.text("DOCUMENTO LEGAL VIGENTE", pageWidth - marginX, 14, { align: "right" });
+
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Orden: ${numeroOrden}`, pageWidth - marginX, 20, { align: "right" });
+    doc.setTextColor(90, 90, 90);
+    doc.text(`Orden: ${numeroOrden}`, pageWidth - marginX, 18, { align: "right" });
 
-    doc.setDrawColor(220, 223, 220);
-    doc.setLineWidth(0.5);
-    doc.line(marginX, 23, pageWidth - marginX, 23);
+    doc.setDrawColor(210, 215, 210);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, 21, pageWidth - marginX, 21);
 
-    return 30; // Posición Y donde comienza el texto tras el header
+    return 27;
   }
 
-  // Comprueba si el texto cabe en la página; si no, añade nueva hoja con encabezado
+  // Verificación de desborde y salto de página
   function verificarEspacio(alturaNecesaria) {
     if (posY + alturaNecesaria > pageHeight - marginBottom) {
       doc.addPage();
@@ -87,9 +93,9 @@ export function generarContratoPDF(orden = {}) {
     }
   }
 
-  function agregarParrafo(texto, interlineado = 5, espacioPosterior = 4) {
+  function agregarParrafo(texto, interlineado = 4.2, espacioPosterior = 3) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
+    doc.setFontSize(8.5);
     doc.setTextColor(34, 34, 34);
 
     const lineas = doc.splitTextToSize(texto, contentWidth);
@@ -102,94 +108,134 @@ export function generarContratoPDF(orden = {}) {
 
   function agregarClausula(titulo, texto) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
+    doc.setFontSize(8.5);
     doc.setTextColor(26, 54, 54);
 
     const lineasTitulo = doc.splitTextToSize(titulo, contentWidth);
-    verificarEspacio(lineasTitulo.length * 5 + 3);
+    verificarEspacio(lineasTitulo.length * 4.2 + 2);
     doc.text(lineasTitulo, marginX, posY);
-    posY += lineasTitulo.length * 5 + 2;
+    posY += lineasTitulo.length * 4.2 + 1.5;
 
-    agregarParrafo(texto, 4.8, 5);
+    agregarParrafo(texto, 4.2, 3.5);
   }
 
-  // --- COMIENZO DEL RENDERIZADO DEL CONTRATO ---
+  // --- RENDERIZADO DEL CONTRATO ---
   posY = dibujarEncabezado();
 
-  // Título Principal
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(26, 54, 54);
   doc.text("CONTRATO DE PRESTACIÓN DE SERVICIOS & MANDATO ESPECIAL DE ACCESO", pageWidth / 2, posY, { align: "center" });
-  posY += 8;
+  posY += 6.5;
 
   // Comparecencia inicial
   agregarParrafo(
-    `En Santiago de Chile, a ${fechaDoc}, entre GraveCare SpA, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) ${nombreTitular}, RUT N° ${rutTitular}, domiciliado(a) en ${direccionTitular}, correo electrónico ${emailTitular} y teléfono ${telefonoTitular}, en adelante el «Cliente», se ha convenido el siguiente contrato y mandato:`
+    `En Santiago de Chile, a ${fechaDoc}, entre GraveCare SpA, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) ${nombreTitular}, RUT N° ${rutTitular}, domiciliado(a) en ${direccionTitular}, correo ${emailTitular} y teléfono ${telefonoTitular}, en adelante el «Cliente», se conviene lo siguiente:`
   );
 
-  // Cláusulas completas sin cortes
+  // CLÁUSULA 1
   agregarClausula(
-    "PRIMERO (Objeto y Mandato Especial):",
-    `La Empresa prestará los servicios integrales de mantención, preservación técnica y cuidado ornamental conforme al ${planNombre}. El Cliente declara bajo juramento ser titular, familiar directo o representante debidamente facultado de la sepultura ubicada en ${cementerio} (Patio: ${patio}, N°: ${numSepultura}), correspondiente al lugar de descanso de don(ña) ${nombreDifunto}. Por medio de este instrumento, confiere mandato especial a GraveCare SpA para concurrir al parque cementerio y ejecutar las tareas contratadas.`
+    "1. IDENTIFICACIÓN DE LAS PARTES Y MANDATO ESPECIAL:",
+    `Prestador: GraveCare Chile SpA (Email: info@gravecare.cl · Teléfono: +56 9 8256 6719). Cliente: don(ña) ${nombreTitular}, quien declara ser titular o estar facultado legalmente respecto de la sepultura ubicada en ${cementerio}, Sector: ${sector}, Patio: ${patio}, N° ${numSepultura}, correspondiente al lugar de descanso de don(ña) ${nombreDifunto}. El Cliente confiere a GraveCare SpA mandato especial suficiente para ingresar y ejecutar exclusivamente las labores pactadas.`
   );
 
+  // CLÁUSULA 2
   agregarClausula(
-    "SEGUNDO (Alcance del Servicio y Exclusiones):",
-    "Las labores comprenden retiro cuidadoso de flores secas, remoción mecánica no abrasiva de suciedad y polvo, lavado neutro de lápidas, cruces y jardineras, desmalezado y poda perimetral del césped o manto verde, y aplicación de preservantes autorizados. Quedan expresamente excluidas intervenciones estructurales mayores, movimientos de losas pesadas, exhumaciones o modificaciones a la arquitectura funeraria protegida."
+    "2. DESCRIPCIÓN DEL SERVICIO Y MODALIDAD:",
+    `Se acuerda la prestación de ${tipoServicio.toLowerCase()} bajo el nombre comercial ${planNombre}, según las coberturas escogidas. Monto pactado: ${montoFormato}. Estado del contrato: Confirmado con pago electrónico y firma digital vinculante.`
   );
 
+  // CLÁUSULA 3
   agregarClausula(
-    "TERCERO (Certificación y Reporte Digital):",
-    "La Empresa registrará fotográficamente el sitio antes y después de cada visita programada. Dicho material será publicado en la plataforma web privada del Cliente y notificado por correo electrónico dentro de las 48 horas hábiles siguientes a la finalización de los trabajos en terreno."
+    "3. ALCANCE DEL SERVICIO:",
+    "Para suscripciones de plan: limpiezas periódicas no abrasivas, acondicionamiento de flores y ornamentos, desmalezado superficial, reporte fotográfico técnico tras cada visita y atención de mantenciones menores. Para servicios Spot: ejecución única programada, limpieza integral no estructural y reporte fotográfico comparativo antes y después de la intervención."
   );
 
+  // CLÁUSULA 4
   agregarClausula(
-    "CUARTO (Precio, Formas de Pago y Renovación):",
-    "Los servicios se pactan por la tarifa correspondiente al plan elegido por el Cliente y cancelada electrónicamente a través de los portales autorizados de la Empresa (Webpay Plus / Oneclick). En planes de suscripción periódica, el cobro se renovará automáticamente al término de cada ciclo, salvo notificación previa del Cliente."
+    "4. RESPONSABILIDADES DEL CLIENTE:",
+    "El Cliente se compromete a: (a) Abonar oportunamente los montos acordados; (b) Mantener actualizada su información de contacto; (c) Proporcionar los datos fidedignos de ubicación y titularidad en el cementerio; (d) Facilitar el acceso cuando el recinto requiera acreditación del deudo; (e) Revisar los reportes e informar observaciones dentro de 5 días hábiles."
   );
 
+  // CLÁUSULA 5
   agregarClausula(
-    "QUINTO (Eximentes de Responsabilidad):",
-    "La Empresa velará por el resguardo ornamental, pero no responderá por deterioros derivados de fenómenos telúricos, aluviones, robo o sustracción de placas de bronce o adornos cometidos por terceros al interior del recinto, ni por restricciones sanitarias o administrativas emanadas por la administración del cementerio o autoridades públicas."
+    "5. TÉRMINOS DE PAGO Y FACTURACIÓN:",
+    `El monto total de ${montoFormato} es pagado mediante transacción electrónica certificada (Webpay Plus, Oneclick u otros medios autorizados). Para planes recurrentes, el cargo se efectúa en forma anticipada al inicio de cada ciclo de servicio.`
   );
 
+  // CLÁUSULA 6
   agregarClausula(
-    "SEXTO (Vigencia, Terminación y Jurisdicción):",
-    "El presente contrato rige a contar del pago efectivo del servicio. El Cliente podrá dar término a las suscripciones mensuales mediante aviso con 30 días de anticipación por correo electrónico. Para todos los efectos legales, las partes fijan domicilio en la ciudad de Santiago y se someten a la competencia de sus Tribunales Ordinarios de Justicia."
+    "6. VIGENCIA Y CANCELACIÓN:",
+    "Los planes de suscripción cuentan con vigencia indefinida y renovación automática por períodos iguales, pudiendo el Cliente poner término al contrato en cualquier momento mediante aviso escrito con 30 días de anticipación. Los servicios Spot concluyen con la entrega formal del reporte fotográfico."
   );
 
-  // Cuadro de Firmas y Validación Electrónica
-  verificarEspacio(42);
-  posY += 6;
+  // CLÁUSULA 7
+  agregarClausula(
+    "7. LIMITACIONES Y EXIMENTES DE RESPONSABILIDAD:",
+    "GraveCare SpA no responderá por deterioros atribuibles a fuerza mayor, sismos, inundaciones, robos o hurtos de elementos cometidos por terceros en el camposanto, restricciones sanitarias de la autoridad, ni restricciones normativas impuestas por la administración del cementerio."
+  );
 
-  doc.setDrawColor(200, 200, 200);
+  // CLÁUSULA 8
+  agregarClausula(
+    "8. PROTECCIÓN DE DATOS PERSONALES (LEY N° 19.628):",
+    "Los datos personales y de sepultura recopilados serán tratados bajo estrictos estándares de confidencialidad para la ejecución operativa, facturación y contacto. No serán cedidos ni comercializados a terceras entidades sin autorización previa."
+  );
+
+  // CLÁUSULA 9
+  agregarClausula(
+    "9. MODIFICACIONES Y ACTUALIZACIONES:",
+    "La Empresa podrá perfeccionar sus metodologías y procesos operativos garantizando estándares de calidad iguales o superiores. Cualquier ajuste en tarifas periódicas será notificado al Cliente con un mínimo de 30 días de antelación, quien podrá rescindir el servicio si no acepta las modificaciones."
+  );
+
+  // CLÁUSULA 10
+  agregarClausula(
+    "10. RESOLUCIÓN DE CONTROVERSIAS Y JURISDICCIÓN:",
+    "Las partes procurarán resolver amigablemente cualquier diferencia derivada de este instrumento. En caso de persistir el conflicto, se someten a la legislación chilena y prorrogan competencia ante los Tribunales Ordinarios de Justicia de la comuna de Santiago."
+  );
+
+  // CLÁUSULA 11
+  agregarClausula(
+    "11. ACEPTACIÓN DE TÉRMINOS Y VALIDEZ ELECTRÓNICA:",
+    "Al confirmar la orden en la plataforma y completar el pago, el Cliente suscribe el presente documento mediante aceptación electrónica, otorgándole pleno valor probatorio y fuerza obligatoria según la Ley N° 19.799 sobre documentos electrónicos y firma digital."
+  );
+
+  // CLÁUSULA 12
+  agregarClausula(
+    "12. CONTACTO, SOPORTE Y CANALES OFICIALES:",
+    "Canales de atención: Email contacto@gravecare.cl / info@gravecare.cl · WhatsApp +56 9 8256 6719 · Portal web www.gravecare.cl. Horario de atención: lunes a viernes de 09:00 a 18:00 hrs (hora de Chile continental)."
+  );
+
+  // Cuadro de Certificación y Firma Electrónica
+  verificarEspacio(36);
+  posY += 4;
+
+  doc.setDrawColor(200, 205, 200);
   doc.setFillColor(248, 250, 248);
-  doc.roundedRect(marginX, posY, contentWidth, 32, 3, 3, "FD");
+  doc.roundedRect(marginX, posY, contentWidth, 28, 2.5, 2.5, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(26, 54, 54);
-  doc.text("CONSTANCIA DE FIRMA Y ACEPTACIÓN ELECTRÓNICA", marginX + 5, posY + 7);
+  doc.text("CONSTANCIA DE FIRMA ELECTRÓNICA Y MANDATO APROBADO", marginX + 4, posY + 6);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(80, 80, 80);
-  doc.text(`Aceptado íntegramente por: ${nombreTitular} (RUT ${rutTitular})`, marginX + 5, posY + 13);
-  doc.text(`Identificador de Operación: ${numeroOrden} · Protocolo Seguro GraveCare Chile SpA`, marginX + 5, posY + 18);
-  doc.text(`Fecha y hora de suscripción: ${fechaDoc} · Plataforma Oficial www.gravecare.cl`, marginX + 5, posY + 23);
+  doc.setFontSize(7.5);
+  doc.setTextColor(70, 70, 70);
+  doc.text(`Titular Aceptante: ${nombreTitular} · RUT: ${rutTitular}`, marginX + 4, posY + 11);
+  doc.text(`Identificador de Contrato: ${numeroOrden} · Protocolo Seguro GraveCare Chile SpA`, marginX + 4, posY + 16);
+  doc.text(`Fecha y Certificación: ${fechaDoc} · Suscrito en línea vía www.gravecare.cl`, marginX + 4, posY + 21);
 
-  // Pie de página y numeración en todas las hojas creadas
+  // Pie de página y numeración correlativa en todas las hojas
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
+    doc.setFontSize(7.5);
+    doc.setTextColor(140, 140, 140);
     doc.text(
-      `GraveCare Chile SpA · Documento Legal ORD: ${numeroOrden} · Página ${i} de ${totalPages}`,
+      `GraveCare Chile SpA · Contrato y Mandato Especial ORD: ${numeroOrden} · Página ${i} de ${totalPages}`,
       pageWidth / 2,
-      pageHeight - 10,
+      pageHeight - 8,
       { align: "center" }
     );
   }
