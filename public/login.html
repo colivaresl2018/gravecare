@@ -90,21 +90,21 @@
           <span class="material-symbols-outlined text-2xl">lock_reset</span>
         </div>
         <h3 class="text-xl font-bold text-[#002d1a]">Restablecer Contraseña</h3>
-        <p class="text-xs text-gray-500 mt-1">Ingresa tu correo registrado para enviarte un enlace de recuperación seguro.</p>
+        <p class="text-xs text-gray-500 mt-1">Ingresa tu RUT o correo registrado para enviarte un enlace de recuperación seguro.</p>
       </div>
 
       <div id="modalAlert" style="display: none;" class="p-3 rounded-lg text-xs font-medium mb-4"></div>
 
       <form id="formRecuperar" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="emailRecuperar">Correo Electrónico</label>
-          <input type="email" id="emailRecuperar" required placeholder="correo@ejemplo.com" 
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1" for="emailRecuperar">RUT o Correo Electrónico</label>
+          <input type="text" id="emailRecuperar" required placeholder="correo@ejemplo.com o 12.345.678-9" 
                  class="w-full px-4 py-2.5 bg-[#f2f4f2] border border-gray-300 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] outline-none">
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" id="btnCerrarModal" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50">Cancelar</button>
-          <button type="submit" id="btnEnviarRecuperar" class="w-1/2 py-2.5 bg-[#002d1a] text-white rounded-lg text-sm font-bold hover:bg-[#1a432f]">Enviar Enlace</button>
+          <button type="button" id="btnCerrarModal" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 cursor-pointer">Cancelar</button>
+          <button type="submit" id="btnEnviarRecuperar" class="w-1/2 py-2.5 bg-[#002d1a] text-white rounded-lg text-sm font-bold hover:bg-[#1a432f] cursor-pointer">Enviar Enlace</button>
         </div>
       </form>
     </div>
@@ -125,7 +125,7 @@
       apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
       authDomain: "gravecare-2e8d2.firebaseapp.com",
       projectId: "gravecare-2e8d2",
-      storageBucket: "gravecare-2e8d2.firebasestorage.app",
+      storageBucket: "gravecare-2e8d2.appspot.com",
       messagingSenderId: "160012946248",
       appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
     };
@@ -140,6 +140,25 @@
     const togglePassword = document.getElementById('togglePassword');
     const contrasenaInput = document.getElementById('contrasena');
     const iconPassword = document.getElementById('iconPassword');
+
+    // Función auxiliar para buscar correo a partir de un RUT en rut_lookup
+    async function resolverEmailPorRut(rutTexto) {
+      const cleanRut = rutTexto.toLowerCase().replace(/\./g, '').replace(/\s/g, ''); // ej: 13793668-2
+      const soloNumeros = cleanRut.replace(/[^0-9k]/g, ''); // ej: 137936682
+      const formatos = [cleanRut, soloNumeros, rutTexto.trim()];
+
+      for (const fId of formatos) {
+        try {
+          const rutSnap = await getDoc(doc(db, 'rut_lookup', fId));
+          if (rutSnap.exists() && rutSnap.data().email) {
+            return rutSnap.data().email.toLowerCase().trim();
+          }
+        } catch (e) {
+          console.warn('Búsqueda en rut_lookup:', e);
+        }
+      }
+      return null;
+    }
 
     // Alternar visibilidad de contraseña
     togglePassword.addEventListener('click', () => {
@@ -159,7 +178,6 @@
       alertBox.style.display = 'block';
     }
 
-    // Traductor exhaustivo de errores de Firebase
     function traducirErrorFirebase(codigo) {
       switch (codigo) {
         case 'auth/invalid-credential':
@@ -205,18 +223,15 @@
       let emailFinal = identificador.toLowerCase();
 
       try {
-        // Si no contiene '@', buscar correspondencia de RUT en Firestore
         if (!identificador.includes('@')) {
-          const rutLimpio = identificador.toLowerCase().replace(/\./g, '').replace(/-/g, '').replace(/\s/g, '');
-          const rutDoc = await getDoc(doc(db, 'rut_lookup', rutLimpio));
-          if (rutDoc.exists() && rutDoc.data().email) {
-            emailFinal = rutDoc.data().email.toLowerCase();
+          const emailEncontrado = await resolverEmailPorRut(identificador);
+          if (emailEncontrado) {
+            emailFinal = emailEncontrado;
           } else {
             throw { code: 'auth/user-not-found' };
           }
         }
 
-        // Autenticación oficial
         await signInWithEmailAndPassword(auth, emailFinal, contrasena);
 
         showAlert('✓ Acceso concedido. Redirigiendo...', 'success');
@@ -244,13 +259,23 @@
     const formRecuperar = document.getElementById('formRecuperar');
     const modalAlert = document.getElementById('modalAlert');
     const btnEnviarRecuperar = document.getElementById('btnEnviarRecuperar');
+    const inputRecuperar = document.getElementById('emailRecuperar');
 
-    btnOlvidoClave.addEventListener('click', () => {
+    btnOlvidoClave.addEventListener('click', async () => {
       const inputIdentificador = document.getElementById('identificador').value.trim();
-      if (inputIdentificador.includes('@')) {
-        document.getElementById('emailRecuperar').value = inputIdentificador;
-      }
       modalAlert.style.display = 'none';
+
+      if (inputIdentificador.includes('@')) {
+        inputRecuperar.value = inputIdentificador;
+      } else if (inputIdentificador) {
+        // Si escribió un RUT en la pantalla principal, intentar resolverlo al abrir
+        inputRecuperar.value = inputIdentificador;
+        const emailRut = await resolverEmailPorRut(inputIdentificador);
+        if (emailRut) inputRecuperar.value = emailRut;
+      } else {
+        inputRecuperar.value = '';
+      }
+
       modalRecuperar.style.display = 'flex';
     });
 
@@ -262,25 +287,47 @@
       e.preventDefault();
       modalAlert.style.display = 'none';
 
-      const email = document.getElementById('emailRecuperar').value.trim().toLowerCase();
+      const valorIngresado = inputRecuperar.value.trim();
+      if (!valorIngresado) return;
+
       btnEnviarRecuperar.disabled = true;
       btnEnviarRecuperar.textContent = 'Enviando...';
 
+      let emailDestino = valorIngresado.toLowerCase();
+
       try {
-        await sendPasswordResetEmail(auth, email);
+        // Si el usuario escribió un RUT en la ventana modal
+        if (!valorIngresado.includes('@')) {
+          const emailResuelto = await resolverEmailPorRut(valorIngresado);
+          if (emailResuelto) {
+            emailDestino = emailResuelto;
+          } else {
+            throw { code: 'auth/user-not-found' };
+          }
+        }
+
+        // Envío del enlace oficial por Firebase Auth
+        await sendPasswordResetEmail(auth, emailDestino);
+
         modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-green-50 text-green-900 border border-green-200';
-        modalAlert.textContent = '✓ Enlace de recuperación enviado. Revisa tu bandeja de entrada o carpeta de spam.';
+        modalAlert.innerHTML = `✓ Enlace de recuperación enviado con éxito a <strong>${emailDestino}</strong>. Revisa tu bandeja de entrada o spam.`;
         modalAlert.style.display = 'block';
 
         setTimeout(() => {
           modalRecuperar.style.display = 'none';
           btnEnviarRecuperar.disabled = false;
           btnEnviarRecuperar.textContent = 'Enviar Enlace';
-        }, 3500);
+        }, 4000);
 
       } catch (err) {
         modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-red-50 text-red-900 border border-red-200';
-        modalAlert.textContent = '❌ Error al enviar el correo: ' + (err.code === 'auth/user-not-found' ? 'Correo no registrado.' : err.message);
+        if (err.code === 'auth/user-not-found') {
+          modalAlert.textContent = '❌ No encontramos ninguna cuenta vinculada a este RUT o correo.';
+        } else if (err.code === 'auth/invalid-email') {
+          modalAlert.textContent = '❌ El correo ingresado no tiene un formato válido.';
+        } else {
+          modalAlert.textContent = '❌ Error al enviar el correo: ' + err.message;
+        }
         modalAlert.style.display = 'block';
         btnEnviarRecuperar.disabled = false;
         btnEnviarRecuperar.textContent = 'Enviar Enlace';
