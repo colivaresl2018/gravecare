@@ -344,7 +344,7 @@
             "Tarapacá": ["Iquique", "Alto Hospicio", "Camiña", "Colchane", "Huara", "Pica", "Pozo Almonte"],
             "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "San Pedro de Atacama", "Tocopilla"],
             "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña"],
-            "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo", "Coquimbo"],
+            "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo"],
             "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Santo Domingo", "Viña del Mar", "Los Andes", "San Felipe", "Santa María", "Putaendo"],
             "Metropolitana de Santiago": ["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "Lampa", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"],
             "Libertador General Bernardo O'Higgins": ["Rancagua", "Machalí", "Mostazal", "Graneros", "Doñihue", "Requínoa", "Olivar", "Peumo", "Pichidegua"],
@@ -359,17 +359,22 @@
         };
 
         const regionSelect = document.getElementById('region');
-        Object.keys(regionesComunas).forEach(reg => {
-            const opt = document.createElement('option');
-            opt.value = reg;
-            opt.textContent = reg;
-            regionSelect.appendChild(opt);
-        });
-
         const paisSelect = document.getElementById('pais');
         const regionText = document.getElementById('regionText');
         const comunaSelect = document.getElementById('comuna');
         const comunaText = document.getElementById('comunaText');
+
+        function inicializarRegionesYComunas() {
+            regionSelect.innerHTML = '<option disabled selected value="">Selecciona región</option>';
+            Object.keys(regionesComunas).forEach(reg => {
+                const opt = document.createElement('option');
+                opt.value = reg;
+                opt.textContent = reg;
+                regionSelect.appendChild(opt);
+            });
+        }
+
+        inicializarRegionesYComunas();
 
         paisSelect.addEventListener('change', function() {
             const isChile = this.value === 'Chile';
@@ -396,7 +401,7 @@
             }
         });
 
-        // Fechas permitidas (mínimo 2 días de anticipación)
+        // Configurar fechas permitidas (mínimo 2 días de anticipación)
         const hoy = new Date();
         const minFecha = new Date(hoy);
         minFecha.setDate(minFecha.getDate() + 2);
@@ -437,7 +442,7 @@
                 const boxResumen = document.getElementById('modal-datos-resumen');
                 boxResumen.innerHTML = `
                     <p><strong>RUT:</strong> ${rut}</p>
-                    <p><strong>Nombre:</strong> ${datos.nombreCompleto || datos.nombre || 'Usuario Registrado'}</p>
+                    <p><strong>Nombre:</strong> ${datos.nombreCompleto || datos.nombres || 'Usuario Registrado'}</p>
                     <p><strong>Email:</strong> ${datos.email || 'No disponible'}</p>
                 `;
                 modal.classList.remove('hidden');
@@ -483,7 +488,7 @@
         }
 
         // ===================================================================
-        // SUBMIT DEL FORMULARIO CON VALIDACIÓN EN FIRESTORE
+        // SUBMIT DEL FORMULARIO CON VALIDACIÓN EN FIRESTORE BLINDADA
         // ===================================================================
         document.getElementById('contratacion-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -515,7 +520,7 @@
             }
 
             const btnSubmit = document.getElementById('submitBtn');
-            const textoOriginal = btnSubmit.textContent;
+            const textoOriginal = 'Continuar a Resumen de Pago →';
             btnSubmit.textContent = 'Verificando datos...';
             btnSubmit.disabled = true;
 
@@ -526,44 +531,59 @@
             let cuentaPreexistenteAceptada = false;
 
             try {
+                // Esperar a que Firebase esté listo si tarda en cargar
+                let intentos = 0;
+                while ((!window.gcFirebase || !window.gcFirebase.db) && intentos < 20) {
+                    await new Promise(r => setTimeout(r, 100));
+                    intentos++;
+                }
+
                 // 2. Consulta en Firestore a rut_lookup
                 if (window.gcFirebase && window.gcFirebase.db && cleanRut) {
-                    const snapRut = await window.gcFirebase.getDoc(
-                        window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', cleanRut)
-                    );
+                    try {
+                        const snapRut = await window.gcFirebase.getDoc(
+                            window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', cleanRut)
+                        );
 
-                    if (snapRut.exists()) {
-                        const datosEncontrados = snapRut.data();
-                        const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
+                        if (snapRut.exists()) {
+                            const datosEncontrados = snapRut.data();
+                            const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
 
-                        if (!aceptaIncorporar) {
-                            btnSubmit.textContent = textoOriginal;
-                            btnSubmit.disabled = false;
-                            document.getElementById('rut').value = '';
-                            document.getElementById('rut').focus();
-                            alert('Por favor, ingresa un nuevo RUT para continuar.');
-                            return;
+                            if (!aceptaIncorporar) {
+                                btnSubmit.textContent = textoOriginal;
+                                btnSubmit.disabled = false;
+                                document.getElementById('rut').value = '';
+                                document.getElementById('rut').focus();
+                                alert('Por favor, ingresa un nuevo RUT para continuar.');
+                                return;
+                            }
+
+                            cuentaPreexistenteAceptada = true;
+                            precargarDatosTitular(datosEncontrados);
                         }
-
-                        cuentaPreexistenteAceptada = true;
-                        precargarDatosTitular(datosEncontrados);
+                    } catch (fsErr) {
+                        console.error('Error al consultar rut_lookup en Firestore:', fsErr);
                     }
                 }
 
-                // 3. Validar si el email ya existe en Auth (si no aceptó su propia cuenta previa)
+                // 3. Validar si el email ya existe en Auth (si no aceptó su propia cuenta)
                 if (!cuentaPreexistenteAceptada && window.gcFirebase && window.gcFirebase.auth && email) {
-                    const metodos = await window.gcFirebase.fetchSignInMethodsForEmail(window.gcFirebase.auth, email);
-                    if (metodos && metodos.length > 0) {
-                        btnSubmit.textContent = textoOriginal;
-                        btnSubmit.disabled = false;
-                        alert('Este correo electrónico ya está registrado en el sistema. Debes ingresar uno diferente o iniciar sesión.');
-                        document.getElementById('email').focus();
-                        return;
+                    try {
+                        const metodos = await window.gcFirebase.fetchSignInMethodsForEmail(window.gcFirebase.auth, email);
+                        if (metodos && metodos.length > 0) {
+                            btnSubmit.textContent = textoOriginal;
+                            btnSubmit.disabled = false;
+                            alert('Este correo electrónico ya está registrado en el sistema. Debes ingresar uno diferente o iniciar sesión.');
+                            document.getElementById('email').focus();
+                            return;
+                        }
+                    } catch (authErr) {
+                        console.warn('Aviso en validación auth:', authErr);
                     }
                 }
 
             } catch (err) {
-                console.warn('Aviso durante validación previa:', err);
+                console.error('Aviso general durante validación:', err);
             }
 
             // 4. Guardado y avance a Resumen de Pago
