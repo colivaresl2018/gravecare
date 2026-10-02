@@ -78,9 +78,16 @@
         </span>
       </div>
       <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">¡Solicitud Registrada con Éxito!</h1>
-      <p class="text-on-surface-variant text-base max-w-xl">
+      <p id="conf-header-desc" class="text-on-surface-variant text-base max-w-xl">
         Hemos registrado tu contratación correctamente. Para acceder a tu panel y hacer seguimiento a tus fotos y reportes, crea tu cuenta o ingresa a tu perfil.
       </p>
+      
+      <!-- Aviso de Redirección Automática para Usuarios Existentes -->
+      <div id="conf-redirect-notice" class="hidden mt-4 bg-emerald-50 border border-emerald-300 text-emerald-900 px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm animate-pulse">
+        <span class="material-symbols-outlined text-emerald-700 text-lg">login</span>
+        <span>Detectamos tu cuenta existente. Redirigiendo a Inicio de Sesión en 3 segundos...</span>
+      </div>
+
       <div id="conf-order-badge" class="mt-4 inline-block bg-secondary-container px-4 py-1.5 rounded-full text-xs font-bold text-primary tracking-wider">
         Nº DE ORDEN: CARGANDO...
       </div>
@@ -157,8 +164,8 @@
           <div class="flex items-start gap-4 relative z-10">
             <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold">1</div>
             <div>
-              <h3 class="text-sm font-bold text-on-surface mb-1">Completa tu registro para crear tu cuenta de Usuario</h3>
-              <p class="text-xs text-on-surface-variant">Con tus datos podrás revisar reportes fotográficos de cada visita.</p>
+              <h3 id="step-1-title" class="text-sm font-bold text-on-surface mb-1">Completa tu registro para crear tu cuenta de Usuario</h3>
+              <p id="step-1-desc" class="text-xs text-on-surface-variant">Con tus datos podrás revisar reportes fotográficos de cada visita.</p>
             </div>
           </div>
 
@@ -185,7 +192,7 @@
     <!-- Actions Buttons -->
     <div class="flex flex-col sm:flex-row gap-4 items-center mt-2">
       <a id="btn-ir-registro" href="registro.html" class="bg-primary text-white hover:bg-primary-container transition-colors py-3.5 px-8 rounded-full text-sm font-bold w-full sm:w-auto text-center shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-        <span>Completar Registro</span>
+        <span id="btn-action-text">Completar Registro</span>
         <span class="material-symbols-outlined text-sm">arrow_forward</span>
       </a>
 
@@ -209,7 +216,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('=== CARGANDO CONFIRMACIÓN GRAVECARE ===');
 
-      // Si venimos de Webpay, el resultado real viene en la URL — nunca asumir éxito sin verificarlo.
       const urlParams = new URLSearchParams(window.location.search);
       const resultadoPago = urlParams.get('resultado');
       const numeroOrdenUrl = urlParams.get('orden');
@@ -227,9 +233,6 @@
         return;
       }
 
-      // Fuente de verdad principal: Firestore, usando el número de orden que
-      // viene en la URL (confiable, no depende de que el navegador haya
-      // conservado el localStorage durante el viaje de ida y vuelta a Webpay).
       let orderData = null;
 
       if (numeroOrdenUrl) {
@@ -246,8 +249,6 @@
         }
       }
 
-      // Respaldo: si no hay número de orden en la URL, o falló la lectura,
-      // intenta con lo que haya quedado guardado en el navegador.
       if (!orderData) {
         const ordenStr = localStorage.getItem('gravecare_datos_completos') ||
                          sessionStorage.getItem('gravecare_registro_datos') ||
@@ -256,15 +257,15 @@
         if (ordenStr) {
           try {
             orderData = JSON.parse(ordenStr);
-            console.log('✅ Orden recuperada desde almacenamiento del navegador:', orderData);
+            console.log('✅ Orden recuperada desde almacenamiento local:', orderData);
           } catch (errParse) {
-            console.warn('⚠️ No se pudo interpretar la orden guardada en el navegador:', errParse);
+            console.warn('⚠️ Error al interpretar orden local:', errParse);
           }
         }
       }
 
       if (!orderData) {
-        console.warn('⚠️ No se encontraron datos de la orden ni en Firestore ni en el navegador.');
+        console.warn('⚠️ No se encontraron datos de la orden.');
         document.getElementById('conf-plan-name').textContent = 'Plan Estándar';
         document.getElementById('conf-deceased-name').textContent = 'Ser Querido';
         document.getElementById('conf-cemetery-name').textContent = 'Cementerio por confirmar';
@@ -324,7 +325,7 @@
         document.getElementById('conf-sepultura-location').textContent = 
           partesUbicacion.length > 0 ? partesUbicacion.join(' | ') : (orderData.ubicacion || 'Por coordinar');
 
-        // 6. Monto Total (Conversión garantizada a número)
+        // 6. Monto Total
         let total = 0;
         if (orderData.valores?.total) {
           total = Number(orderData.valores.total);
@@ -337,24 +338,82 @@
           total = Number(orderData.precioBase);
         }
 
-        if (!total || total === 0) {
-          total = 34990; // Respaldo del plan inicial
-        }
-
+        if (!total || total === 0) total = 34990;
         document.getElementById('conf-price').textContent = `$${total.toLocaleString('es-CL')} (IVA incluido)`;
 
-        // 7. Configurar enlace a registro con el correo
-        const emailTitular = orderData.titular?.email || orderData.email || orderData.emailCliente || '';
-        const btnRegistro = document.getElementById('btn-ir-registro');
-        if (btnRegistro && emailTitular) {
-          btnRegistro.href = `registro.html?email=${encodeURIComponent(emailTitular)}`;
+        // 7. COMPROBACIÓN DE CUENTA EXISTENTE Y REDIRECCIÓN DIRECTA A LOGIN
+        const emailTitular = (orderData.titular?.email || orderData.email || orderData.emailCliente || '').toLowerCase().trim();
+        const rutTitular = (orderData.titular?.rut || orderData.rut || '').trim();
+        
+        let esClienteExistente = orderData.cuentaExistente === true;
+
+        // Si no venía la bandera explícita, verificar en rut_lookup con formatos compatibles
+        if (!esClienteExistente && rutTitular) {
+          try {
+            const rutLimpioSinPuntos = rutTitular.replace(/\./g, '').trim().toLowerCase();
+            const rutSoloNumeros = rutLimpioSinPuntos.replace(/[^0-9k]/g, '');
+            const formatos = [rutLimpioSinPuntos, rutSoloNumeros, rutTitular];
+
+            for (const fId of formatos) {
+              const snapRut = await getDoc(doc(db, 'rut_lookup', fId));
+              if (snapRut.exists()) {
+                esClienteExistente = true;
+                break;
+              }
+            }
+          } catch (e) {
+            console.warn('Verificación adicional en rut_lookup:', e);
+          }
         }
 
-        // Mantener la sesión activa para la pantalla de registro
+        const btnRegistro = document.getElementById('btn-ir-registro');
+        const btnActionText = document.getElementById('btn-action-text');
+        const headerDesc = document.getElementById('conf-header-desc');
+        const step1Title = document.getElementById('step-1-title');
+        const step1Desc = document.getElementById('step-1-desc');
+        const redirectNotice = document.getElementById('conf-redirect-notice');
+
+        if (esClienteExistente) {
+          console.log('👤 Cliente preexistente detectado. Preparando redirección a login.html');
+          
+          const loginUrl = `login.html${emailTitular ? `?email=${encodeURIComponent(emailTitular)}` : ''}`;
+
+          // Adaptar interfaz para usuario existente
+          if (btnRegistro) {
+            btnRegistro.href = loginUrl;
+          }
+          if (btnActionText) {
+            btnActionText.textContent = 'Iniciar Sesión en Mi Cuenta';
+          }
+          if (headerDesc) {
+            headerDesc.textContent = 'Hemos asociado tu nueva compra a tu cuenta existente. Accede a tu panel para ver tus órdenes y servicios activos.';
+          }
+          if (step1Title) {
+            step1Title.textContent = 'Ingresa con tu clave actual';
+          }
+          if (step1Desc) {
+            step1Desc.textContent = 'Tu servicio ya está vinculado a tu cuenta registrada.';
+          }
+          if (redirectNotice) {
+            redirectNotice.classList.remove('hidden');
+          }
+
+          // Redirección directa y automática tras 3 segundos
+          setTimeout(() => {
+            window.location.href = loginUrl;
+          }, 3000);
+
+        } else {
+          // Cliente nuevo: flujo habitual a registro
+          if (btnRegistro && emailTitular) {
+            btnRegistro.href = `registro.html?email=${encodeURIComponent(emailTitular)}`;
+          }
+        }
+
         sessionStorage.setItem('gravecare_registro_datos', JSON.stringify(orderData));
 
       } catch (err) {
-        console.error('❌ Error al renderizar confirmación:', err);
+        console.error('❌ Error al procesar confirmación:', err);
       }
     });
   </script>
