@@ -538,33 +538,47 @@
                     intentos++;
                 }
 
-                // 2. Consulta en Firestore a rut_lookup
-                if (window.gcFirebase && window.gcFirebase.db && cleanRut) {
-                    try {
-                        const snapRut = await window.gcFirebase.getDoc(
-                            window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', cleanRut)
-                        );
+// 2. Consulta en Firestore a rut_lookup (multiformato con guion y limpio)
+if (window.gcFirebase && window.gcFirebase.db) {
+    try {
+        const rutLimpioSinPuntos = rut.replace(/\./g, '').trim().toLowerCase(); // ej: 13793668-2
+        const formatosABuscar = [
+            rutLimpioSinPuntos,                 // '13793668-2' (tu formato actual en Firestore)
+            cleanRut,                           // '137936682'
+            rut.trim()                          // '13.793.668-2'
+        ];
 
-                        if (snapRut.exists()) {
-                            const datosEncontrados = snapRut.data();
-                            const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
+        let snapRut = null;
+        for (const fId of formatosABuscar) {
+            if (!fId) continue;
+            const refDoc = window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', fId);
+            const res = await window.gcFirebase.getDoc(refDoc);
+            if (res.exists()) {
+                snapRut = res;
+                break;
+            }
+        }
 
-                            if (!aceptaIncorporar) {
-                                btnSubmit.textContent = textoOriginal;
-                                btnSubmit.disabled = false;
-                                document.getElementById('rut').value = '';
-                                document.getElementById('rut').focus();
-                                alert('Por favor, ingresa un nuevo RUT para continuar.');
-                                return;
-                            }
+        if (snapRut && snapRut.exists()) {
+            const datosEncontrados = snapRut.data();
+            const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
 
-                            cuentaPreexistenteAceptada = true;
-                            precargarDatosTitular(datosEncontrados);
-                        }
-                    } catch (fsErr) {
-                        console.error('Error al consultar rut_lookup en Firestore:', fsErr);
-                    }
-                }
+            if (!aceptaIncorporar) {
+                btnSubmit.textContent = textoOriginal;
+                btnSubmit.disabled = false;
+                document.getElementById('rut').value = '';
+                document.getElementById('rut').focus();
+                alert('Por favor, ingresa un nuevo RUT para continuar.');
+                return;
+            }
+
+            cuentaPreexistenteAceptada = true;
+            precargarDatosTitular(datosEncontrados);
+        }
+    } catch (fsErr) {
+        console.error('Error al consultar rut_lookup en Firestore:', fsErr);
+    }
+}
 
                 // 3. Validar si el email ya existe en Auth (si no aceptó su propia cuenta)
                 if (!cuentaPreexistenteAceptada && window.gcFirebase && window.gcFirebase.auth && email) {
