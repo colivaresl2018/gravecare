@@ -62,7 +62,12 @@
             <form id="contratacion-form" class="form-card">
                 <div style="background-color: #f0f8f6; border-left: 4px solid var(--primary-color); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
                     <strong style="color: var(--primary-color); font-size: 1rem;">📋 Paso 1 - Datos del Servicio Spot</strong>
-                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del ser querido. ubicación de la sepultura, fecha de visita y titular</p>
+                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del ser querido, ubicación de la sepultura, fecha de visita y titular</p>
+                </div>
+
+                <div id="banner-datos-precargados" class="hidden" style="background-color: #ecfdf5; border-left: 4px solid #059669; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; color: #065f46;">
+                    <strong style="font-size: 0.95rem;">✓ Datos de cuenta existente cargados automáticamente</strong>
+                    <p style="margin-top: 0.25rem; font-size: 0.85rem;">Esta contratación se vinculará directamente a tu perfil registrado.</p>
                 </div>
 
                 <!-- Ser Querido -->
@@ -225,81 +230,95 @@
         </div>
     </div>
 
+    <!-- Modal de Decisión RUT -->
+    <div id="modal-decision-rut" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
+        <div style="background: white; border-radius: 16px; padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                <strong style="color: #92400e; font-size: 0.95rem;">⚠️ RUT Ya Registrado</strong>
+            </div>
+            <p style="color: #374151; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
+                Este RUT ya figura en nuestro sistema. <strong>¿Deseas incorporar esta compra a esa cuenta?</strong>
+            </p>
+            <div id="modal-datos-resumen" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; font-size: 0.85rem; color: #475569; margin-bottom: 1.25rem;"></div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="button" id="btnModalNoRut" style="flex: 1; padding: 0.75rem; background: #e2e8f0; color: #1e293b; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">No, Otro RUT</button>
+                <button type="button" id="btnModalSiRut" style="flex: 1; padding: 0.75rem; background: #1a3636; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Sí, Esta Cuenta</button>
+            </div>
+        </div>
+    </div>
+
     <div class="footer">
         <p>&copy; 2024 GraveCare SpA - Preservación & Memoria · contacto@gravecare.cl</p>
     </div>
 
+    <!-- Firebase SDK Modular Oficial -->
+    <script type="module">
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+            authDomain: "gravecare-2e8d2.firebaseapp.com",
+            projectId: "gravecare-2e8d2",
+            storageBucket: "gravecare-2e8d2.appspot.com",
+            messagingSenderId: "160012946248",
+            appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+        };
+
+        const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.gcFirebase = { db, auth, doc, getDoc, fetchSignInMethodsForEmail };
+    </script>
+
     <script>
-        // ===================================================================
-        // VALIDADOR DE RUT CHILENO
-        // ===================================================================
+        function normalizarRut(r) {
+            return (r || '').toLowerCase().replace(/[^0-9k]/g, '');
+        }
+
         function validarRutChileno(rut) {
-            // Si no es chileno, permitir cualquier cosa
             if (document.getElementById('pais').value !== 'Chile') {
                 return { valido: true, mensaje: '' };
             }
-
-            // Limpiar RUT: remover puntos, espacios y convertir a mayúsculas
             const rutLimpio = rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
-
-            // Validar formato básico
             if (!rutLimpio.match(/^\d{1,8}-[0-9K]$/)) {
-                return { 
-                    valido: false, 
-                    mensaje: 'Formato inválido. Usa: 12.345.678-9 o 12345678-K' 
-                };
+                return { valido: false, mensaje: 'Formato inválido. Usa: 12.345.678-9 o 12345678-K' };
             }
-
-            // Separar número y dígito verificador
             const [numeroStr, digitoVerificador] = rutLimpio.split('-');
-            const numero = parseInt(numeroStr, 10);
-
-            // Calcular dígito verificador correcto
             let suma = 0;
             let multiplicador = 2;
-
             for (let i = numeroStr.length - 1; i >= 0; i--) {
                 suma += parseInt(numeroStr[i], 10) * multiplicador;
                 multiplicador++;
                 if (multiplicador > 7) multiplicador = 2;
             }
-
             const resto = 11 - (suma % 11);
             let digitoEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
-
-            // Validar dígito verificador
             if (digitoVerificador !== digitoEsperado) {
-                return { 
-                    valido: false, 
-                    mensaje: `RUT inválido. Dígito verificador debe ser ${digitoEsperado}` 
-                };
+                return { valido: false, mensaje: `RUT inválido. Dígito verificador debe ser ${digitoEsperado}` };
             }
-
             return { valido: true, mensaje: 'RUT válido' };
         }
 
-        // Listener para validar RUT en tiempo real
         const rutInput = document.getElementById('rut');
         const rutError = document.getElementById('rutError');
         const rutValid = document.getElementById('rutValid');
 
         rutInput.addEventListener('input', function() {
             const resultado = validarRutChileno(this.value);
-            
             if (this.value.trim() === '') {
-                // Campo vacío: resetear
                 this.classList.remove('error', 'valid');
                 rutError.classList.remove('show');
                 rutValid.classList.remove('show');
             } else if (resultado.valido) {
-                // RUT válido
                 this.classList.remove('error');
                 this.classList.add('valid');
                 rutError.classList.remove('show');
                 rutValid.classList.add('show');
                 rutValid.textContent = '✓ RUT válido';
             } else {
-                // RUT inválido
                 this.classList.remove('valid');
                 this.classList.add('error');
                 rutError.classList.add('show');
@@ -308,25 +327,16 @@
             }
         });
 
-        // Validar RUT al cambiar país (Chile vs Extranjero)
         document.getElementById('pais').addEventListener('change', function() {
             if (this.value !== 'Chile') {
-                // No es Chile: limpiar validación
                 rutInput.classList.remove('error', 'valid');
                 rutError.classList.remove('show');
                 rutValid.classList.remove('show');
-                rutInput.removeAttribute('pattern');
-            } else {
-                // Es Chile: re-validar si hay RUT escrito
-                if (rutInput.value.trim()) {
-                    rutInput.dispatchEvent(new Event('input'));
-                }
+            } else if (rutInput.value.trim()) {
+                rutInput.dispatchEvent(new Event('input'));
             }
         });
 
-        // ===================================================================
-        // RESTO DEL CÓDIGO ORIGINAL
-        // ===================================================================
         let datosDelPlanGlobal = {};
 
         const regionesComunas = {
@@ -386,7 +396,7 @@
             }
         });
 
-        // Configurar fechas permitidas (mínimo 2 días de anticipación)
+        // Fechas permitidas (mínimo 2 días de anticipación)
         const hoy = new Date();
         const minFecha = new Date(hoy);
         minFecha.setDate(minFecha.getDate() + 2);
@@ -421,10 +431,64 @@
             }
         }
 
-        document.getElementById('contratacion-form').addEventListener('submit', (e) => {
+        function preguntarModalRut(rut, datos) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-decision-rut');
+                const boxResumen = document.getElementById('modal-datos-resumen');
+                boxResumen.innerHTML = `
+                    <p><strong>RUT:</strong> ${rut}</p>
+                    <p><strong>Nombre:</strong> ${datos.nombreCompleto || datos.nombre || 'Usuario Registrado'}</p>
+                    <p><strong>Email:</strong> ${datos.email || 'No disponible'}</p>
+                `;
+                modal.classList.remove('hidden');
+
+                const btnNo = document.getElementById('btnModalNoRut');
+                const btnSi = document.getElementById('btnModalSiRut');
+
+                const cleanup = () => {
+                    modal.classList.add('hidden');
+                    btnNo.onclick = null;
+                    btnSi.onclick = null;
+                };
+
+                btnNo.onclick = () => { cleanup(); resolve(false); };
+                btnSi.onclick = () => { cleanup(); resolve(true); };
+            });
+        }
+
+        function precargarDatosTitular(datos) {
+            if (datos.nombres) document.getElementById('nombresTitular').value = datos.nombres;
+            else if (datos.nombreCompleto) document.getElementById('nombresTitular').value = datos.nombreCompleto;
+            if (datos.apellidoPaterno) document.getElementById('apellidoPaternoTitular').value = datos.apellidoPaterno;
+            if (datos.apellidoMaterno) document.getElementById('apellidoMaternoTitular').value = datos.apellidoMaterno;
+
+            if (datos.email) {
+                const elEmail = document.getElementById('email');
+                elEmail.value = datos.email;
+                elEmail.readOnly = true;
+                elEmail.style.backgroundColor = '#f1f5f9';
+            }
+            if (datos.telefono) document.getElementById('telefono').value = datos.telefono;
+            if (datos.direccion) document.getElementById('direccion').value = datos.direccion;
+            if (datos.numero) document.getElementById('numero').value = datos.numero;
+            if (datos.departamento) document.getElementById('departamento').value = datos.departamento;
+
+            if (datos.region && regionSelect) {
+                regionSelect.value = datos.region;
+                regionSelect.dispatchEvent(new Event('change'));
+                if (datos.comuna && comunaSelect) comunaSelect.value = datos.comuna;
+            }
+
+            document.getElementById('banner-datos-precargados').classList.remove('hidden');
+        }
+
+        // ===================================================================
+        // SUBMIT DEL FORMULARIO CON VALIDACIÓN EN FIRESTORE
+        // ===================================================================
+        document.getElementById('contratacion-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Validar RUT si es Chile
+            // 1. Validar formato RUT si es Chile
             if (document.getElementById('pais').value === 'Chile') {
                 const resultadoRut = validarRutChileno(document.getElementById('rut').value);
                 if (!resultadoRut.valido) {
@@ -450,6 +514,59 @@
                 return;
             }
 
+            const btnSubmit = document.getElementById('submitBtn');
+            const textoOriginal = btnSubmit.textContent;
+            btnSubmit.textContent = 'Verificando datos...';
+            btnSubmit.disabled = true;
+
+            const rut = document.getElementById('rut').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const cleanRut = normalizarRut(rut);
+
+            let cuentaPreexistenteAceptada = false;
+
+            try {
+                // 2. Consulta en Firestore a rut_lookup
+                if (window.gcFirebase && window.gcFirebase.db && cleanRut) {
+                    const snapRut = await window.gcFirebase.getDoc(
+                        window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', cleanRut)
+                    );
+
+                    if (snapRut.exists()) {
+                        const datosEncontrados = snapRut.data();
+                        const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
+
+                        if (!aceptaIncorporar) {
+                            btnSubmit.textContent = textoOriginal;
+                            btnSubmit.disabled = false;
+                            document.getElementById('rut').value = '';
+                            document.getElementById('rut').focus();
+                            alert('Por favor, ingresa un nuevo RUT para continuar.');
+                            return;
+                        }
+
+                        cuentaPreexistenteAceptada = true;
+                        precargarDatosTitular(datosEncontrados);
+                    }
+                }
+
+                // 3. Validar si el email ya existe en Auth (si no aceptó su propia cuenta previa)
+                if (!cuentaPreexistenteAceptada && window.gcFirebase && window.gcFirebase.auth && email) {
+                    const metodos = await window.gcFirebase.fetchSignInMethodsForEmail(window.gcFirebase.auth, email);
+                    if (metodos && metodos.length > 0) {
+                        btnSubmit.textContent = textoOriginal;
+                        btnSubmit.disabled = false;
+                        alert('Este correo electrónico ya está registrado en el sistema. Debes ingresar uno diferente o iniciar sesión.');
+                        document.getElementById('email').focus();
+                        return;
+                    }
+                }
+
+            } catch (err) {
+                console.warn('Aviso durante validación previa:', err);
+            }
+
+            // 4. Guardado y avance a Resumen de Pago
             const pais = document.getElementById('pais').value;
             const region = (pais === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
             const comuna = (pais === 'Chile') ? document.getElementById('comuna').value : document.getElementById('comunaText').value;
@@ -471,6 +588,7 @@
                 numeroOrden: datosDelPlanGlobal.numeroOrden || ('ORD-' + Date.now()),
                 tipoServicio: 'SPOT',
                 tipoSuscripcion: 'SPOT',
+                cuentaExistente: cuentaPreexistenteAceptada,
                 fechaServicioProgramada: fechaISO,
                 fechaServicioTexto: fechaInput.value,
                 titular: {
@@ -478,9 +596,9 @@
                     nombres: nombresTit,
                     apellidoPaterno: apPatTit,
                     apellidoMaterno: apMatTit,
-                    email: document.getElementById('email').value.trim(),
-                    rut: document.getElementById('rut').value.trim(),
-                    rutDni: document.getElementById('rut').value.trim(),
+                    email: email,
+                    rut: rut,
+                    rutDni: rut,
                     telefono: document.getElementById('telefono').value.trim(),
                     pais: pais,
                     direccion: dirCalle,
@@ -530,26 +648,6 @@
         });
 
         cargarDatosPrevios();
-
-        // Funciones placeholder (implementar según tu lógica)
-        function obtenerDatosTitularPrevios() {
-            return Promise.resolve(null);
-        }
-
-        function rellenarCamposTitular(titular) {
-            // Rellenar campos si existen datos previos
-        }
-
-        function mostrarAvisoDatosPrevios() {
-            // Mostrar aviso si hay datos previos
-        }
-
-        obtenerDatosTitularPrevios().then((titular) => {
-            if (!titular) return;
-            rellenarCamposTitular(titular);
-            mostrarAvisoDatosPrevios();
-        });
     </script>
-    <script src="js/validacion-contratacion.js"></script>
-  </body>
+</body>
 </html>
