@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>Login - GraveCare Operaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background: linear-gradient(135deg, #002d1a 0%, #1a472a 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+      padding: 36px 32px;
+    }
+    .logo { text-align: center; margin-bottom: 24px; }
+    .logo i { font-size: 2.5rem; color: #002d1a; margin-bottom: 8px; }
+    .logo h1 { font-size: 1.6rem; color: #002d1a; font-weight: 700; }
+    .logo p { color: #4e6451; font-size: 0.85rem; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: #002d1a; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #c1c8c1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: #002d1a;
+      box-shadow: 0 0 0 3px rgba(0, 45, 26, 0.1);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: #002d1a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .btn-login:hover { background: #1a432f; }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+    .alert { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.85rem; }
+    .alert.error { background: #fed7d7; color: #c53030; border: 1px solid #fc8181; }
+    .alert.success { background: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
+    .loading { display: none; text-align: center; margin-top: 14px; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid #e2e8f0;
+      border-top-color: #002d1a; border-radius: 50%;
+      animation: spin 1s linear infinite; margin: 0 auto 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="logo">
+    <i class="fa-solid fa-leaf"></i>
+    <h1>GraveCare</h1>
+    <p>Portal de Operaciones</p>
+  </div>
+
+  <div id="alertContainer"></div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label for="identifier">Correo Electrónico</label>
+      <input type="text" id="identifier" placeholder="usuario@gravecare.cl" required autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" class="btn-login" id="btnLogin">Ingresar</button>
+  </form>
+
+  <div class="loading" id="loadingScreen">
+    <div class="spinner"></div>
+    <p style="font-size: 0.8rem; color: #4e6451;">Verificando credenciales...</p>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "./js/firebaseConfig.js";
+  import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const form = document.getElementById("loginForm");
+  const btnLogin = document.getElementById("btnLogin");
+  const alertContainer = document.getElementById("alertContainer");
+  const loadingScreen = document.getElementById("loadingScreen");
+
+  function showAlert(tipo, msg) {
+    alertContainer.innerHTML = `<div class="alert ${tipo}">${msg}</div>`;
+    setTimeout(() => { alertContainer.innerHTML = ""; }, 5000);
+  }
+
+  async function esUsuarioStaff(uid) {
+    try {
+      const staffSnap = await getDoc(doc(db, "staff", uid));
+      if (staffSnap.exists()) {
+        const d = staffSnap.data();
+        if (d.activo !== false) return true;
+      }
+
+      const userSnap = await getDoc(doc(db, "usuarios", uid));
+      if (userSnap.exists()) {
+        const u = userSnap.data();
+        const rol = (u.rol || u.tipo || "").toLowerCase();
+        if (["staff", "operador", "admin", "administrador", "operaciones"].includes(rol)) {
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn("Validando permisos de staff:", e);
+    }
+    return false;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const tieneAcceso = await esUsuarioStaff(user.uid);
+      if (tieneAcceso) {
+        window.location.replace("/portal.html");
+      }
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("identifier").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      showAlert("error", "Por favor completa ambos campos.");
+      return;
+    }
+
+    btnLogin.disabled = true;
+    loadingScreen.style.display = "block";
+
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const tienePermiso = await esUsuarioStaff(cred.user.uid);
+
+      if (!tienePermiso) {
+        showAlert("error", "Acceso denegado: tu cuenta no tiene permisos de operador.");
+        btnLogin.disabled = false;
+        loadingScreen.style.display = "none";
+        return;
+      }
+
+      showAlert("success", "✓ Acceso verificado. Ingresando...");
+      setTimeout(() => { window.location.replace("/portal.html"); }, 600);
+
+    } catch (err) {
+      console.error(err);
+      loadingScreen.style.display = "none";
+      btnLogin.disabled = false;
+      showAlert("error", "Credenciales incorrectas o usuario no registrado.");
+    }
+  });
+</script>
+
+</body>
+</html>
