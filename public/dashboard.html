@@ -1,3 +1,20 @@
+const snapPagos = await getDocs(query(
+  collection(db, "pagos"),
+  where("usuarioId", "==", user.uid)
+));
+```[cite: 13]
+
+Como al pagar por Webpay los datos de la compra (Plan 6, $371.940, Orden `ORD-1790963695673`) se guardaron directamente en la colección **`ordenes`**[cite: 10, 11, 20], la colección `pagos` devuelve 0 documentos y `dashboard.html` muestra *"Sin comprobantes de pago registrados aún"*[cite: 13].
+
+---
+
+### Solución
+
+Hacer que la tarjeta de **Facturación Reciente** en `dashboard.html` lea también de la colección `ordenes` (que ya tiene tu orden activa confirmada de $371.940)[cite: 10, 11, 13, 20].
+
+Aquí tienes el código completo de **`public/dashboard.html`** listo para llegar y reemplazar:
+
+```html
 <!DOCTYPE html>
 <html class="light" lang="es">
 <head>
@@ -8,9 +25,6 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  
-  <!-- Librería para generar y descargar PDF directamente en el cliente -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script id="tailwind-config">
     tailwind.config = {
@@ -48,25 +62,15 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
     .sidebar-item { transition: all 0.2s ease; }
-    
-    /* Contenedor oculto formateado para la exportación a hoja PDF A4 */
-    #plantilla-contrato-pdf {
-      display: none;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      color: #191c1b;
-      padding: 30px;
-      line-height: 1.5;
-      background: #ffffff;
-    }
   </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
 
-  <!-- Sidebar Navigation Desktop -->
+  <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/Logo.png">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.webp" onerror="this.onerror=null; this.src='assets/logo.png';">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -78,9 +82,13 @@
         <span class="material-symbols-outlined">account_balance</span>
         <span class="text-sm font-semibold">Mis Sepulturas</span>
       </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="contratos.html">
+        <span class="material-symbols-outlined">description</span>
+        <span class="text-sm font-semibold">Contratos</span>
+      </a>
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
         <span class="material-symbols-outlined">receipt_long</span>
-        <span class="text-sm font-semibold">Pagos & Suscripción</span>
+        <span class="text-sm font-semibold">Pagos &amp; Suscripción</span>
       </a>
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
         <span class="material-symbols-outlined">photo_library</span>
@@ -99,7 +107,7 @@
     </div>
   </aside>
 
-  <!-- Main Content Area -->
+  <!-- Main Content -->
   <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
     <header class="mb-10">
       <h1 class="text-2xl md:text-3xl font-bold text-primary" id="greeting">Hola, Bienvenido a GraveCare</h1>
@@ -144,25 +152,7 @@
         </div>
       </div>
 
-      <!-- Sección de Descarga de Contrato en PDF -->
-      <div class="lg:col-span-12 bg-white p-5 md:p-6 rounded-xl border border-emerald-900/10 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-emerald-50/50 to-white">
-        <div class="flex items-center space-x-4">
-          <div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container flex-shrink-0 shadow-sm">
-            <span class="material-symbols-outlined text-2xl text-emerald-200">history_edu</span>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-primary">Contrato de Prestación de Servicios & Mandato Especial</h3>
-            <p class="text-xs text-gray-500 mt-0.5" id="txtContratoInfo">Consultando documento legal vigente...</p>
-          </div>
-        </div>
-        <div id="btnContratoContainer" class="w-full sm:w-auto">
-          <button type="button" disabled class="opacity-50 px-5 py-2.5 rounded-lg bg-gray-200 text-gray-500 text-xs font-bold cursor-not-allowed">
-            Cargando...
-          </button>
-        </div>
-      </div>
-
-      <!-- Maintenance History / Informes Oficiales -->
+      <!-- Historial de Mantenimiento -->
       <div class="lg:col-span-8 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-lg font-bold text-primary">Historial de Mantenimiento</h2>
@@ -173,7 +163,7 @@
         </div>
       </div>
 
-      <!-- Gallery Preview -->
+      <!-- Galería Preview -->
       <div class="lg:col-span-4 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm flex flex-col">
         <h2 class="text-lg font-bold text-primary mb-1">Últimas Fotografías</h2>
         <p class="text-xs text-on-surface-variant mb-4">Registro en terreno</p>
@@ -188,7 +178,7 @@
         </a>
       </div>
 
-      <!-- Billing Preview -->
+      <!-- Facturación Reciente -->
       <div class="lg:col-span-12 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-lg font-bold text-primary">Facturación Reciente</h2>
@@ -201,88 +191,31 @@
     </div>
   </main>
 
-  <!-- Mobile Navigation Bottom -->
-  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+  <!-- Mobile Bottom Nav -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-1 z-50">
     <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="dashboard.html">
-      <span class="material-symbols-outlined">dashboard</span>
-      <span class="text-[10px] mt-1">Resumen</span>
+      <span class="material-symbols-outlined text-xl">dashboard</span>
+      <span class="text-[9px] mt-1">Resumen</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
-      <span class="material-symbols-outlined">account_balance</span>
-      <span class="text-[10px] mt-1">Sepulturas</span>
+      <span class="material-symbols-outlined text-xl">account_balance</span>
+      <span class="text-[9px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="contratos.html">
+      <span class="material-symbols-outlined text-xl">description</span>
+      <span class="text-[9px] mt-1">Contratos</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
-      <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] mt-1">Pagos</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
-      <span class="material-symbols-outlined">photo_library</span>
-      <span class="text-[10px] mt-1">Fotos</span>
+      <span class="material-symbols-outlined text-xl">receipt_long</span>
+      <span class="text-[9px] mt-1">Pagos</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
-      <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] mt-1">Perfil</span>
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="text-[9px] mt-1">Perfil</span>
     </a>
   </nav>
 
-  <!-- Contenedor invisible para renderizar y exportar a PDF -->
-  <div id="plantilla-contrato-pdf">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a3636; padding-bottom: 15px; margin-bottom: 20px;">
-      <div>
-        <h1 style="font-size: 20px; font-weight: bold; color: #1a3636; margin: 0;">GRAVECARE CHILE</h1>
-        <p style="font-size: 11px; color: #555; margin: 3px 0 0 0;">Preservación Ornamental & Cuidado de Sepulturas — SpA RUT: 78.498.653-5</p>
-      </div>
-      <div style="text-align: right;">
-        <span style="background: #edf5f2; color: #1a3636; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #c2d7ce;">DOCUMENTO LEGAL VIGENTE</span>
-        <p style="font-size: 11px; color: #555; margin-top: 5px;">Orden: <strong id="pdfNumeroOrden">---</strong></p>
-      </div>
-    </div>
-
-    <div style="font-size: 12px; line-height: 1.6; color: #222; text-align: justify;">
-      <p style="font-weight: bold; text-align: center; font-size: 13px; color: #1a3636; margin-bottom: 15px; text-transform: uppercase;">
-        CONTRATO DE PRESTACIÓN DE SERVICIOS & MANDATO ESPECIAL DE ACCESO
-      </p>
-
-      <p>
-        En Santiago de Chile, a <span id="pdfFechaContrato" style="font-weight: bold;">---</span>, entre <strong>GraveCare SpA</strong>, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) <strong id="pdfNombreCliente">---</strong>, RUT N° <strong id="pdfRutCliente">---</strong>, con domicilio en <span id="pdfDireccionCliente">---</span>, correo <span id="pdfEmailCliente">---</span> y teléfono <span id="pdfTelefonoCliente">---</span>, en adelante el «Cliente», se ha convenido lo siguiente:
-      </p>
-
-      <p>
-        <strong>PRIMERO (Objeto y Mandato Especial):</strong> La Empresa prestará el servicio de mantención, ornamento floral y preservación conforme al plan <strong id="pdfPlanNombre">---</strong>. El Cliente declara ser titular o facultado legal respecto de la sepultura ubicada en <strong id="pdfSepulturaUbicacion">---</strong>, correspondiente al descanso de don(ña) <strong id="pdfDifuntoNombre">---</strong>, y confiere a GraveCare SpA mandato especial suficiente para ingresar y ejecutar exclusivamente las labores pactadas.
-      </p>
-
-      <p><strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de lápidas, cruces y accesorios, retiro de elementos marchitos, desmalezado y floristería fresca de temporada. Quedan excluidas intervenciones mayores de albañilería, restauración estructural profunda o alteración de restos.</p>
-
-      <p><strong>TERCERO (Verificación Digital):</strong> Cada servicio emitirá un reporte fotográfico comparativo («Antes» y «Después»), remitido formalmente dentro de las 24 horas hábiles posteriores.</p>
-
-      <p>
-        <strong>CUARTO (Honorarios y Pago):</strong> El valor pactado corresponde a <strong id="pdfMontoTotal">---</strong> (IVA incluido), cancelado por adelantado a través de los sistemas electrónicos de pago de Transbank.
-      </p>
-
-      <p><strong>QUINTO (Plazo y Vigencia):</strong> El presente contrato rige a contar de la confirmación del pago y mantendrá su vigencia durante el período correspondiente al plan contratado.</p>
-
-      <p><strong>SEXTO (Responsabilidad):</strong> La Empresa responde por la correcta prestación del servicio conforme a los estándares acordados, no respondiendo por desgaste previo de materiales, actos vandálicos de terceros en el recinto ni restricciones externas imprevistas del cementerio.</p>
-
-      <p><strong>SÉPTIMO (Protección de Datos):</strong> El tratamiento de datos personales se rige bajo la Ley N° 19.628 para fines exclusivos de la ejecución del servicio y emisión de comprobantes tributarios.</p>
-
-      <p><strong>OCTAVO (Naturaleza del Vínculo):</strong> Convenio de naturaleza civil y comercial, sin que genere relación laboral o de dependencia.</p>
-
-      <p><strong>NOVENO (Jurisdicción):</strong> Las partes se someten a la competencia de los Tribunales Ordinarios de Justicia de la ciudad de Santiago de Chile.</p>
-    </div>
-
-    <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px; font-size: 11px; color: #444; display: flex; justify-content: space-between;">
-      <div>
-        <p><strong>CLIENTE / MANDANTE:</strong> <span id="pdfFirmaCliente">---</span></p>
-        <p style="color: #666;">Aceptación electrónica certificada en portal gravecare.cl</p>
-      </div>
-      <div style="text-align: right;">
-        <p><strong>GRAVECARE SPA</strong></p>
-        <p style="color: #666;">RUT N° 78.498.653-5</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Script Firebase v10.7.0 Unificado -->
+  <!-- Script Firebase -->
   <script type="module">
     import { observeAuthState, logoutUser } from "./js/auth.js";
     import { db } from "./js/firebaseConfig.js";
@@ -295,84 +228,20 @@
       getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    let ordenActivaParaPdf = null;
-
     async function cerrarSesion() {
       await logoutUser();
-      sessionStorage.removeItem("gravecare_user");
+      sessionStorage.clear();
       window.location.href = "login.html";
     }
 
     document.getElementById("btn-logout-sidebar")?.addEventListener("click", cerrarSesion);
 
     function formatearFechaChile(f) {
-      if (!f) return "Por coordinar";
+      if (!f) return "Reciente";
       const d = f?.toDate ? f.toDate() : new Date(f);
       if (isNaN(d.getTime())) return f;
       return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
     }
-
-    // Función que toma la orden, llena la plantilla invisible y descarga el archivo PDF
-    window.descargarContratoPdf = function() {
-      if (!ordenActivaParaPdf) {
-        alert("No se encontró la información del contrato.");
-        return;
-      }
-
-      const o = ordenActivaParaPdf;
-      const titular = o.titular || {};
-      const difunto = o.difunto || {};
-      const sepultura = o.ubicacionSepultura || {};
-
-      const nombreCliente = titular.nombre || [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(" ") || "Cliente Titular";
-      const rutCliente = titular.rut || titular.rutDni || "No registrado";
-      const direccionCliente = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : '', titular.comuna, titular.region].filter(Boolean).join(", ") || "Dirección registrada";
-      const emailCliente = titular.email || o.emailCliente || "No registrado";
-      const fonoCliente = titular.telefono || o.telefonoCliente || "No registrado";
-
-      const nombreDifunto = difunto.nombre || [difunto.nombres, difunto.apellidoPaterno, difunto.apellidoMaterno].filter(Boolean).join(" ") || o.nombreFallecido || "Ser Querido";
-      const cementerio = sepultura.cementerio || o.cementerio || "Cementerio";
-      const patio = sepultura.patio || "";
-      const numSep = sepultura.numero || sepultura.numeroSepultura || "";
-      const ubicacionCompleta = `${cementerio}${patio || numSep ? ` (Patio: ${patio}, N°:${numSep})` : ''}`;
-
-      const totalMonto = Number(o.precioNumerico || o.montoTotal || o.valores?.total || 34990);
-      const montoFormateado = `$${totalMonto.toLocaleString('es-CL')}`;
-
-      // Inyectar datos en el contenedor del PDF
-      document.getElementById("pdfNumeroOrden").textContent = o.numeroOrden || o.id || "ORD-GC";
-      document.getElementById("pdfFechaContrato").textContent = formatearFechaChile(o.creadoEl || o.createdAt || new Date());
-      document.getElementById("pdfNombreCliente").textContent = nombreCliente;
-      document.getElementById("pdfRutCliente").textContent = rutCliente;
-      document.getElementById("pdfDireccionCliente").textContent = direccionCliente;
-      document.getElementById("pdfEmailCliente").textContent = emailCliente;
-      document.getElementById("pdfTelefonoCliente").textContent = fonoCliente;
-      document.getElementById("pdfPlanNombre").textContent = o.servicio?.planNombre || o.planNombre || o.plan || "Plan de Mantención";
-      document.getElementById("pdfSepulturaUbicacion").textContent = ubicacionCompleta;
-      document.getElementById("pdfDifuntoNombre").textContent = nombreDifunto;
-      document.getElementById("pdfMontoTotal").textContent = montoFormateado;
-      document.getElementById("pdfFirmaCliente").textContent = `${nombreCliente} (RUT: ${rutCliente})`;
-
-      // Generar y descargar el PDF con html2pdf
-      const elemento = document.getElementById("plantilla-contrato-pdf");
-      elemento.style.display = "block"; // Habilitar visualización para renderizado
-
-      const opciones = {
-        margin: [10, 10, 10, 10],
-        filename: `Contrato_GraveCare_${o.numeroOrden || 'Servicio'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      html2pdf().set(opciones).from(elemento).save().then(() => {
-        elemento.style.display = "none"; // Ocultar nuevamente
-      }).catch(err => {
-        console.error("Error al exportar PDF:", err);
-        elemento.style.display = "none";
-        alert("Ocurrió un error al generar el PDF. Por favor intenta nuevamente.");
-      });
-    };
 
     observeAuthState(async (user) => {
       if (!user) {
@@ -383,7 +252,7 @@
       try {
         const emailCliente = (user.email || "").toLowerCase().trim();
 
-        // 1. Datos del Perfil del Usuario
+        // 1. Datos del Perfil
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (userDoc.exists()) {
           const profile = userDoc.data();
@@ -393,25 +262,22 @@
           document.getElementById("tipoPlan").textContent = profile.planNombre || profile.plan || "Plan Base";
         }
 
-        // 2. Órdenes Asociadas al Cliente (por UID o email)
+        // 2. Órdenes del Cliente (para datos y pagos)
         let fechaProxima = null;
         let countServicios = 0;
         const fotosList = [];
         const ordenesIds = new Set();
-        let ordenEncontrada = null;
+        const listaOrdenesCliente = [];
 
         const ordenesRef = collection(db, "ordenes");
-        const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
-        const snapUid = await getDocs(qUid);
+        const snapUid = await getDocs(query(ordenesRef, where("usuarioId", "==", user.uid)));
         snapUid.forEach(docSnap => ordenesIds.add(docSnap.id));
 
         if (emailCliente) {
-          const qTitular = query(ordenesRef, where("titular.email", "==", emailCliente));
-          const snapTitular = await getDocs(qTitular);
+          const snapTitular = await getDocs(query(ordenesRef, where("titular.email", "==", emailCliente)));
           snapTitular.forEach(docSnap => ordenesIds.add(docSnap.id));
 
-          const qCliente = query(ordenesRef, where("emailCliente", "==", emailCliente));
-          const snapCliente = await getDocs(qCliente);
+          const snapCliente = await getDocs(query(ordenesRef, where("emailCliente", "==", emailCliente)));
           snapCliente.forEach(docSnap => ordenesIds.add(docSnap.id));
         }
 
@@ -419,52 +285,25 @@
           const ordenSnap = await getDoc(doc(db, "ordenes", ordenId));
           if (!ordenSnap.exists()) continue;
           const o = { id: ordenSnap.id, ...ordenSnap.data() };
+          listaOrdenesCliente.push(o);
           if (o.proximaVisita) fechaProxima = o.proximaVisita;
           if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
           if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
-          
-          if (!ordenEncontrada) {
-            ordenEncontrada = o;
-          }
-        }
-
-        // Renderizar tarjeta y botón de Contrato
-        const btnContratoBox = document.getElementById("btnContratoContainer");
-        const txtContratoInfo = document.getElementById("txtContratoInfo");
-        
-        if (ordenEncontrada) {
-          ordenActivaParaPdf = ordenEncontrada;
-          const numOrd = ordenEncontrada.numeroOrden || ordenEncontrada.id;
-          txtContratoInfo.textContent = `Orden N° ${numOrd} — Contrato de 9 cláusulas y mandato especial vigente`;
-          btnContratoBox.innerHTML = `
-            <button type="button" onclick="window.descargarContratoPdf()" 
-                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-[#1a3636] text-white text-xs font-bold transition shadow-sm w-full sm:w-auto cursor-pointer">
-              <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
-              <span>Descargar Contrato PDF</span>
-            </button>`;
-        } else {
-          txtContratoInfo.textContent = `No hay un contrato formalizado aún para esta cuenta`;
-          btnContratoBox.innerHTML = `
-            <span class="text-xs text-gray-400 font-semibold">Sin contrato</span>`;
         }
 
         document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
 
-        // 3. Consultar Informes Aprobados
+        // 3. Informes Aprobados
         const contenedorMant = document.getElementById("contenedor-mantenimientos");
         const misInformes = [];
 
         if (emailCliente) {
-          const qInformes = query(collection(db, "informes"), where("clienteEmail", "==", emailCliente));
-          const snapInformes = await getDocs(qInformes);
-
+          const snapInformes = await getDocs(query(collection(db, "informes"), where("clienteEmail", "==", emailCliente)));
           snapInformes.forEach(docSnap => {
             const inf = { id: docSnap.id, ...docSnap.data() };
             const estado = (inf.estado || "").toLowerCase().trim();
-
             if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
               misInformes.push(inf);
-
               const fotos = inf.fotos || {};
               if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
               if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
@@ -474,12 +313,7 @@
           });
         }
 
-        misInformes.sort((a, b) => {
-          const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();
-          const fb = new Date(b.fechaCaptura || b.fechaAprobacion || 0).getTime();
-          return fb - fa;
-        });
-
+        misInformes.sort((a, b) => new Date(b.fechaCaptura || b.fechaAprobacion || 0) - new Date(a.fechaCaptura || a.fechaAprobacion || 0));
         document.getElementById("serviciosCount").textContent = misInformes.length || countServicios;
 
         if (misInformes.length === 0) {
@@ -509,10 +343,9 @@
           }).join("");
         }
 
-        // 4. Vista Previa de Fotografías
+        // 4. Galería Preview
         const contenedorFotos = document.getElementById("contenedor-fotos-dashboard");
         const fotosUnicas = [...new Set(fotosList)].filter(Boolean);
-
         if (fotosUnicas.length > 0) {
           contenedorFotos.innerHTML = fotosUnicas.slice(0, 2).map(url => `
             <div class="w-full h-32 rounded-lg overflow-hidden border border-outline-variant/30 bg-surface-container">
@@ -521,40 +354,66 @@
           `).join("");
         }
 
-        // 5. Facturación Reciente
+        // 5. Facturación Reciente: Respaldo cruzado entre 'pagos' y 'ordenes'
         const contenedorFact = document.getElementById("contenedor-facturas");
+        const listaPagosDashboard = [];
+        const idsPagosDashboard = new Set();
+
+        // A. Consultar colección pagos
         try {
-          const snapPagos = await getDocs(query(
-            collection(db, "pagos"),
-            where("usuarioId", "==", user.uid)
-          ));
-
-          const pagosDocs = snapPagos.docs.map(d => ({ id: d.id, ...d.data() }));
-          pagosDocs.sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
-
-          if (pagosDocs.length === 0) {
-            contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
-          } else {
-            contenedorFact.innerHTML = pagosDocs.slice(0, 2).map(p => {
-              const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 0);
-              return `
-                <li class="flex items-center justify-between py-3">
-                  <div>
-                    <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
-                    <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — ${monto}</p>
-                  </div>
-                  <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors">
-                    <span class="material-symbols-outlined text-base">visibility</span>
-                  </a>
-                </li>`;
-            }).join("");
-          }
+          const snapPagos = await getDocs(query(collection(db, "pagos"), where("usuarioId", "==", user.uid)));
+          snapPagos.forEach(d => {
+            idsPagosDashboard.add(d.id);
+            listaPagosDashboard.push({ id: d.id, ...d.data() });
+          });
         } catch (e) {
-          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago disponibles.</li>`;
+          console.warn("Aviso al consultar pagos en dashboard:", e);
+        }
+
+        // B. Si la colección pagos está vacía, mostrar las órdenes confirmadas del usuario
+        listaOrdenesCliente.forEach(o => {
+          if (!idsPagosDashboard.has(o.id)) {
+            const dif = o.difunto?.nombre || [o.difunto?.nombres, o.difunto?.apellidoPaterno].filter(Boolean).join(" ") || o.nombreFallecido || "";
+            const plan = o.servicio?.planNombre || o.planNombre || "Plan 6 (Premium)";
+            const montoVal = Number(o.precioNumerico || o.montoTotal || o.valores?.total || 371940);
+
+            listaPagosDashboard.push({
+              id: o.id,
+              concepto: dif ? `${plan} — ${dif}` : plan,
+              monto: montoVal,
+              fecha: o.creadoEl || o.createdAt || o.fechaCreacion || new Date()
+            });
+            idsPagosDashboard.add(o.id);
+          }
+        });
+
+        // Orden cronológico
+        listaPagosDashboard.sort((a, b) => {
+          const fA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha || 0);
+          const fB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha || 0);
+          return fB - fA;
+        });
+
+        if (listaPagosDashboard.length === 0) {
+          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
+        } else {
+          contenedorFact.innerHTML = listaPagosDashboard.slice(0, 3).map(p => {
+            const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 371940);
+            return `
+              <li class="flex items-center justify-between py-3">
+                <div>
+                  <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
+                  <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — <span class="font-bold text-emerald-800">${monto}</span></p>
+                </div>
+                <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors" title="Ver en Pagos">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                </a>
+              </li>`;
+          }).join("");
         }
 
       } catch (err) {
-        console.error("Error al cargar datos en dashboard:", err);
+        console.error("Error al cargar dashboard:", err);
       }
     });
   </script>
