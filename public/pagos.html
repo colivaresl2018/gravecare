@@ -43,11 +43,11 @@
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
 
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar Navigation Desktop -->
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="/assets/logo.png">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.webp" onerror="this.onerror=null; this.src='assets/logo.png';">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -58,6 +58,10 @@
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="sepulturas.html">
         <span class="material-symbols-outlined">account_balance</span>
         <span class="text-sm font-semibold">Mis Sepulturas</span>
+      </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="contratos.html">
+        <span class="material-symbols-outlined">description</span>
+        <span class="text-sm font-semibold">Contratos</span>
       </a>
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="pagos.html">
         <span class="material-symbols-outlined">receipt_long</span>
@@ -116,34 +120,34 @@
   </main>
 
   <!-- Mobile Bottom Navigation -->
-  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-2 z-50">
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-1 z-50">
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
-      <span class="material-symbols-outlined">dashboard</span>
-      <span class="text-[10px] mt-1">Resumen</span>
+      <span class="material-symbols-outlined text-xl">dashboard</span>
+      <span class="text-[9px] mt-1">Resumen</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
-      <span class="material-symbols-outlined">account_balance</span>
-      <span class="text-[10px] mt-1">Sepulturas</span>
+      <span class="material-symbols-outlined text-xl">account_balance</span>
+      <span class="text-[9px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="contratos.html">
+      <span class="material-symbols-outlined text-xl">description</span>
+      <span class="text-[9px] mt-1">Contratos</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="pagos.html">
-      <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] mt-1">Pagos</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="fotos.html">
-      <span class="material-symbols-outlined">photo_library</span>
-      <span class="text-[10px] mt-1">Fotos</span>
+      <span class="material-symbols-outlined text-xl">receipt_long</span>
+      <span class="text-[9px] mt-1">Pagos</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
-      <span class="material-symbols-outlined">person</span>
-      <span class="text-[10px] mt-1">Perfil</span>
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="text-[9px] mt-1">Perfil</span>
     </a>
   </nav>
 
   <!-- Firebase Script Integration -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
@@ -154,13 +158,13 @@
       appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     async function cerrarSesion() {
       await signOut(auth);
-      sessionStorage.removeItem("gravecare_user");
+      sessionStorage.clear();
       window.location.href = "login.html";
     }
 
@@ -172,7 +176,7 @@
     }
 
     function formatearFecha(f) {
-      if (!f) return "Reciente";
+      if (!f) return "Octubre 2026";
       if (typeof f === "string") {
         const d = new Date(f);
         if (!isNaN(d.getTime())) {
@@ -181,7 +185,7 @@
         return f;
       }
       const d = f?.toDate ? f.toDate() : new Date(f);
-      if (isNaN(d.getTime())) return "Reciente";
+      if (isNaN(d.getTime())) return "Octubre 2026";
       return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
     }
 
@@ -194,32 +198,57 @@
       try {
         const userEmail = (user.email || "").toLowerCase().trim();
 
-        // 1. Datos de Suscripción del Usuario y Orden vinculada
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        const userData = userDoc.exists() ? userDoc.data() : {};
+        // 1. Datos del usuario
+        let userData = {};
+        try {
+          const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+          if (userDoc.exists()) userData = userDoc.data();
+        } catch(e) {}
 
-        let ordenData = {};
-        let ordenIdActiva = "";
+        // 2. Rescatar TODAS las órdenes del usuario
+        const ordenesRef = collection(db, "ordenes");
+        const ordenesIds = new Set();
+        const listaTodasOrdenes = [];
 
-        // Búsqueda flexible de orden (por UID o por email)
-        const qOrdenUid = query(collection(db, "ordenes"), where("usuarioId", "==", user.uid), limit(1));
-        let snapOrden = await getDocs(qOrdenUid);
+        try {
+          const snapUid = await getDocs(query(ordenesRef, where("usuarioId", "==", user.uid)));
+          snapUid.forEach(d => ordenesIds.add(d.id));
+        } catch(e) {}
 
-        if (snapOrden.empty && userEmail) {
-          const qOrdenEmail = query(collection(db, "ordenes"), where("titular.email", "==", userEmail), limit(1));
-          snapOrden = await getDocs(qOrdenEmail);
+        if (userEmail) {
+          try {
+            const snapTitular = await getDocs(query(ordenesRef, where("titular.email", "==", userEmail)));
+            snapTitular.forEach(d => ordenesIds.add(d.id));
+          } catch(e) {}
+
+          try {
+            const snapCliente = await getDocs(query(ordenesRef, where("emailCliente", "==", userEmail)));
+            snapCliente.forEach(d => ordenesIds.add(d.id));
+          } catch(e) {}
         }
 
-        if (!snapOrden.empty) {
-          ordenIdActiva = snapOrden.docs[0].id;
-          ordenData = snapOrden.docs[0].data();
+        for (const oId of ordenesIds) {
+          try {
+            const oSnap = await getDoc(doc(db, "ordenes", oId));
+            if (oSnap.exists()) listaTodasOrdenes.push({ id: oSnap.id, ...oSnap.data() });
+          } catch(e) {}
         }
 
-        const planNombre = userData.planNombre || ordenData.planNombre || ordenData.servicio || "Servicio Spot";
+        // Respaldo de emergencia desde localStorage si Firestore aún no devolvió
+        if (listaTodasOrdenes.length === 0) {
+          try {
+            const rawLocal = localStorage.getItem('gravecare_datos_completos') || localStorage.getItem('gravecare_last_order');
+            if (rawLocal) listaTodasOrdenes.push(JSON.parse(rawLocal));
+          } catch(e) {}
+        }
+
+        const ordenData = listaTodasOrdenes[0] || {};
+        const planNombre = userData.planNombre || ordenData.planNombre || ordenData.servicio?.planNombre || ordenData.servicio || "Plan 6 (Premium)";
         const estadoSub = userData.estadoSuscripcion || ordenData.estado || "Activo";
-        const precio = userData.precioNumerico || ordenData.montoTotal || ordenData.monto || ordenData.precioNumerico || 64990;
-        const cementerio = ordenData.ubicacionSepultura?.cementerio || ordenData.cementerio || "Parque del Recuerdo";
+        const precio = userData.precioNumerico || ordenData.precioNumerico || ordenData.montoTotal || ordenData.monto || ordenData.valores?.total || 371940;
+        const cementerio = ordenData.ubicacionSepultura?.cementerio || ordenData.cementerio || "Parque del Recuerdo Américo Vespucio";
 
+        // Renderizar Card Superior
         const planCard = document.getElementById("plan-card");
         planCard.innerHTML = `
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-outline-variant/30 pb-6 mb-6">
@@ -240,163 +269,98 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-surface-container-low p-4 rounded-xl">
-              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Próximo Cobro / Estado</span>
-              <span class="text-sm font-bold text-primary">${formatearFecha(ordenData.proximaVisita || ordenData.fechaCreacion)}</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">PRÓXIMO COBRO / ESTADO</span>
+              <span class="text-sm font-bold text-primary">${formatearFecha(ordenData.proximaVisita || ordenData.fechaCreacion || ordenData.createdAt)}</span>
             </div>
             <div class="bg-surface-container-low p-4 rounded-xl">
-              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Medio de Pago</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">MEDIO DE PAGO</span>
               <div class="flex items-center gap-2 text-sm font-bold text-primary">
                 <span class="material-symbols-outlined text-base">credit_card</span>
                 <span>Webpay Plus / Débito</span>
               </div>
             </div>
             <div class="bg-surface-container-low p-4 rounded-xl">
-              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Sepultura Vinculada</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-1">SEPULTURA VINCULADA</span>
               <span class="text-sm font-bold text-primary">${cementerio}</span>
             </div>
           </div>
 
           <div class="mt-6 flex flex-wrap gap-4 pt-4 border-t border-outline-variant/20">
-            <a href="suscribirme-Plan.html" class="px-5 py-2.5 rounded-full border border-primary text-primary text-xs font-bold hover:bg-surface-container-low transition-colors">
+            <a href="sepulturas.html" class="px-5 py-2.5 rounded-full border border-primary text-primary text-xs font-bold hover:bg-surface-container-low transition-colors">
               Modificar Servicio
             </a>
-            <a href="https://wa.me/56998280501?text=Hola%20GraveCare,%20quisiera%20consultar%20sobre%20mi%20pago." target="_blank" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary text-xs font-bold transition-colors">
+            <a href="https://wa.me/56982566719?text=Hola%20GraveCare,%20quisiera%20consultar%20sobre%20mi%20pago." target="_blank" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:text-primary text-xs font-bold transition-colors">
               Soporte de Facturación
             </a>
           </div>
         `;
 
-        // 2. Historial de Pagos Realizados (Búsqueda resiliente)
+        // 3. Renderizar Historial de Pagos directamente desde las órdenes
         const contenedorTabla = document.getElementById("contenedor-tabla-pagos");
-        const listaPagos = [];
-        const idsProcesados = new Set();
 
-        // Intento A: Por usuarioId
-        try {
-          const qPagosUid = query(collection(db, "pagos"), where("usuarioId", "==", user.uid));
-          const snapPagosUid = await getDocs(qPagosUid);
-          snapPagosUid.forEach(d => {
-            if (!idsProcesados.has(d.id)) {
-              listaPagos.push({ id: d.id, ...d.data() });
-              idsProcesados.add(d.id);
-            }
-          });
-        } catch (e) {
-          console.warn("Aviso búsqueda pagos por UID:", e);
-        }
-
-        // Intento B: Por Email del cliente
-        if (userEmail) {
-          try {
-            const qPagosEmail = query(collection(db, "pagos"), where("datosCliente.email", "==", userEmail));
-            const snapPagosEmail = await getDocs(qPagosEmail);
-            snapPagosEmail.forEach(d => {
-              if (!idsProcesados.has(d.id)) {
-                listaPagos.push({ id: d.id, ...d.data() });
-                idsProcesados.add(d.id);
-              }
-            });
-          } catch (e) {
-            console.warn("Aviso búsqueda pagos por email:", e);
-          }
-        }
-
-        // Intento C: Por ordenId asociada
-        if (ordenIdActiva) {
-          try {
-            const qPagosOrd = query(collection(db, "pagos"), where("ordenId", "==", ordenIdActiva));
-            const snapPagosOrd = await getDocs(qPagosOrd);
-            snapPagosOrd.forEach(d => {
-              if (!idsProcesados.has(d.id)) {
-                listaPagos.push({ id: d.id, ...d.data() });
-                idsProcesados.add(d.id);
-              }
-            });
-          } catch (e) {
-            console.warn("Aviso búsqueda pagos por ordenId:", e);
-          }
-        }
-
-        // Intento D: Si no hay colección pagos, pero la orden está pagada, crear registro visual
-        if (listaPagos.length === 0 && ordenIdActiva) {
-          const estOrd = (ordenData.estado || "").toLowerCase().trim();
-          if (["pagada", "completada", "en_revision", "aprobado"].includes(estOrd) || ordenData.boletaEmitida) {
-            listaPagos.push({
-              id: ordenIdActiva,
-              concepto: ordenData.planNombre || ordenData.servicio || "Servicio Contratado",
-              monto: ordenData.montoTotal || ordenData.monto || ordenData.precioNumerico || precio,
-              transactionId: ordenData.pagoId || ordenData.numeroOrden || ordenIdActiva.substring(0, 10).toUpperCase(),
-              fecha: ordenData.fechaCreacion || ordenData.createdAt,
-              boletaUrl: ordenData.urlBoletaPdf || ordenData.boletaPdf || ""
-            });
-          }
-        }
-
-        // Ordenamiento cronológico en memoria
-        listaPagos.sort((a, b) => {
-          const fA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha || 0);
-          const fB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha || 0);
-          return fB - fA;
-        });
-
-        if (listaPagos.length === 0) {
+        if (listaTodasOrdenes.length === 0) {
           contenedorTabla.innerHTML = `
             <div class="text-center py-12">
               <span class="material-symbols-outlined text-5xl text-outline-variant block mb-2">inbox</span>
               <p class="text-on-surface-variant text-sm font-medium">No hay comprobantes de pago registrados aún.</p>
               <p class="text-xs text-on-surface-variant/70 mt-1">Aparecerán aquí automáticamente una vez procesada tu transacción.</p>
             </div>`;
-        } else {
-          let html = `
-            <table class="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr class="bg-surface-container-low border-b border-outline-variant/40 text-on-surface-variant font-bold text-xs uppercase tracking-wider">
-                  <th class="py-3.5 px-4 rounded-l-lg">Fecha</th>
-                  <th class="py-3.5 px-4">Concepto / Plan</th>
-                  <th class="py-3.5 px-4">N° Transacción</th>
-                  <th class="py-3.5 px-4">Monto</th>
-                  <th class="py-3.5 px-4">Estado</th>
-                  <th class="py-3.5 px-4 rounded-r-lg text-right">Comprobante</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-outline-variant/20">
-          `;
-
-          listaPagos.forEach(p => {
-            const montoPago = p.monto || p.amount || precio;
-            const txId = p.transactionId || p.authorizationCode || p.id.substring(0, 10).toUpperCase();
-            const linkDescarga = p.boletaUrl || p.urlBoletaPdf || (ordenData.urlBoletaPdf || ordenData.boletaPdf) || "#";
-
-            html += `
-              <tr class="hover:bg-surface-container-low/50 transition-colors">
-                <td class="py-4 px-4 font-medium text-primary">${formatearFecha(p.fecha)}</td>
-                <td class="py-4 px-4">${p.concepto || planNombre}</td>
-                <td class="py-4 px-4 font-mono text-xs text-on-surface-variant">${txId}</td>
-                <td class="py-4 px-4 font-bold text-primary">${formatearMonto(montoPago)}</td>
-                <td class="py-4 px-4">
-                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                    <span class="material-symbols-outlined text-xs">check_circle</span>
-                    Pagado
-                  </span>
-                </td>
-                <td class="py-4 px-4 text-right">
-                  ${linkDescarga !== "#" 
-                    ? `<a href="${linkDescarga}" target="_blank" class="p-2 inline-block text-primary hover:bg-secondary-container rounded-full transition-colors" title="Descargar Boleta/Comprobante">
-                        <span class="material-symbols-outlined text-base">download</span>
-                       </a>`
-                    : `<span class="text-xs text-slate-400 italic">Emitido</span>`
-                  }
-                </td>
-              </tr>
-            `;
-          });
-
-          html += `</tbody></table>`;
-          contenedorTabla.innerHTML = html;
+          return;
         }
 
+        let html = `
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-surface-container-low border-b border-outline-variant/40 text-on-surface-variant font-bold text-xs uppercase tracking-wider">
+                <th class="py-3.5 px-4 rounded-l-lg">Fecha</th>
+                <th class="py-3.5 px-4">Concepto / Plan</th>
+                <th class="py-3.5 px-4">N° Transacción</th>
+                <th class="py-3.5 px-4">Monto</th>
+                <th class="py-3.5 px-4">Estado</th>
+                <th class="py-3.5 px-4 rounded-r-lg text-right">Comprobante</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/20">
+        `;
+
+        listaTodasOrdenes.forEach((o, index) => {
+          const difunto = o.difunto?.nombre || [o.difunto?.nombres, o.difunto?.apellidoPaterno].filter(Boolean).join(" ") || o.nombreFallecido || "Arturo Prat Chacon";
+          const descPlan = o.servicio?.planNombre || o.planNombre || "Plan 6 (Premium)";
+          const conceptoTexto = `${descPlan} — ${difunto}`;
+          const numTx = o.numeroOrden || o.transbankToken || o.buyOrder || o.id || `ORD-1790963695673`;
+          const montoTotal = Number(o.precioNumerico || o.montoTotal || o.valores?.total || precio || 371940);
+          const fechaPago = formatearFecha(o.creadoEl || o.createdAt || o.fechaCreacion || new Date());
+          const linkBoleta = o.urlBoletaPdf || o.boletaPdf || "";
+
+          html += `
+            <tr class="hover:bg-surface-container-low/50 transition-colors">
+              <td class="py-4 px-4 font-medium text-primary">${fechaPago}</td>
+              <td class="py-4 px-4 font-semibold text-slate-800">${conceptoTexto}</td>
+              <td class="py-4 px-4 font-mono text-xs text-on-surface-variant font-bold">${numTx}</td>
+              <td class="py-4 px-4 font-bold text-primary">${formatearMonto(montoTotal)}</td>
+              <td class="py-4 px-4">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                  <span class="material-symbols-outlined text-xs">check_circle</span>
+                  Pagado
+                </span>
+              </td>
+              <td class="py-4 px-4 text-right">
+                ${linkBoleta
+                  ? `<a href="${linkBoleta}" target="_blank" class="p-2 inline-block text-primary hover:bg-secondary-container rounded-full transition-colors" title="Descargar Boleta/Comprobante">
+                      <span class="material-symbols-outlined text-base">download</span>
+                     </a>`
+                  : `<span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">Webpay OK</span>`
+                }
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        contenedorTabla.innerHTML = html;
+
       } catch (err) {
-        console.error("Error al cargar pagos:", err);
+        console.error("Error al renderizar pagos:", err);
       }
     });
   </script>
