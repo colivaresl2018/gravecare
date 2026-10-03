@@ -1,20 +1,3 @@
-const snapPagos = await getDocs(query(
-  collection(db, "pagos"),
-  where("usuarioId", "==", user.uid)
-));
-```[cite: 13]
-
-Como al pagar por Webpay los datos de la compra (Plan 6, $371.940, Orden `ORD-1790963695673`) se guardaron directamente en la colección **`ordenes`**[cite: 10, 11, 20], la colección `pagos` devuelve 0 documentos y `dashboard.html` muestra *"Sin comprobantes de pago registrados aún"*[cite: 13].
-
----
-
-### Solución
-
-Hacer que la tarjeta de **Facturación Reciente** en `dashboard.html` lea también de la colección `ordenes` (que ya tiene tu orden activa confirmada de $371.940)[cite: 10, 11, 13, 20].
-
-Aquí tienes el código completo de **`public/dashboard.html`** listo para llegar y reemplazar:
-
-```html
 <!DOCTYPE html>
 <html class="light" lang="es">
 <head>
@@ -359,7 +342,6 @@ Aquí tienes el código completo de **`public/dashboard.html`** listo para llega
         const listaPagosDashboard = [];
         const idsPagosDashboard = new Set();
 
-        // A. Consultar colección pagos
         try {
           const snapPagos = await getDocs(query(collection(db, "pagos"), where("usuarioId", "==", user.uid)));
           snapPagos.forEach(d => {
@@ -367,10 +349,9 @@ Aquí tienes el código completo de **`public/dashboard.html`** listo para llega
             listaPagosDashboard.push({ id: d.id, ...d.data() });
           });
         } catch (e) {
-          console.warn("Aviso al consultar pagos en dashboard:", e);
+          console.warn("Aviso al consultar pagos:", e);
         }
 
-        // B. Si la colección pagos está vacía, mostrar las órdenes confirmadas del usuario
         listaOrdenesCliente.forEach(o => {
           if (!idsPagosDashboard.has(o.id)) {
             const dif = o.difunto?.nombre || [o.difunto?.nombres, o.difunto?.apellidoPaterno].filter(Boolean).join(" ") || o.nombreFallecido || "";
@@ -387,7 +368,6 @@ Aquí tienes el código completo de **`public/dashboard.html`** listo para llega
           }
         });
 
-        // Orden cronológico
         listaPagosDashboard.sort((a, b) => {
           const fA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha || 0);
           const fB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha || 0);
