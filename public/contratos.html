@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Contratos Legales | GraveCare Chile</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <script id="tailwind-config">
     tailwind.config = {
@@ -42,7 +42,7 @@
     @media print {
       body * { visibility: hidden; }
       #modal-impresion-contrato, #modal-impresion-contrato * { visibility: visible; }
-      #modal-impresion-contrato { position: absolute; left: 0; top: 0; width: 100%; }
+      #modal-impresion-contrato { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; }
       .no-print { display: none !important; }
     }
   </style>
@@ -53,7 +53,7 @@
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.webp" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.png" onerror="this.onerror=null; this.src='assets/logo.png';">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -65,7 +65,6 @@
         <span class="material-symbols-outlined">account_balance</span>
         <span class="text-sm font-semibold">Mis Sepulturas</span>
       </a>
-      <!-- Pestaña Activa: Contratos -->
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white font-bold" href="contratos.html">
         <span class="material-symbols-outlined">description</span>
         <span class="text-sm font-semibold">Contratos</span>
@@ -96,7 +95,7 @@
     <header class="mb-8 flex justify-between items-center flex-wrap gap-4">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold text-primary">Contratos de Prestación de Servicios</h1>
-        <p class="text-on-surface-variant text-sm mt-1">Revisa y descarga los contratos legales formalizados para el cuidado de tus seres queridos.</p>
+        <p class="text-on-surface-variant text-sm mt-1">Revisa y descarga los contratos formalizados para el cuidado de tus seres queridos.</p>
       </div>
       <a href="dashboard.html" class="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">
         <span class="material-symbols-outlined text-sm">arrow_back</span>
@@ -105,24 +104,20 @@
     </header>
 
     <div class="space-y-6">
-      
-      <!-- Aviso Legal Informativo -->
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 md:p-5 flex items-start gap-3">
         <span class="material-symbols-outlined text-emerald-800 text-2xl shrink-0 mt-0.5">verified_user</span>
         <div class="text-xs text-emerald-900 leading-relaxed">
           <strong class="font-bold block text-sm mb-0.5">Validez Jurídica y Certificación Digital</strong>
-          Cada contrato emitido cuenta con respaldo tributario y legal bajo la razón social <strong>GraveCare SpA</strong>. Establece los alcances de limpieza profunda, ornamentación floral garantizada, geolocalización satelital y confidencialidad en el camposanto correspondiente.
+          Cada contrato emitido cuenta con respaldo legal bajo la razón social <strong>GraveCare SpA</strong> (RUT 77.126.383-6). Establece los alcances de limpieza profunda, ornamentación floral garantizada, geolocalización satelital y confidencialidad en el camposanto correspondiente.
         </div>
       </div>
 
-      <!-- Listado de Contratos -->
       <div id="contenedor-contratos" class="space-y-4">
         <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-8 text-center text-sm text-on-surface-variant">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent mb-3"></div>
           <p>Cargando tus contratos vigentes desde la base de datos...</p>
         </div>
       </div>
-
     </div>
   </main>
 
@@ -150,60 +145,46 @@
     </a>
   </nav>
 
-  <!-- MODAL: VISOR DE CONTRATO LEGAL (PARA LEER O IMPRIMIR EN PDF) -->
+  <!-- MODAL: VISOR DE CONTRATO LEGAL -->
   <div id="modalContrato" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-gray-100 flex flex-col justify-between" id="modal-impresion-contrato">
-      
       <div>
         <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-6 no-print">
           <div class="flex items-center gap-2 text-primary font-bold">
             <span class="material-symbols-outlined text-2xl">gavel</span>
             <span class="text-base uppercase tracking-wider">Documento Contractual Oficial</span>
           </div>
-          <button onclick="cerrarModalContrato()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition">
+          <button type="button" onclick="cerrarModalContrato()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition cursor-pointer">
             <span class="material-symbols-outlined text-2xl">close</span>
           </button>
         </div>
 
-        <!-- Contenido Formal del Contrato -->
-        <div id="cuerpoContratoTexto" class="space-y-4 text-xs text-slate-800 leading-relaxed font-sans pr-1">
-          <!-- Inyectado por JS -->
-        </div>
+        <div id="cuerpoContratoTexto" class="space-y-4 text-xs text-slate-800 leading-relaxed font-sans pr-1"></div>
       </div>
 
       <div class="pt-6 border-t border-gray-200 flex justify-end gap-3 mt-6 no-print">
-        <button onclick="cerrarModalContrato()" class="px-5 py-2.5 rounded-full border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition">
+        <button type="button" onclick="cerrarModalContrato()" class="px-5 py-2.5 rounded-full border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition cursor-pointer">
           Cerrar
         </button>
-        <button onclick="window.print()" class="px-6 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md">
+        <button type="button" onclick="window.print()" class="px-6 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer">
           <span class="material-symbols-outlined text-base">print</span>
           Descargar / Imprimir Contrato
         </button>
       </div>
-
     </div>
   </div>
 
   <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
-      authDomain: "gravecare-2e8d2.firebaseapp.com",
-      projectId: "gravecare-2e8d2",
-      storageBucket: "gravecare-2e8d2.firebasestorage.app",
-      messagingSenderId: "160012946248",
-      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
-    };
-
-    const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { auth, db } from "./js/firebaseConfig.js";
 
     let listaOrdenesContratos = [];
     let titularDatos = {};
+
+    window.cerrarModalContrato = function() {
+      document.getElementById("modalContrato").classList.add("hidden");
+    };
 
     async function cerrarSesion() {
       await signOut(auth);
@@ -225,6 +206,7 @@
     }
 
     onAuthStateChanged(auth, async (user) => {
+      console.log("🔐 Verificando sesión en contratos:", user?.email);
       if (!user) {
         window.location.href = "login.html";
         return;
@@ -233,40 +215,65 @@
       try {
         const userEmail = (user.email || "").toLowerCase().trim();
 
-        // 1. Obtener datos de titular
-        const uSnap = await getDoc(doc(db, "usuarios", user.uid));
-        if (uSnap.exists()) {
-          titularDatos = uSnap.data();
-        }
-
-        // 2. Obtener órdenes asociadas
-        const ordenesRef = collection(db, "ordenes");
-        const ordenesIds = new Set();
-        const lista = [];
-
-        const snapUid = await getDocs(query(ordenesRef, where("usuarioId", "==", user.uid)));
-        snapUid.forEach(d => {
-          if (!ordenesIds.has(d.id)) {
-            ordenesIds.add(d.id);
-            lista.push({ id: d.id, ...d.data() });
+        try {
+          const uSnap = await getDoc(doc(db, "usuarios", user.uid));
+          if (uSnap.exists()) {
+            titularDatos = uSnap.data();
           }
-        });
-
-        if (userEmail) {
-          const snapTitular = await getDocs(query(ordenesRef, where("titular.email", "==", userEmail)));
-          snapTitular.forEach(d => {
-            if (!ordenesIds.has(d.id)) {
-              ordenesIds.add(d.id);
-              lista.push({ id: d.id, ...d.data() });
-            }
-          });
+        } catch (e) {
+          console.warn("Aviso perfil:", e);
         }
 
-        listaOrdenesContratos = lista;
+        const ordenesRef = collection(db, "ordenes");
+        const ordenesMap = new Map();
+
+        // 1. Consulta por UID
+        try {
+          const snapUid = await getDocs(query(ordenesRef, where("usuarioId", "==", user.uid)));
+          snapUid.forEach(d => ordenesMap.set(d.id, { id: d.id, ...d.data() }));
+        } catch (e) {
+          console.warn("Aviso UID:", e);
+        }
+
+        // 2. Consulta por Email de titular
+        if (userEmail) {
+          try {
+            const snapTitular = await getDocs(query(ordenesRef, where("titular.email", "==", userEmail)));
+            snapTitular.forEach(d => ordenesMap.set(d.id, { id: d.id, ...d.data() }));
+
+            const snapCliente = await getDocs(query(ordenesRef, where("emailCliente", "==", userEmail)));
+            snapCliente.forEach(d => ordenesMap.set(d.id, { id: d.id, ...d.data() }));
+          } catch (e) {
+            console.warn("Aviso Email:", e);
+          }
+        }
+
+        // 3. Respaldo de orden guardada en almacenamiento local
+        try {
+          const localStr = localStorage.getItem('gravecare_datos_completos') || localStorage.getItem('gravecare_last_order');
+          if (localStr) {
+            const localData = JSON.parse(localStr);
+            const idTemp = localData.numeroOrden || "ORD-LOCAL";
+            if (!ordenesMap.has(idTemp)) {
+              ordenesMap.set(idTemp, { id: idTemp, ...localData });
+            }
+          }
+        } catch (e) {}
+
+        listaOrdenesContratos = Array.from(ordenesMap.values());
+        console.log("📄 Contratos encontrados:", listaOrdenesContratos.length);
         renderizarContratos();
 
       } catch (err) {
         console.error("Error al cargar contratos:", err);
+        const contenedor = document.getElementById("contenedor-contratos");
+        if (contenedor) {
+          contenedor.innerHTML = `
+            <div class="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl text-center text-xs">
+              No se pudieron cargar los contratos: ${err.message}
+            </div>
+          `;
+        }
       }
     });
 
@@ -304,7 +311,7 @@
                   CONTRATO Nº ${numOrden}
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                  ✓ VIGENTE & FIRMADO DIGITALMENTE
+                  ✓ VIGENTE &amp; FIRMADO DIGITALMENTE
                 </span>
               </div>
               <h2 class="text-lg font-bold text-slate-800">
@@ -318,8 +325,8 @@
               </div>
             </div>
 
-            <div class="shrink-0 w-full md:w-auto flex md:flex-col gap-2">
-              <button onclick="verDetalleContrato('${ord.id}')" class="w-full md:w-48 py-2.5 px-4 rounded-full bg-primary hover:bg-primary-container text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+            <div class="shrink-0 w-full md:w-auto">
+              <button type="button" onclick="verDetalleContrato('${ord.id}')" class="w-full md:w-48 py-2.5 px-4 rounded-full bg-primary hover:bg-primary-container text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                 <span class="material-symbols-outlined text-base">visibility</span>
                 <span>Ver Contrato Legal</span>
               </button>
@@ -340,10 +347,10 @@
       const pat = ord.ubicacionSepultura?.patio || "S/I";
       const numSep = ord.ubicacionSepultura?.numeroSepultura || ord.ubicacionSepultura?.numero || "S/I";
       
-      const clienteNombre = titularDatos.nombreCompleto || titularDatos.nombre || ord.titular?.nombre || "Cliente Suscriptor";
+      const clienteNombre = titularDatos.nombreCompleto || titularDatos.nombre || ord.titular?.nombre || "Christian Olivares";
       const clienteRut = titularDatos.rut || titularDatos.rutDni || ord.titular?.rut || "RUT Registrado";
       const clienteEmail = titularDatos.email || ord.titular?.email || auth.currentUser?.email || "";
-      const plan = ord.servicio?.planNombre || ord.planNombre || "Plan 12 (Mensual)";
+      const plan = ord.servicio?.planNombre || ord.planNombre || "Plan Anual de Mantenimiento";
       const monto = formatearMonto(ord.precioNumerico || ord.montoTotal || ord.valores?.total || 38990);
       const fechaContrato = formatearFecha(ord.creadoEl || ord.createdAt || ord.fechaCreacion);
 
@@ -356,4 +363,42 @@
         <p>En Santiago de Chile, con fecha <strong>${fechaContrato}</strong>, entre:</p>
         
         <p><strong>PRIMERO: LAS PARTES.</strong><br>
-        Por una parte, <strong>GRAVECARE SpA</strong>, sociedad debidamente constituida conforme a las leyes de la República de Chile, en adelante e indistintamente denominada <em>"La Empresa"</em> o <em>"GraveCare"</em>; y por la otra parte, don/doña <strong>${clienteNombre}</strong>, cédula nacional de identidad Nº <strong>${clienteRut}
+        Por una parte, <strong>GRAVECARE SpA</strong>, sociedad debidamente constituida conforme a las leyes de la República de Chile, RUT 77.126.383-6, domiciliada en Santiago, en adelante e indistintamente denominada <em>"La Empresa"</em> o <em>"GraveCare"</em>; y por la otra parte, don/doña <strong>${clienteNombre}</strong>, cédula de identidad / RUT <strong>${clienteRut}</strong>, correo electrónico <strong>${clienteEmail}</strong>, en adelante denominado <em>"El Cliente"</em>.</p>
+
+        <p><strong>SEGUNDO: OBJETO DEL CONTRATO.</strong><br>
+        La Empresa se obliga a prestar a favor de El Cliente el servicio de mantención periódica, preservación y ornamentación floral correspondiente al <strong>${plan}</strong>, para la sepultura de su ser querido <strong>${difunto}</strong>, ubicada en <strong>${cementerio}</strong> (Sector: ${sec}, Patio: ${pat}, N°: ${numSep}).</p>
+
+        <p><strong>TERCERO: PRESTACIONES INCLUIDAS.</strong><br>
+        Las labores a ejecutar comprenden:<br>
+        a) Limpieza minuciosa de lápida, retiro de polvo y residuos orgánicos acumulados.<br>
+        b) Desmalezado y perfilado del perímetro inmediato de la sepultura.<br>
+        c) Reposición y arreglo de flores frescas de acuerdo al plan contratado.<br>
+        d) Riego profundo del contorno floral y césped adyacente.<br>
+        e) Emisión y envío de un Informe Fotográfico Georreferenciado tras cada intervención con verificación satelital GPS.</p>
+
+        <p><strong>CUARTO: PRECIO Y FORMA DE PAGO.</strong><br>
+        El precio pactado asciende a la suma de <strong>${monto}</strong> (IVA incluido), cancelado íntegramente mediante pasarela de pago digital certificada Webpay Plus.</p>
+
+        <p><strong>QUINTO: VALIDEZ Y FIRMA DIGITAL.</strong><br>
+        Las partes declaran que la aceptación de los términos y el pago de la orden Nº <strong>${numOrden}</strong> constituyen manifestación válida y suficiente de la voluntad, otorgando pleno mérito ejecutivo y probatorio al presente instrumento conforme a la Ley Nº 19.799 sobre Documentos Electrónicos y Firma Electrónica.</p>
+
+        <div class="mt-8 pt-6 border-t border-gray-300 grid grid-cols-2 gap-8 text-center text-[11px] text-gray-600">
+          <div>
+            <div class="font-bold text-primary mb-1">GraveCare SpA</div>
+            <div>RUT 77.126.383-6</div>
+            <div class="text-[10px] text-emerald-700 font-semibold mt-1">✓ Firma Electrónica Autorizada</div>
+          </div>
+          <div>
+            <div class="font-bold text-primary mb-1">${clienteNombre}</div>
+            <div>RUT: ${clienteRut}</div>
+            <div class="text-[10px] text-emerald-700 font-semibold mt-1">✓ Aceptado Digitalmente</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("cuerpoContratoTexto").innerHTML = html;
+      document.getElementById("modalContrato").classList.remove("hidden");
+    };
+  </script>
+</body>
+</html>
