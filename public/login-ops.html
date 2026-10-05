@@ -104,9 +104,22 @@
 </div>
 
 <script type="module">
-  import { auth, db } from "./js/firebaseConfig.js";
-  import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+    authDomain: "gravecare-2e8d2.firebaseapp.com",
+    projectId: "gravecare-2e8d2",
+    storageBucket: "gravecare-2e8d2.firebasestorage.app",
+    messagingSenderId: "160012946248",
+    appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+  };
+
+  const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
   const form = document.getElementById("loginForm");
   const btnLogin = document.getElementById("btnLogin");
@@ -118,15 +131,35 @@
     setTimeout(() => { alertContainer.innerHTML = ""; }, 5000);
   }
 
-  async function esUsuarioStaff(uid) {
+  async function esUsuarioStaff(user) {
+    if (!user) return false;
+    const emailLower = (user.email || "").toLowerCase().trim();
+
+    // 1. Autorización directa para administradores principales
+    if (emailLower === "colivaresl@hotmail.com" || emailLower.endsWith("@gravecare.cl")) {
+      return true;
+    }
+
     try {
-      const staffSnap = await getDoc(doc(db, "staff", uid));
+      // 2. Consulta en colección staff por UID
+      const staffSnap = await getDoc(doc(db, "staff", user.uid));
       if (staffSnap.exists()) {
         const d = staffSnap.data();
         if (d.activo !== false) return true;
       }
 
-      const userSnap = await getDoc(doc(db, "usuarios", uid));
+      // 3. Consulta en colección staff por email
+      if (emailLower) {
+        const qStaff = query(collection(db, "staff"), where("email", "==", emailLower));
+        const snapEmail = await getDocs(qStaff);
+        if (!snapEmail.empty) {
+          const d = snapEmail.docs[0].data();
+          if (d.activo !== false) return true;
+        }
+      }
+
+      // 4. Consulta en colección usuarios
+      const userSnap = await getDoc(doc(db, "usuarios", user.uid));
       if (userSnap.exists()) {
         const u = userSnap.data();
         const rol = (u.rol || u.tipo || "").toLowerCase();
@@ -135,14 +168,14 @@
         }
       }
     } catch (e) {
-      console.warn("Validando permisos de staff:", e);
+      console.warn("Aviso validando staff:", e);
     }
     return false;
   }
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      const tieneAcceso = await esUsuarioStaff(user.uid);
+      const tieneAcceso = await esUsuarioStaff(user);
       if (tieneAcceso) {
         window.location.replace("/portal.html");
       }
@@ -164,7 +197,7 @@
 
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      const tienePermiso = await esUsuarioStaff(cred.user.uid);
+      const tienePermiso = await esUsuarioStaff(cred.user);
 
       if (!tienePermiso) {
         showAlert("error", "Acceso denegado: tu cuenta no tiene permisos de operador.");

@@ -3,17 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Planes y Precios | GraveCare </title>
+  <title>Planes y Precios | GraveCare</title>
   
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Material Symbols Outlined -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script id="tailwind-config">
     tailwind.config = {
@@ -69,12 +65,6 @@
             "on-tertiary-fixed": "#131e17",
             "outline-variant": "#c1c8c1"
           },
-          "borderRadius": {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
           "spacing": {
             "card-gap": "32px",
             "container-max-width": "1200px",
@@ -83,371 +73,247 @@
             "section-padding-mobile": "48px"
           },
           "fontFamily": {
-            "headline-lg-mobile": ["Plus Jakarta Sans"],
-            "body-md": ["Plus Jakarta Sans"],
-            "body-lg": ["Plus Jakarta Sans"],
-            "headline-md": ["Plus Jakarta Sans"],
-            "display-lg": ["Plus Jakarta Sans"],
-            "label-md": ["Plus Jakarta Sans"],
-            "headline-lg": ["Plus Jakarta Sans"]
-          },
-          "fontSize": {
-            "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "600" }],
-            "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
-            "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
-            "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
-            "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-            "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600" }],
-            "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }]
+            "body": ["Plus Jakarta Sans", "sans-serif"]
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-background text-on-background font-body-md antialiased flex flex-col min-h-screen">
+<body class="bg-background text-on-background font-body antialiased flex flex-col min-h-screen">
 
-<!-- TopNavBar -->
-<header class="bg-surface/90 dark:bg-primary/95 backdrop-blur-md full-width top-0 sticky z-50 border-b border-outline-variant/30 dark:border-primary-container transition-all duration-300">
-  <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
-    <div class="flex items-center h-full py-2">
-      <a href="index.html" class="flex items-center h-full">
-        <img src="assets/logo.png" alt="GraveCare" class="h-full w-auto max-h-full object-contain">
-      </a>
-    </div>
+  <!-- TopNavBar -->
+  <header class="bg-surface/90 backdrop-blur-md top-0 sticky z-50 border-b border-outline-variant/30">
+    <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
+      <div class="flex items-center h-full py-2">
+        <a href="index.html" class="flex items-center h-full">
+          <img src="assets/logo.png" alt="GraveCare" class="h-full w-auto max-h-full object-contain">
+        </a>
+      </div>
       
-      <!-- Menú Escritorio -->
-      <nav class="hidden md:flex items-center gap-8">
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="index.html">Inicio</a>
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="quienes-somos.html">Quiénes Somos</a>
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="servicios.html">Servicios</a>
-        <a class="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" href="suscribirme-Plan.html">Planes y Precios</a>
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="cementerios.html">Cementerios</a>
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="contacto.html">Contacto y Preguntas Frecuentes</a>
+      <nav class="hidden md:flex items-center gap-8 text-sm">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold" href="index.html">Inicio</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold" href="quienes-somos.html">Quiénes Somos</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold" href="servicios.html">Servicios</a>
+        <a class="text-primary font-bold border-b-2 border-primary pb-1" href="planes.html">Planes y Precios</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold" href="cementerios.html">Cementerios</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-semibold" href="contacto.html">Contacto</a>
       </nav>
       
-      <!-- Botón Inicio Sesión (Escritorio) -->
       <div class="hidden md:flex items-center gap-3">
-        <a href="login.html" class="bg-transparent border border-primary text-primary px-6 py-2.5 rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-colors text-center inline-block">
+        <a href="login.html" class="border border-primary text-primary px-6 py-2.5 rounded-full text-sm font-bold hover:bg-surface-container-low transition-colors">
           Inicio Sesión
         </a>
       </div>
 
-      <!-- Botón Menú Móvil (3 Líneas) -->
-      <button id="mobile-menu-btn" type="button" onclick="toggleMenu(event)" class="md:hidden text-primary p-2 focus:outline-none flex items-center justify-center rounded-lg hover:bg-surface-container-low cursor-pointer" aria-label="Abrir menú" style="cursor: pointer; -webkit-tap-highlight-color: transparent;">
-        <span id="mobile-menu-icon" class="material-symbols-outlined text-3xl pointer-events-none">menu</span>
+      <button id="mobile-menu-btn" type="button" onclick="toggleMenu(event)" class="md:hidden text-primary p-2">
+        <span id="mobile-menu-icon" class="material-symbols-outlined text-3xl">menu</span>
       </button>
     </div>
 
-    <!-- Menú Desplegable Móvil -->
-    <div id="mobile-menu-drawer" style="display: none;" class="md:hidden bg-surface dark:bg-primary/95 border-b border-outline-variant/30 px-6 py-6 shadow-2xl transition-all w-full">
-      <div class="flex flex-col space-y-3">
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="index.html" onclick="closeMenu()">
-          <span>Inicio</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="quienes-somos.html" onclick="closeMenu()">
-          <span>Quiénes Somos</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="servicios.html" onclick="closeMenu()">
-          <span>Servicios y Cobertura</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="suscribirme-Plan.html" onclick="closeMenu()">
-          <span>Planes y Precios</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="cementerios.html" onclick="closeMenu()">
-          <span>Cementerios</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <a class="text-on-surface hover:text-primary font-medium text-lg py-2 border-b border-outline-variant/20 flex items-center justify-between" href="contacto.html" onclick="closeMenu()">
-          <span>Contacto y Preguntas Frecuentes</span>
-          <span class="material-symbols-outlined text-sm text-outline">chevron_right</span>
-        </a>
-        <div class="pt-3 flex flex-col gap-3">
-          <a href="login.html" onclick="closeMenu()" class="w-full text-center bg-transparent border border-primary text-primary py-3 rounded-full font-semibold text-base hover:bg-surface-container-low transition-colors block">
-            Inicio Sesión
-          </a>
+    <!-- Menú Móvil -->
+    <div id="mobile-menu-drawer" style="display: none;" class="md:hidden bg-surface border-b border-outline-variant/30 px-6 py-6 shadow-2xl">
+      <div class="flex flex-col space-y-3 text-base">
+        <a class="text-on-surface py-2 border-b border-outline-variant/20 flex justify-between" href="index.html">Inicio <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a class="text-on-surface py-2 border-b border-outline-variant/20 flex justify-between" href="quienes-somos.html">Quiénes Somos <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a class="text-on-surface py-2 border-b border-outline-variant/20 flex justify-between" href="servicios.html">Servicios <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a class="text-primary font-bold py-2 border-b border-outline-variant/20 flex justify-between" href="planes.html">Planes y Precios <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a class="text-on-surface py-2 border-b border-outline-variant/20 flex justify-between" href="cementerios.html">Cementerios <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <a class="text-on-surface py-2 border-b border-outline-variant/20 flex justify-between" href="contacto.html">Contacto <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+        <div class="pt-3">
+          <a href="login.html" class="w-full text-center border border-primary text-primary py-3 rounded-full font-bold block">Inicio Sesión</a>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Catálogo de Planes -->
   <main class="flex-grow">
-    <section class="py-section-padding-mobile md:py-section-padding-desktop px-gutter max-w-container-max-width mx-auto">
+    <section class="py-12 md:py-16 px-gutter max-w-container-max-width mx-auto">
       
-      <!-- Back Link -->
       <div class="mb-8">
-        <a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="index.html">
-          <span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
-          Volver al Inicio
+        <a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold" href="index.html">
+          <span class="material-symbols-outlined text-sm">arrow_back</span> Volver al Inicio
         </a>
       </div>
 
-      <!-- Section Header -->
-      <div class="text-center mb-16 max-w-3xl mx-auto">
-        <h1 class="font-display-lg text-display-lg text-primary mb-4">PLANES Y TARIFAS</h1>
-        <p class="font-body-lg text-body-lg text-on-surface-variant">Selecciona la frecuencia que mejor se adapte a tus necesidades de cuidado y ornamentación.</p>
-               <p class="font-body-lg text-body-lg text-on-surface-variant">*Planes en base a contratación anual</p> 
-<div class="w-16 h-1 bg-secondary mx-auto mt-5"></div>
+      <div class="text-center mb-14 max-w-3xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-primary mb-3">PLANES Y TARIFAS</h1>
+        <p class="text-base text-on-surface-variant">Selecciona la frecuencia que mejor se adapte a tus necesidades de cuidado y ornamentación.</p>
+        <p class="text-xs text-on-surface-variant mt-1 font-semibold">*Planes en base a contratación anual</p> 
+        <div class="w-16 h-1 bg-secondary mx-auto mt-4 rounded-full"></div>
       </div>
 
-      <!-- Pricing Cards Grid -->
+      <!-- Tarjetas de Precios Oficiales -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap items-stretch">
         
-        <!-- Card 1: 12 (Destacado) -> Enlaza a suscribirme-Plan.html -->
-        <div class="bg-surface-container-lowest rounded-xl p-8 border-2 border-primary relative flex flex-col shadow-lg">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
+        <!-- PLAN 12 -->
+        <div class="bg-surface-container-lowest rounded-2xl p-8 border-2 border-primary relative flex flex-col shadow-lg">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
             Más Elegido
           </div>
-          <div class="text-center mb-8 pt-4">
-            <h3 class="font-headline-md text-headline-md text-primary mb-2 uppercase">PLAN 12</h3>
-            <p class="font--md headline-on-surface-variant mb-1">12 visitas anuales, 1 cada mes</p>
-            <div class="flex items-center justify-center gap-2">
-              <span class="text-sm text-primary">Desde</span>
-              <span class="font-display-lg text-display-lg text-primary">$38.990</span>
-              <span class="text-xs text-primary leading-tight text-left">CLP<br>por<br>visita</span>
+          <div class="text-center mb-6 pt-2">
+            <h3 class="text-xl font-extrabold text-primary mb-1 uppercase">PLAN 12</h3>
+            <p class="text-xs text-on-surface-variant mb-3">12 visitas anuales (1 cada mes)</p>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xs text-primary font-bold">Desde</span>
+              <span class="text-3xl font-extrabold text-primary">$38.990</span>
+              <span class="text-[11px] text-primary leading-tight text-left">CLP<br>por visita</span>
             </div>
           </div>
-          <ul class="space-y-4 mb-8 flex-grow">
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Mantención regular mensual</span>
+          <ul class="space-y-3 mb-8 flex-grow text-xs text-on-surface-variant">
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Mantención regular mensual</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Limpieza profunda de lápida</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Limpieza profunda de lápida</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Ramo de flores frescas a elección de acuerdo a servicio contratado</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Ramo de flores frescas de temporada</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Reporte fotográfico</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Reporte fotográfico georreferenciado</span>
             </li>
           </ul>
-          <a href="suscribirme-Plan.html?plan=12" class="w-full bg-primary text-on-primary py-3.5 rounded-full font-label-md text-label-md hover:bg-primary-container transition-colors mt-auto text-center block font-semibold">
-            Contratar Plan
+          <a href="suscribirme-Plan.html?plan=12" class="w-full bg-primary text-white py-3 rounded-full text-xs font-bold hover:bg-primary-container transition-colors text-center block">
+            Contratar Plan 12
           </a>
         </div>
 
-        <!-- Card 2: 6 -> Enlaza a suscribirme-Plan.html -->
-        <div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/50 flex flex-col shadow-sm">
-          <div class="text-center mb-8 pt-4">
-            <h3 class="font-headline-md text-headline-md text-on-surface mb-2 uppercase">PLAN 6</h3>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-1">6 visitas anuales, 1 cada 2 meses</p>
-            <div class="flex items-center justify-center gap-2">
-              <span class="text-sm text-on-surface">Desde</span>
-              <span class="font-display-lg text-display-lg text-on-surface">$44.990</span>
-              <span class="text-xs text-on-surface leading-tight text-left">CLP<br>por<br>visita</span>
+        <!-- PLAN 6 -->
+        <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 flex flex-col shadow-sm">
+          <div class="text-center mb-6 pt-2">
+            <h3 class="text-xl font-extrabold text-on-surface mb-1 uppercase">PLAN 6</h3>
+            <p class="text-xs text-on-surface-variant mb-3">6 visitas anuales (1 cada 2 meses)</p>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xs text-on-surface font-bold">Desde</span>
+              <span class="text-3xl font-extrabold text-on-surface">$44.990</span>
+              <span class="text-[11px] text-on-surface leading-tight text-left">CLP<br>por visita</span>
             </div>
           </div>
-          <ul class="space-y-4 mb-8 flex-grow">
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Mantención regular bimestral</span>
+          <ul class="space-y-3 mb-8 flex-grow text-xs text-on-surface-variant">
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Mantención regular bimestral</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Limpieza profunda de lápida</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Limpieza profunda de lápida</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Ramo de flores frescas a elección de acuerdo a servicio contratado</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Ramo de flores frescas de temporada</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Reporte fotográfico</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Reporte fotográfico georreferenciado</span>
             </li>
           </ul>
-          <a href="suscribirme-Plan.html?plan=6" class="w-full bg-surface-container-low text-primary border border-primary py-3.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors mt-auto text-center block font-semibold">
-            Contratar Plan
+          <a href="suscribirme-Plan.html?plan=6" class="w-full bg-surface-container-low text-primary border border-primary py-3 rounded-full text-xs font-bold hover:bg-surface-container-high transition-colors text-center block">
+            Contratar Plan 6
           </a>
         </div>
 
-        <!-- Card 3: Plan 4 -->
-        <div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/50 flex flex-col shadow-sm">
-          <div class="text-center mb-8 pt-4">
-            <h3 class="font-headline-md text-headline-md text-on-surface mb-2 uppercase">PLAN 4</h3>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-1"> 4 visitas anuales, 1 cada 3 meses</p>
-            <div class="flex items-center justify-center gap-2">
-              <span class="text-sm text-on-surface">Desde</span>
-              <span class="font-display-lg text-display-lg text-on-surface">$46.990</span>
-              <span class="text-xs text-on-surface leading-tight text-left">CLP<br>por<br>visita</span>
+        <!-- PLAN 4 -->
+        <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 flex flex-col shadow-sm">
+          <div class="text-center mb-6 pt-2">
+            <h3 class="text-xl font-extrabold text-on-surface mb-1 uppercase">PLAN 4</h3>
+            <p class="text-xs text-on-surface-variant mb-3">4 visitas anuales (1 cada 3 meses)</p>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xs text-on-surface font-bold">Desde</span>
+              <span class="text-3xl font-extrabold text-on-surface">$46.990</span>
+              <span class="text-[11px] text-on-surface leading-tight text-left">CLP<br>por visita</span>
             </div>
           </div>
-          <ul class="space-y-4 mb-8 flex-grow">
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Mantención regular trimestral</span>
+          <ul class="space-y-3 mb-8 flex-grow text-xs text-on-surface-variant">
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Mantención regular trimestral</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Limpieza profunda de lápida</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Limpieza profunda de lápida</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Ramo de flores frescas a elección de acuerdo a servicio contratado</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Ramo de flores frescas de temporada</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Reporte fotográfico</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Reporte fotográfico georreferenciado</span>
             </li>
           </ul>
-          <a href="suscribirme-Plan.html?plan=4" class="w-full bg-surface-container-low text-primary border border-primary py-3.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors mt-auto text-center block font-semibold">
-            Contratar Plan
+          <a href="suscribirme-Plan.html?plan=4" class="w-full bg-surface-container-low text-primary border border-primary py-3 rounded-full text-xs font-bold hover:bg-surface-container-high transition-colors text-center block">
+            Contratar Plan 4
           </a>
         </div>
 
-        <!-- Card 4: Visita Spot -> Enlaza a suscribirme-Spot.html -->
-        <div class="bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/50 flex flex-col shadow-sm" id="spot">
-          <div class="text-center mb-8 pt-4">
-            <h3 class="font-headline-md text-headline-md text-on-surface mb-2 uppercase">VISITA SPOT</h3>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-6">Fecha Única / Especial</p>
-            <div class="flex items-center justify-center gap-2">
-              <span class="text-sm text-on-surface">Desde</span>
-              <span class="font-display-lg text-display-lg text-on-surface">$58.990</span>
-              <span class="text-xs text-on-surface leading-tight text-left">CLP<br>por<br>visita</span>
+        <!-- VISITA SPOT -->
+        <div class="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 flex flex-col shadow-sm">
+          <div class="text-center mb-6 pt-2">
+            <h3 class="text-xl font-extrabold text-on-surface mb-1 uppercase">VISITA SPOT</h3>
+            <p class="text-xs text-on-surface-variant mb-3">Fecha Única / Conmemorativa</p>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xs text-on-surface font-bold">Desde</span>
+              <span class="text-3xl font-extrabold text-on-surface">$58.990</span>
+              <span class="text-[11px] text-on-surface leading-tight text-left">CLP<br>por visita</span>
             </div>
           </div>
-          <ul class="space-y-4 mb-8 flex-grow">
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Fecha a tu elección</span>
+          <ul class="space-y-3 mb-8 flex-grow text-xs text-on-surface-variant">
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Fecha a tu elección</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Limpieza profunda y abrillantado</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Limpieza profunda y abrillantado</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Ramo floral Standard</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Ramo floral Standard fresco</span>
             </li>
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">check_circle</span>
-              <span class="font-body-md text-body-md text-on-surface-variant">Reporte fotográfico</span>
+            <li class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+              <span>Reporte fotográfico georreferenciado</span>
             </li>
           </ul>
-          <a href="suscribirme-Spot.html?plan=spot" class="w-full bg-surface-container-low text-primary border border-primary py-3.5 rounded-full font-label-md text-label-md hover:bg-surface-container-high transition-colors mt-auto text-center block font-semibold">
+          <a href="suscribirme-Spot.html?plan=spot" class="w-full bg-surface-container-low text-primary border border-primary py-3 rounded-full text-xs font-bold hover:bg-surface-container-high transition-colors text-center block">
             Contratar Visita Spot
           </a>
         </div>
 
-        <!-- Nota: estructuras de mayor envergadura (ocupa el espacio vacío junto a Visita Spot) -->
-        <div class="md:col-span-2 bg-surface-container-lowest rounded-xl p-8 border border-outline-variant/50 flex flex-col justify-center shadow-sm">
-          <p class="font-body-lg text-body-lg text-on-surface-variant mb-6">
+        <!-- Estructuras Mayores -->
+        <div class="md:col-span-2 bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 flex flex-col justify-center shadow-sm">
+          <p class="text-sm text-on-surface-variant mb-5">
             Nuestros servicios de limpieza y ornamentación están diseñados para placas estándar, nichos individuales y sepulturas tipo parque. Si requieres atención para estructuras de mayor envergadura, como mausoleos o panteones, contáctanos para coordinarlo directamente.
           </p>
-          <a href="contacto.html" class="self-start bg-primary text-on-primary px-8 py-3.5 rounded-full font-label-md text-label-md hover:bg-primary-container transition-colors inline-block font-semibold">
+          <a href="contacto.html" class="self-start bg-primary text-white px-7 py-3 rounded-full text-xs font-bold hover:bg-primary-container transition-colors inline-block">
             Contáctanos
           </a>
         </div>
 
       </div>
-
-      <!-- FAQ Teaser -->
-      <div class="mt-16 bg-surface-container-low rounded-2xl p-8 text-center max-w-2xl mx-auto border border-secondary-fixed/50">
-        <h4 class="font-headline-md text-lg font-bold text-primary mb-2">¿Tienes dudas sobre los planes o coberturas?</h4>
-        <p class="font-body-md text-sm text-on-surface-variant mb-4">Revisa nuestras preguntas frecuentes o escríbenos directamente a WhatsApp.</p>
-        <a href="contacto.html" class="inline-block text-primary font-bold text-sm underline decoration-primary/30 underline-offset-4 hover:text-secondary">
-          Ver Preguntas Frecuentes y Contacto
-        </a>
-      </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-primary dark:bg-tertiary-container full-width">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-card-gap px-gutter py-section-padding-desktop max-w-container-max-width mx-auto border-b border-primary-container">
-      <!-- Brand -->
-      <div class="col-span-1 md:col-span-1">
-        <div class="text-headline-md font-headline-md font-bold text-surface-container-lowest mb-4">GRAVECARE</div>
-        <p class="font-body-md text-body-md text-on-primary/80 mb-6">
-          Brindando tranquilidad y respeto continuo a través del cuidado profesional de sepulturas.
-        </p>
-      </div>
-      
-      <!-- Links 1 -->
-      <div class="col-span-1">
-        <h4 class="font-label-md text-label-md text-surface-container-lowest mb-4 uppercase tracking-wider">Enlaces</h4>
-        <ul class="space-y-3">
-          <li><a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="servicios.html">Servicios y Cobertura</a></li>
-          <li><a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="suscribirme-Plan.html">Planes y Precios</a></li>
-          <li><a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="cementerios.html">Cementerios</a></li>
-          <li><a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="quienes-somos.html">Quiénes Somos</a></li>
-        </ul>
-      </div>
-
-      <!-- Links 2 -->
-      <div class="col-span-1">
-        <h4 class="font-label-md text-label-md text-surface-container-lowest mb-4 uppercase tracking-wider">Contacto</h4>
-        <ul class="space-y-3">
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-on-tertiary-container/80 text-sm">mail</span>
-            <a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="mailto:contacto@gravecare.cl">contacto@gravecare.cl</a>
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-on-tertiary-container/80 text-sm">call</span>
-            <span class="font-body-md text-body-md text-on-tertiary-container/80">+56 9 8256 6719</span>
-          </li>
-        </ul>
-      </div>
-      
-      <div class="col-span-1"></div>
-    </div>
-    
-    <div class="px-gutter py-6 max-w-container-max-width mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-on-tertiary-container/60 font-body-md">
-      <p>© 2026 GraveCare SpA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
-    </div>
+  <footer class="bg-primary text-on-primary py-8 text-center text-xs mt-auto">
+    <p>© 2026 GraveCare Chile SpA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
   </footer>
 
-  <!-- Botón Flotante de WhatsApp -->
-  <a href="https://wa.me/569xxxxxxxx?text=Hola%20GraveCare,%20quisiera%20consultar%20por%20los%20servicios%20de%20cuidado%20y%20preservaci%C3%B3n." 
-     target="_blank" 
-     rel="noopener noreferrer" 
-     class="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3.5 rounded-full shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_6px_24px_rgba(37,211,102,0.6)] hover:scale-105 transition-all duration-300 group" 
-     title="Contáctanos por WhatsApp (+56 9 8256 6719)"
-     aria-label="Contactar por WhatsApp">
-    <svg class="w-7 h-7 fill-white flex-shrink-0" viewBox="0 0 24 24">
-      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.63.076-1.503-.277-.991-.399-1.928-1.455-2.457-2.148-.528-.693-.974-1.637-.974-2.607 0-.969.497-1.446.673-1.642.176-.196.386-.245.516-.245.13 0 .26.002.373.007.12.006.279-.045.437.334.162.388.552 1.346.6 1.444.048.099.08.215.016.342-.064.128-.096.208-.192.319-.096.111-.202.247-.289.332-.096.095-.197.199-.085.39.112.192.497.82 1.066 1.328.734.654 1.353.857 1.545.953.192.096.305.08.417-.048.112-.128.481-.559.61-.751.128-.192.257-.16.433-.096.176.064 1.118.527 1.311.624.192.096.321.144.369.224.048.08.048.463-.096.868zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.176L2 22l4.981-1.309A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
-    </svg>
-    <span class="font-semibold text-sm text-white tracking-wide whitespace-nowrap">
-      WhatsApp +56 9 8256 6719
-    </span>
-  </a>
-
-  <!-- Script Interactivo del Menú Móvil -->
   <script>
     function toggleMenu(e) {
-      if (e) {
-        if (e.preventDefault) e.preventDefault();
-        if (e.stopPropagation) e.stopPropagation();
-      }
-      var drawer = document.getElementById('mobile-menu-drawer');
-      var icon = document.getElementById('mobile-menu-icon');
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const drawer = document.getElementById('mobile-menu-drawer');
+      const icon = document.getElementById('mobile-menu-icon');
       if (!drawer) return;
-
-      var currentDisplay = drawer.style.display;
-      if (currentDisplay === 'none' || currentDisplay === '') {
-        drawer.style.display = 'block';
-        if (icon) icon.textContent = 'close';
-      } else {
-        drawer.style.display = 'none';
-        if (icon) icon.textContent = 'menu';
-      }
-    }
-
-    function closeMenu() {
-      var drawer = document.getElementById('mobile-menu-drawer');
-      var icon = document.getElementById('mobile-menu-icon');
-      if (drawer) {
-        drawer.style.display = 'none';
-        if (icon) icon.textContent = 'menu';
-      }
+      const isOpen = drawer.style.display === 'block';
+      drawer.style.display = isOpen ? 'none' : 'block';
+      if (icon) icon.textContent = isOpen ? 'menu' : 'close';
     }
   </script>
 </body>

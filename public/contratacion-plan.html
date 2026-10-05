@@ -151,10 +151,18 @@
 
                 <div class="form-group-grid">
                     <div>
-                        <label class="form-label">RUT/DNI/Pasaporte *</label>
-                        <input type="text" id="rut" class="form-input" placeholder="12.345.678-9 / Pasaporte" required>
+                        <label class="form-label" id="labelDocumento">RUT del Titular *</label>
+                        <input type="text" id="rut" class="form-input" placeholder="12.345.678-9 o 12345678-K" required>
                         <span class="error-message" id="rutError"></span>
                         <span class="valid-message" id="rutValid">✓ RUT válido</span>
+
+                        <!-- Checkbox extranjero: Solo visible si NO vive en Chile -->
+                        <div id="contenedorExtranjero" class="hidden" style="margin-top: 0.6rem; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="checkExtranjero" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-color);">
+                            <label for="checkExtranjero" style="font-size: 0.82rem; color: var(--secondary-color); cursor: pointer; font-weight: 600;">
+                                No tengo Rut Chileno, soy extranjero
+                            </label>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label">Email *</label>
@@ -220,25 +228,25 @@
         </div>
     </div>
 
-    <!-- Modales de Decisión y Alertas -->
+    <!-- Modal de Decisión RUT -->
     <div id="modal-decision-rut" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
         <div style="background: white; border-radius: 16px; padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
             <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
-                <strong style="color: #92400e; font-size: 0.95rem;">⚠️ RUT Ya Registrado</strong>
+                <strong style="color: #92400e; font-size: 0.95rem;">⚠️ Identificación Ya Registrada</strong>
             </div>
             <p style="color: #374151; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
-                Este RUT ya figura en nuestro sistema. <strong>¿Deseas incorporar esta compra a esa cuenta?</strong>
+                Esta identificación ya figura en nuestro sistema. <strong>¿Deseas incorporar esta compra a esa cuenta?</strong>
             </p>
             <div id="modal-datos-resumen" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; font-size: 0.85rem; color: #475569; margin-bottom: 1.25rem;"></div>
             <div style="display: flex; gap: 0.75rem;">
-                <button type="button" id="btnModalNoRut" style="flex: 1; padding: 0.75rem; background: #e2e8f0; color: #1e293b; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">No, Otro RUT</button>
+                <button type="button" id="btnModalNoRut" style="flex: 1; padding: 0.75rem; background: #e2e8f0; color: #1e293b; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">No, Otro Documento</button>
                 <button type="button" id="btnModalSiRut" style="flex: 1; padding: 0.75rem; background: #1a3636; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Sí, Esta Cuenta</button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <p>&copy; 2024 GraveCare SpA - Preservación & Memoria · contacto@gravecare.cl</p>
+        <p>&copy; 2026 GraveCare SpA - Preservación & Memoria · contacto@gravecare.cl</p>
     </div>
 
     <!-- Firebase SDK Modular Oficial -->
@@ -264,30 +272,75 @@
     </script>
 
     <script>
+        // Función de capitalización estándar para nombres y apellidos (Title Case)
+        function capitalizarTexto(texto) {
+            if (!texto) return '';
+            return texto
+                .trim()
+                .toLowerCase()
+                .split(/\s+/)
+                .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+                .join(' ');
+        }
+
+        // Eventos blur para auto-corregir nombres y apellidos al salir del campo
+        const camposNombres = [
+            'nombresTitular',
+            'apellidoPaternoTitular',
+            'apellidoMaternoTitular',
+            'nombresDifunto',
+            'apellidoPaternoDifunto',
+            'apellidoMaternoDifunto'
+        ];
+
+        camposNombres.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('blur', function() {
+                    this.value = capitalizarTexto(this.value);
+                });
+            }
+        });
+
+        // Limpia a solo números y 'k'
         function normalizarRut(r) {
             return (r || '').toLowerCase().replace(/[^0-9k]/g, '');
         }
 
+        // Formatea cualquier entrada a puntos y guion: 12.345.678-9
+        function formatearRutConPuntosYGuion(rut) {
+            const limpio = (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
+            if (limpio.length < 2) return rut;
+            const cuerpo = limpio.slice(0, -1);
+            const dv = limpio.slice(-1);
+            const cuerpoConPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return `${cuerpoConPuntos}-${dv}`;
+        }
+
+        // Valida RUT chileno admitiendo cualquier formato
         function validarRutChileno(rut) {
-            if (document.getElementById('pais').value !== 'Chile') {
-                return { valido: true, mensaje: '' };
+            const limpio = (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
+            if (limpio.length < 2 || limpio.length > 9) {
+                return { valido: false, mensaje: 'Ingresa un RUT válido (ej: 12.345.678-9 o 12345678-K)' };
             }
-            const rutLimpio = rut.replace(/\./g, '').replace(/\s/g, '').toUpperCase();
-            if (!rutLimpio.match(/^\d{1,8}-[0-9K]$/)) {
-                return { valido: false, mensaje: 'Formato inválido. Usa: 12.345.678-9 o 12345678-K' };
+            const cuerpo = limpio.slice(0, -1);
+            const dv = limpio.slice(-1);
+
+            if (!/^\d+$/.test(cuerpo)) {
+                return { valido: false, mensaje: 'El cuerpo del RUT debe contener solo números' };
             }
-            const [numeroStr, digitoVerificador] = rutLimpio.split('-');
+
             let suma = 0;
             let multiplicador = 2;
-            for (let i = numeroStr.length - 1; i >= 0; i--) {
-                suma += parseInt(numeroStr[i], 10) * multiplicador;
+            for (let i = cuerpo.length - 1; i >= 0; i--) {
+                suma += parseInt(cuerpo[i], 10) * multiplicador;
                 multiplicador++;
                 if (multiplicador > 7) multiplicador = 2;
             }
             const resto = 11 - (suma % 11);
-            let digitoEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
-            if (digitoVerificador !== digitoEsperado) {
-                return { valido: false, mensaje: `RUT inválido. Dígito verificador debe ser ${digitoEsperado}` };
+            const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
+            if (dv !== dvEsperado) {
+                return { valido: false, mensaje: `RUT inválido. Dígito verificador debe ser ${dvEsperado}` };
             }
             return { valido: true, mensaje: 'RUT válido' };
         }
@@ -295,14 +348,68 @@
         const rutInput = document.getElementById('rut');
         const rutError = document.getElementById('rutError');
         const rutValid = document.getElementById('rutValid');
+        const checkExtranjero = document.getElementById('checkExtranjero');
+        const contenedorExtranjero = document.getElementById('contenedorExtranjero');
+        const labelDocumento = document.getElementById('labelDocumento');
 
+        function activarModoRutChileno() {
+            labelDocumento.textContent = 'RUT del Titular *';
+            rutInput.placeholder = '12.345.678-9 o 12345678-K';
+            rutInput.classList.remove('valid', 'error');
+            rutError.classList.remove('show');
+            rutValid.classList.remove('show');
+        }
+
+        checkExtranjero.addEventListener('change', function() {
+            if (this.checked) {
+                labelDocumento.textContent = 'DNI / Pasaporte / Documento Extranjero *';
+                rutInput.placeholder = 'Nº Pasaporte o ID Extranjero';
+                rutError.classList.remove('show');
+                if (rutInput.value.trim().length >= 4) {
+                    rutInput.classList.remove('error');
+                    rutInput.classList.add('valid');
+                    rutValid.classList.add('show');
+                    rutValid.textContent = '✓ Documento extranjero ingresado';
+                } else {
+                    rutInput.classList.remove('valid', 'error');
+                    rutValid.classList.remove('show');
+                }
+            } else {
+                activarModoRutChileno();
+                if (rutInput.value.trim()) {
+                    rutInput.dispatchEvent(new Event('input'));
+                }
+            }
+        });
+
+        // Validación reactiva
         rutInput.addEventListener('input', function() {
-            const resultado = validarRutChileno(this.value);
-            if (this.value.trim() === '') {
+            const esExtranjeroSinRut = (document.getElementById('pais').value !== 'Chile') && checkExtranjero.checked;
+
+            if (esExtranjeroSinRut) {
+                if (this.value.trim().length >= 4) {
+                    this.classList.remove('error');
+                    this.classList.add('valid');
+                    rutError.classList.remove('show');
+                    rutValid.classList.add('show');
+                    rutValid.textContent = '✓ Documento extranjero ingresado';
+                } else {
+                    this.classList.remove('valid');
+                    rutValid.classList.remove('show');
+                }
+                return;
+            }
+
+            const val = this.value.trim();
+            if (val === '') {
                 this.classList.remove('error', 'valid');
                 rutError.classList.remove('show');
                 rutValid.classList.remove('show');
-            } else if (resultado.valido) {
+                return;
+            }
+
+            const resultado = validarRutChileno(val);
+            if (resultado.valido) {
                 this.classList.remove('error');
                 this.classList.add('valid');
                 rutError.classList.remove('show');
@@ -317,13 +424,14 @@
             }
         });
 
-        document.getElementById('pais').addEventListener('change', function() {
-            if (this.value !== 'Chile') {
-                rutInput.classList.remove('error', 'valid');
-                rutError.classList.remove('show');
-                rutValid.classList.remove('show');
-            } else if (rutInput.value.trim()) {
-                rutInput.dispatchEvent(new Event('input'));
+        // Auto-formateo a puntos y guion en blur si es chileno
+        rutInput.addEventListener('blur', function() {
+            const esExtranjeroSinRut = (document.getElementById('pais').value !== 'Chile') && checkExtranjero.checked;
+            if (!esExtranjeroSinRut && this.value.trim()) {
+                const res = validarRutChileno(this.value);
+                if (res.valido) {
+                    this.value = formatearRutConPuntosYGuion(this.value);
+                }
             }
         });
 
@@ -354,7 +462,6 @@
         const comunaSelect = document.getElementById('comuna');
         const comunaText = document.getElementById('comunaText');
 
-        // Poblar regiones al cargar
         function inicializarRegionesYComunas() {
             regionSelect.innerHTML = '<option disabled selected value="">Selecciona región</option>';
             Object.keys(regionesComunas).forEach(reg => {
@@ -377,6 +484,21 @@
             comunaSelect.required = isChile;
             comunaText.classList.toggle('hidden', isChile);
             comunaText.required = !isChile;
+
+            // Restricción estricta de residencia: extranjeros solo si no viven en Chile
+            if (isChile) {
+                contenedorExtranjero.classList.add('hidden');
+                contenedorExtranjero.style.display = 'none';
+                checkExtranjero.checked = false;
+                activarModoRutChileno();
+            } else {
+                contenedorExtranjero.classList.remove('hidden');
+                contenedorExtranjero.style.display = 'flex';
+            }
+
+            if (rutInput.value.trim()) {
+                rutInput.dispatchEvent(new Event('input'));
+            }
         });
 
         regionSelect.addEventListener('change', function() {
@@ -419,7 +541,7 @@
                 const modal = document.getElementById('modal-decision-rut');
                 const boxResumen = document.getElementById('modal-datos-resumen');
                 boxResumen.innerHTML = `
-                    <p><strong>RUT:</strong> ${rut}</p>
+                    <p><strong>Identificación:</strong> ${rut}</p>
                     <p><strong>Nombre:</strong> ${datos.nombreCompleto || datos.nombres || 'Usuario Registrado'}</p>
                     <p><strong>Email:</strong> ${datos.email || 'No disponible'}</p>
                 `;
@@ -440,10 +562,10 @@
         }
 
         function precargarDatosTitular(datos) {
-            if (datos.nombres) document.getElementById('nombresTitular').value = datos.nombres;
-            else if (datos.nombreCompleto) document.getElementById('nombresTitular').value = datos.nombreCompleto;
-            if (datos.apellidoPaterno) document.getElementById('apellidoPaternoTitular').value = datos.apellidoPaterno;
-            if (datos.apellidoMaterno) document.getElementById('apellidoMaternoTitular').value = datos.apellidoMaterno;
+            if (datos.nombres) document.getElementById('nombresTitular').value = capitalizarTexto(datos.nombres);
+            else if (datos.nombreCompleto) document.getElementById('nombresTitular').value = capitalizarTexto(datos.nombreCompleto);
+            if (datos.apellidoPaterno) document.getElementById('apellidoPaternoTitular').value = capitalizarTexto(datos.apellidoPaterno);
+            if (datos.apellidoMaterno) document.getElementById('apellidoMaternoTitular').value = capitalizarTexto(datos.apellidoMaterno);
 
             if (datos.email) {
                 const elEmail = document.getElementById('email');
@@ -465,17 +587,46 @@
             document.getElementById('banner-datos-precargados').classList.remove('hidden');
         }
 
-        // ===================================================================
-        // SUBMIT DEL FORMULARIO CON VALIDACIÓN EN FIRESTORE BLINDADA
-        // ===================================================================
         document.getElementById('contratacion-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // 1. Validar formato RUT si es Chile
-            if (document.getElementById('pais').value === 'Chile') {
-                const resultadoRut = validarRutChileno(document.getElementById('rut').value);
+            // 1. Estandarización de nombres y apellidos (Title Case)
+            const nombresTit = capitalizarTexto(document.getElementById('nombresTitular').value);
+            const apPatTit   = capitalizarTexto(document.getElementById('apellidoPaternoTitular').value);
+            const apMatTit   = capitalizarTexto(document.getElementById('apellidoMaternoTitular').value);
+            const nombreCompletoTitular = `${nombresTit} ${apPatTit} ${apMatTit}`.trim();
+
+            const nombresDif = capitalizarTexto(document.getElementById('nombresDifunto').value);
+            const apPatDif   = capitalizarTexto(document.getElementById('apellidoPaternoDifunto').value);
+            const apMatDif   = capitalizarTexto(document.getElementById('apellidoMaternoDifunto').value);
+            const nombreCompletoDifunto = `${nombresDif} ${apPatDif} ${apMatDif}`.trim();
+
+            document.getElementById('nombresTitular').value = nombresTit;
+            document.getElementById('apellidoPaternoTitular').value = apPatTit;
+            document.getElementById('apellidoMaternoTitular').value = apMatTit;
+            document.getElementById('nombresDifunto').value = nombresDif;
+            document.getElementById('apellidoPaternoDifunto').value = apPatDif;
+            document.getElementById('apellidoMaternoDifunto').value = apMatDif;
+
+            // 2. Validación de Identificación (RUT Chileno vs Extranjero)
+            const paisVal = document.getElementById('pais').value;
+            const esExtranjeroSinRut = (paisVal !== 'Chile') && checkExtranjero.checked;
+            const inputRutVal = document.getElementById('rut').value.trim();
+
+            let rutFinalGuardado = inputRutVal;
+
+            if (!esExtranjeroSinRut) {
+                const resultadoRut = validarRutChileno(inputRutVal);
                 if (!resultadoRut.valido) {
-                    alert('Por favor, ingresa un RUT válido');
+                    alert(resultadoRut.mensaje);
+                    document.getElementById('rut').focus();
+                    return;
+                }
+                rutFinalGuardado = formatearRutConPuntosYGuion(inputRutVal);
+                document.getElementById('rut').value = rutFinalGuardado;
+            } else {
+                if (inputRutVal.length < 4) {
+                    alert('Por favor, ingresa un número de Pasaporte o DNI válido');
                     document.getElementById('rut').focus();
                     return;
                 }
@@ -486,70 +637,66 @@
             btnSubmit.textContent = 'Verificando datos...';
             btnSubmit.disabled = true;
 
-            const rut = document.getElementById('rut').value.trim();
             const email = document.getElementById('email').value.trim().toLowerCase();
-            const cleanRut = normalizarRut(rut);
-
+            const cleanRut = normalizarRut(rutFinalGuardado);
             let cuentaPreexistenteAceptada = false;
 
             try {
-                // Esperar a que Firebase esté listo si tarda en cargar
                 let intentos = 0;
                 while ((!window.gcFirebase || !window.gcFirebase.db) && intentos < 20) {
                     await new Promise(r => setTimeout(r, 100));
                     intentos++;
                 }
 
-// 2. Consulta en Firestore a rut_lookup (multiformato con guion y limpio)
-if (window.gcFirebase && window.gcFirebase.db) {
-    try {
-        const rutLimpioSinPuntos = rut.replace(/\./g, '').trim().toLowerCase(); // ej: 13793668-2
-        const formatosABuscar = [
-            rutLimpioSinPuntos,                 // '13793668-2' (tu formato actual en Firestore)
-            cleanRut,                           // '137936682'
-            rut.trim()                          // '13.793.668-2'
-        ];
+                if (window.gcFirebase && window.gcFirebase.db) {
+                    try {
+                        const rutLimpioSinPuntos = rutFinalGuardado.replace(/\./g, '').trim().toLowerCase();
+                        const formatosABuscar = [
+                            rutFinalGuardado,
+                            rutLimpioSinPuntos,
+                            cleanRut,
+                            inputRutVal.trim().toLowerCase()
+                        ];
 
-        let snapRut = null;
-        for (const fId of formatosABuscar) {
-            if (!fId) continue;
-            const refDoc = window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', fId);
-            const res = await window.gcFirebase.getDoc(refDoc);
-            if (res.exists()) {
-                snapRut = res;
-                break;
-            }
-        }
+                        let snapRut = null;
+                        for (const fId of formatosABuscar) {
+                            if (!fId) continue;
+                            const refDoc = window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', fId);
+                            const res = await window.gcFirebase.getDoc(refDoc);
+                            if (res.exists()) {
+                                snapRut = res;
+                                break;
+                            }
+                        }
 
-        if (snapRut && snapRut.exists()) {
-            const datosEncontrados = snapRut.data();
-            const aceptaIncorporar = await preguntarModalRut(rut, datosEncontrados);
+                        if (snapRut && snapRut.exists()) {
+                            const datosEncontrados = snapRut.data();
+                            const aceptaIncorporar = await preguntarModalRut(rutFinalGuardado, datosEncontrados);
 
-            if (!aceptaIncorporar) {
-                btnSubmit.textContent = textoOriginal;
-                btnSubmit.disabled = false;
-                document.getElementById('rut').value = '';
-                document.getElementById('rut').focus();
-                alert('Por favor, ingresa un nuevo RUT para continuar.');
-                return;
-            }
+                            if (!aceptaIncorporar) {
+                                btnSubmit.textContent = textoOriginal;
+                                btnSubmit.disabled = false;
+                                document.getElementById('rut').value = '';
+                                document.getElementById('rut').focus();
+                                alert('Por favor, ingresa una nueva identificación para continuar.');
+                                return;
+                            }
 
-            cuentaPreexistenteAceptada = true;
-            precargarDatosTitular(datosEncontrados);
-        }
-    } catch (fsErr) {
-        console.error('Error al consultar rut_lookup en Firestore:', fsErr);
-    }
-}
+                            cuentaPreexistenteAceptada = true;
+                            precargarDatosTitular(datosEncontrados);
+                        }
+                    } catch (fsErr) {
+                        console.error('Error consultando rut_lookup:', fsErr);
+                    }
+                }
 
-                // 3. Validar si el email ya existe en Auth (si no aceptó su propia cuenta)
                 if (!cuentaPreexistenteAceptada && window.gcFirebase && window.gcFirebase.auth && email) {
                     try {
                         const metodos = await window.gcFirebase.fetchSignInMethodsForEmail(window.gcFirebase.auth, email);
                         if (metodos && metodos.length > 0) {
                             btnSubmit.textContent = textoOriginal;
                             btnSubmit.disabled = false;
-                            alert('Este correo electrónico ya está registrado en el sistema. Debes ingresar uno diferente o iniciar sesión.');
+                            alert('Este correo electrónico ya está registrado. Debes ingresar uno diferente o iniciar sesión.');
                             document.getElementById('email').focus();
                             return;
                         }
@@ -562,18 +709,8 @@ if (window.gcFirebase && window.gcFirebase.db) {
                 console.error('Aviso general durante validación:', err);
             }
 
-            // 4. Guardado y avance a Resumen de Pago
-            const pais = document.getElementById('pais').value;
-            const region = (pais === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
-            const comuna = (pais === 'Chile') ? document.getElementById('comuna').value : document.getElementById('comunaText').value;
-
-            const nombresTit = document.getElementById('nombresTitular').value.trim();
-            const apPatTit = document.getElementById('apellidoPaternoTitular').value.trim();
-            const apMatTit = document.getElementById('apellidoMaternoTitular').value.trim();
-
-            const nombresDif = document.getElementById('nombresDifunto').value.trim();
-            const apPatDif = document.getElementById('apellidoPaternoDifunto').value.trim();
-            const apMatDif = document.getElementById('apellidoMaternoDifunto').value.trim();
+            const region = (paisVal === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
+            const comuna = (paisVal === 'Chile') ? document.getElementById('comuna').value : document.getElementById('comunaText').value;
 
             const dirCalle = document.getElementById('direccion').value.trim();
             const dirNum = document.getElementById('numero').value.trim();
@@ -585,16 +722,18 @@ if (window.gcFirebase && window.gcFirebase.db) {
                 tipoServicio: 'PLAN',
                 tipoSuscripcion: 'PLAN',
                 cuentaExistente: cuentaPreexistenteAceptada,
+                esExtranjero: esExtranjeroSinRut,
                 titular: {
-                    nombre: `${nombresTit} ${apPatTit} ${apMatTit}`.trim(),
+                    nombre: nombreCompletoTitular,
                     nombres: nombresTit,
                     apellidoPaterno: apPatTit,
                     apellidoMaterno: apMatTit,
                     email: email,
-                    rut: rut,
-                    rutDni: rut,
+                    rut: rutFinalGuardado,
+                    rutDni: rutFinalGuardado,
+                    rutLimpio: cleanRut,
                     telefono: document.getElementById('telefono').value.trim(),
-                    pais: pais,
+                    pais: paisVal,
                     direccion: dirCalle,
                     numero: dirNum,
                     departamento: dirDepto,
@@ -602,7 +741,7 @@ if (window.gcFirebase && window.gcFirebase.db) {
                     comuna: comuna
                 },
                 direccionTitular: {
-                    pais: pais,
+                    pais: paisVal,
                     direccion: dirCalle,
                     numero: dirNum,
                     departamento: dirDepto,
@@ -610,7 +749,7 @@ if (window.gcFirebase && window.gcFirebase.db) {
                     comuna: comuna
                 },
                 difunto: {
-                    nombre: `${nombresDif} ${apPatDif} ${apMatDif}`.trim(),
+                    nombre: nombreCompletoDifunto,
                     nombres: nombresDif,
                     apellidoPaterno: apPatDif,
                     apellidoMaterno: apMatDif

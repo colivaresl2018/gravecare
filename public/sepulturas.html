@@ -36,7 +36,7 @@
 </head>
 <body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-sans">
 
-  <!-- Sidebar -->
+  <!-- Sidebar Desktop -->
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
@@ -44,7 +44,7 @@
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
-      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100" href="dashboard.html">
+      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100 transition-colors" href="dashboard.html">
         <span class="material-symbols-outlined">dashboard</span>
         <span class="text-sm font-semibold">Resumen</span>
       </a>
@@ -52,21 +52,25 @@
         <span class="material-symbols-outlined">account_balance</span>
         <span class="text-sm font-semibold">Mis Sepulturas</span>
       </a>
-      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100" href="pagos.html">
+      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100 transition-colors" href="contratos.html">
+        <span class="material-symbols-outlined">description</span>
+        <span class="text-sm font-semibold">Contratos</span>
+      </a>
+      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100 transition-colors" href="pagos.html">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-sm font-semibold">Pagos & Suscripción</span>
       </a>
-      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100" href="fotos.html">
+      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100 transition-colors" href="fotos.html">
         <span class="material-symbols-outlined">photo_library</span>
         <span class="text-sm font-semibold">Fotos</span>
       </a>
-      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100" href="perfil.html">
+      <a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-gray-100 transition-colors" href="perfil.html">
         <span class="material-symbols-outlined">person</span>
         <span class="text-sm font-semibold">Perfil</span>
       </a>
     </nav>
     <div class="mt-auto pt-6 border-t border-outline-variant/30">
-      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left cursor-pointer">
         <span class="material-symbols-outlined">logout</span>
         <span class="text-sm font-semibold">Cerrar Sesión</span>
       </button>
@@ -80,10 +84,10 @@
         <h1 class="text-2xl md:text-3xl font-bold text-primary">Mis Sepulturas Contratadas</h1>
         <p class="text-on-surface-variant text-sm mt-1">Ubicación y estado de los servicios de cuidado y ornamentación floral.</p>
       </div>
-      <a href="planes.html" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-container text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all shadow-sm">
+      <button type="button" id="btnAbrirModalNueva" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-container text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
         <span class="material-symbols-outlined text-sm">add</span>
         Agregar Nueva Sepultura
-      </a>
+      </button>
     </header>
 
     <div id="grilla-sepulturas" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -94,10 +98,133 @@
     </div>
   </main>
 
+  <!-- Mobile Bottom Nav -->
+  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-1 z-50">
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="dashboard.html">
+      <span class="material-symbols-outlined text-xl">dashboard</span>
+      <span class="text-[9px] mt-1">Resumen</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="sepulturas.html">
+      <span class="material-symbols-outlined text-xl">account_balance</span>
+      <span class="text-[9px] mt-1">Sepulturas</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="contratos.html">
+      <span class="material-symbols-outlined text-xl">description</span>
+      <span class="text-[9px] mt-1">Contratos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
+      <span class="material-symbols-outlined text-xl">receipt_long</span>
+      <span class="text-[9px] mt-1">Pagos</span>
+    </a>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
+      <span class="material-symbols-outlined text-xl">person</span>
+      <span class="text-[9px] mt-1">Perfil</span>
+    </a>
+  </nav>
+
+  <!-- MODAL: AGREGAR NUEVA SEPULTURA Y PASAR DIRECTO A PAGO -->
+  <div id="modalNuevaSepultura" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-gray-100">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-primary">Nueva Sepultura / Servicio</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Tus datos personales ya están vinculados. Pasa directo al pago.</p>
+        </div>
+        <button type="button" id="btnCerrarModal" class="p-1.5 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition cursor-pointer">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <form id="formNuevaSepultura" class="space-y-4 text-xs">
+        <div class="space-y-1">
+          <label class="font-bold text-gray-700 uppercase block">Tipo de Servicio *</label>
+          <select id="modalTipoServicio" class="w-full rounded-xl border-gray-300 py-2.5 text-xs focus:ring-primary focus:border-primary" required>
+            <option value="PLAN_12" selected>Plan 12 (Mensual — 12 visitas/año) — $38.990 / visita</option>
+            <option value="PLAN_6">Plan 6 (Bimestral — 6 visitas/año) — $44.990 / visita</option>
+            <option value="PLAN_4">Plan 4 (Trimestral — 4 visitas/año) — $46.990 / visita</option>
+            <option value="SPOT">Visita Spot (Fecha Única / Especial) — $58.990</option>
+          </select>
+        </div>
+
+        <div id="campoFechaSpot" class="space-y-1 hidden">
+          <label class="font-bold text-gray-700 uppercase block">Fecha de la Visita Spot *</label>
+          <input type="date" id="modalFechaSpot" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+          <p class="text-[10px] text-gray-500">Mínimo 2 días hábiles de anticipación.</p>
+        </div>
+
+        <div class="pt-2 border-t border-gray-100">
+          <span class="font-bold text-secondary uppercase block mb-2">Datos del Ser Querido</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <label class="text-gray-600 font-semibold block mb-1">Nombres *</label>
+              <input type="text" id="modalNombresDif" required placeholder="María" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="text-gray-600 font-semibold block mb-1">Apellido Paterno *</label>
+              <input type="text" id="modalApPatDif" required placeholder="González" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="text-gray-600 font-semibold block mb-1">Apellido Materno</label>
+              <input type="text" id="modalApMatDif" placeholder="Soto" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-gray-100">
+          <span class="font-bold text-secondary uppercase block mb-2">Ubicación de la Sepultura</span>
+          <div class="space-y-2">
+            <div>
+              <label class="text-gray-600 font-semibold block mb-1">Cementerio *</label>
+              <select id="modalCementerio" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary" required>
+                <option value="Parque del Recuerdo Américo Vespucio" selected>Parque del Recuerdo Américo Vespucio</option>
+                <option value="Parque del Recuerdo Cordillera">Parque del Recuerdo Cordillera</option>
+                <option value="Parque del Recuerdo Padre Hurtado">Parque del Recuerdo Padre Hurtado</option>
+                <option value="Cementerio General de Santiago">Cementerio General de Santiago</option>
+                <option value="Cementerio Católico de Recoleta">Cementerio Católico de Recoleta</option>
+                <option value="Parque del Sendero Maipú">Parque del Sendero Maipú</option>
+                <option value="Otro Cementerio">Otro Cementerio</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="text-gray-600 font-semibold block mb-1">Sector</label>
+                <input type="text" id="modalSector" placeholder="JJ" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="text-gray-600 font-semibold block mb-1">Patio</label>
+                <input type="text" id="modalPatio" placeholder="345" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+              </div>
+              <div>
+                <label class="text-gray-600 font-semibold block mb-1">Nº Sepultura</label>
+                <input type="text" id="modalNumeroSep" placeholder="1234" class="w-full rounded-xl border-gray-300 py-2 text-xs focus:ring-primary focus:border-primary">
+              </div>
+            </div>
+            <div>
+              <label class="text-gray-600 font-semibold block mb-1">Referencias en terreno (Opcional)</label>
+              <textarea id="modalReferencias" rows="2" placeholder="Cerca de calle principal, árbol o lápida gris..." class="w-full rounded-xl border-gray-300 py-1.5 text-xs focus:ring-primary focus:border-primary"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100 flex gap-3">
+          <button type="button" id="btnCancelarModal" class="w-1/3 py-3 border border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="btnIrAPago" class="w-2/3 py-3 bg-primary hover:bg-primary-container text-white rounded-xl font-bold transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer">
+            <span>Continuar al Pago →</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script type="module">
     import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-    import { collection, query, where, getDocs, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+    import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
     import { auth, db } from './js/firebaseConfig.js';
+
+    let datosTitularSesion = null;
+    let usuarioActual = null;
 
     async function cerrarSesion() {
       try {
@@ -120,12 +247,252 @@
       return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
     }
 
+    function capitalizarTexto(texto) {
+      if (!texto) return '';
+      return texto.trim().toLowerCase().split(/\s+/).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    }
+
+    async function enviarCorreoConfirmacionNuevaSepultura(orden) {
+      const emailDestino = orden.titular?.email || orden.emailCliente;
+      if (!emailDestino) return;
+
+      const nombreTitular = orden.titular?.nombre || orden.titular?.nombres || "Estimado(a) Cliente";
+      const nombreDifunto = orden.difunto?.nombre || "Su Ser Querido";
+      const numOrden = orden.numeroOrden || "ORD-" + Date.now();
+      const plan = orden.servicio?.planNombre || orden.planNombre || "Servicio GraveCare";
+      const cementerio = orden.ubicacionSepultura?.cementerio || "Cementerio registrado";
+      const sector = orden.ubicacionSepultura?.sector || "S/I";
+      const patio = orden.ubicacionSepultura?.patio || "S/I";
+      const numero = orden.ubicacionSepultura?.numeroSepultura || orden.ubicacionSepultura?.numero || "S/I";
+      const fechaVisita = orden.servicio?.fechaServicioTexto || orden.fechaServicioTexto || "Por coordinar en terreno";
+      const monto = orden.precioNumerico ? `$${Number(orden.precioNumerico).toLocaleString("es-CL")}` : "$38.990";
+
+      const htmlCorreo = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
+          <div style="background-color: #002d1a; padding: 24px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">GraveCare Chile</h1>
+            <p style="color: #a4d1b5; font-size: 13px; margin: 4px 0 0 0; text-transform: uppercase; font-weight: 600;">Preservación & Memoria</p>
+          </div>
+          
+          <div style="padding: 28px 24px;">
+            <h2 style="font-size: 18px; color: #002d1a; margin-top: 0;">¡Nuevo servicio de sepultura confirmado!</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #475569;">
+              Hola <strong>${nombreTitular}</strong>, hemos registrado e incorporado exitosamente una nueva sepultura a tu cuenta en GraveCare.
+            </p>
+
+            <div style="background-color: #f8faf8; border: 1px solid #d1e9d2; border-radius: 12px; padding: 18px; margin: 20px 0;">
+              <h3 style="font-size: 14px; color: #002d1a; margin: 0 0 12px 0; text-transform: uppercase; font-weight: 700;">Detalles del Servicio Contratado</h3>
+              <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>N° de Orden:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">${numOrden}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Ser Querido:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">${nombreDifunto}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Plan / Servicio:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">${plan}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Cementerio:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">${cementerio}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Ubicación:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">Sector ${sector}, Patio ${patio}, N° ${numero}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Fecha Estimada:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 600; color: #002d1a;">${fechaVisita}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;"><strong>Monto:</strong></td>
+                  <td style="padding: 5px 0; font-weight: 700; color: #16a34a;">${monto} (IVA incluido)</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="font-size: 13px; line-height: 1.6; color: #475569;">
+              Puedes ingresar a tu portal para revisar el avance de las labores, descargar el <strong>Contrato Legal individual</strong> en la sección Contratos y ver los reportes fotográficos.
+            </p>
+
+            <div style="text-align: center; margin: 28px 0 10px 0;">
+              <a href="https://gravecare.cl/dashboard.html" style="background-color: #002d1a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; font-size: 13px; display: inline-block;">
+                Ir a Mi Perfil en GraveCare
+              </a>
+            </div>
+          </div>
+
+          <div style="background-color: #f1f5f9; padding: 16px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
+            GraveCare SpA · Preservación Ornamental & Cuidado de Sepulturas<br>
+            contacto@gravecare.cl · Santiago de Chile
+          </div>
+        </div>
+      `;
+
+      try {
+        await addDoc(collection(db, "mail"), {
+          to: [emailDestino],
+          message: {
+            subject: `Confirmación de Nuevo Servicio de Sepultura #${numOrden} — GraveCare`,
+            html: htmlCorreo
+          },
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        console.warn("Aviso al registrar email en Firestore:", err);
+      }
+    }
+
+    // Modal Control
+    const modalNueva = document.getElementById("modalNuevaSepultura");
+    const btnAbrirModal = document.getElementById("btnAbrirModalNueva");
+    const btnCerrarModal = document.getElementById("btnCerrarModal");
+    const btnCancelarModal = document.getElementById("btnCancelarModal");
+    const selectTipo = document.getElementById("modalTipoServicio");
+    const campoFechaSpot = document.getElementById("campoFechaSpot");
+    const inputFechaSpot = document.getElementById("modalFechaSpot");
+
+    const hoyMas2 = new Date();
+    hoyMas2.setDate(hoyMas2.getDate() + 2);
+    inputFechaSpot.min = hoyMas2.toISOString().split("T")[0];
+
+    function toggleModal(abrir) {
+      if (abrir) modalNueva.classList.remove("hidden");
+      else modalNueva.classList.add("hidden");
+    }
+
+    btnAbrirModal?.addEventListener("click", () => toggleModal(true));
+    btnCerrarModal?.addEventListener("click", () => toggleModal(false));
+    btnCancelarModal?.addEventListener("click", () => toggleModal(false));
+
+    selectTipo?.addEventListener("change", function() {
+      const esSpot = this.value === "SPOT";
+      campoFechaSpot.classList.toggle("hidden", !esSpot);
+      inputFechaSpot.required = esSpot;
+    });
+
+    ['modalNombresDif', 'modalApPatDif', 'modalApMatDif'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("blur", function() { this.value = capitalizarTexto(this.value); });
+    });
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
       }
+      usuarioActual = user;
+      await cargarPerfilTitular(user);
       await cargarSepulturas(user);
+    });
+
+    async function cargarPerfilTitular(user) {
+      try {
+        const uSnap = await getDoc(doc(db, "usuarios", user.uid));
+        if (uSnap.exists()) {
+          datosTitularSesion = uSnap.data();
+        }
+      } catch (err) {
+        console.warn("Aviso al consultar usuario en Firestore:", err);
+      }
+    }
+
+    document.getElementById("formNuevaSepultura")?.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const btnIrAPago = document.getElementById("btnIrAPago");
+      btnIrAPago.disabled = true;
+      btnIrAPago.innerHTML = `<span>Procesando solicitud...</span>`;
+
+      const tipoSel = selectTipo.value;
+      const esSpot = tipoSel === "SPOT";
+
+      let planNombre = "Plan 12 (Mensual)";
+      let precioNumerico = 38990;
+      let tipoServicio = "PLAN";
+
+      if (tipoSel === "PLAN_6") {
+        planNombre = "Plan 6 (Bimestral)";
+        precioNumerico = 44990;
+      } else if (tipoSel === "PLAN_4") {
+        planNombre = "Plan 4 (Trimestral)";
+        precioNumerico = 46990;
+      } else if (tipoSel === "SPOT") {
+        planNombre = "Visita Spot (Fecha Única)";
+        precioNumerico = 58990;
+        tipoServicio = "SPOT";
+      }
+
+      const nombresDif = capitalizarTexto(document.getElementById("modalNombresDif").value);
+      const apPatDif = capitalizarTexto(document.getElementById("modalApPatDif").value);
+      const apMatDif = capitalizarTexto(document.getElementById("modalApMatDif").value);
+
+      const cem = document.getElementById("modalCementerio").value;
+      const sec = document.getElementById("modalSector").value.trim();
+      const pat = document.getElementById("modalPatio").value.trim();
+      const num = document.getElementById("modalNumeroSep").value.trim();
+      const ref = document.getElementById("modalReferencias").value.trim();
+
+      const fechaSpotVal = inputFechaSpot.value;
+      const titularGuardado = datosTitularSesion?.titular || datosTitularSesion || {};
+
+      const ordenNueva = {
+        numeroOrden: "ORD-" + Date.now(),
+        usuarioId: usuarioActual.uid,
+        cuentaExistente: true,
+        tipoServicio: tipoServicio,
+        tipoSuscripcion: tipoServicio,
+        planNombre: planNombre,
+        precioNumerico: precioNumerico,
+        montoTotal: precioNumerico,
+        titular: {
+          nombre: titularGuardado.nombreCompleto || titularGuardado.nombre || titularGuardado.nombres || usuarioActual.displayName || "Cliente GraveCare",
+          nombres: titularGuardado.nombres || "",
+          apellidoPaterno: titularGuardado.apellidoPaterno || "",
+          apellidoMaterno: titularGuardado.apellidoMaterno || "",
+          email: usuarioActual.email || titularGuardado.email || "",
+          rut: titularGuardado.rut || titularGuardado.rutDni || "",
+          telefono: titularGuardado.telefono || "",
+          pais: titularGuardado.pais || "Chile",
+          direccion: titularGuardado.direccion || "",
+          numero: titularGuardado.numero || "",
+          departamento: titularGuardado.departamento || "",
+          region: titularGuardado.region || "",
+          comuna: titularGuardado.comuna || ""
+        },
+        difunto: {
+          nombre: `${nombresDif} ${apPatDif} ${apMatDif}`.trim(),
+          nombres: nombresDif,
+          apellidoPaterno: apPatDif,
+          apellidoMaterno: apMatDif
+        },
+        ubicacionSepultura: {
+          cementerio: cem,
+          sector: sec,
+          patio: pat,
+          numero: num,
+          numeroSepultura: num,
+          referencias: ref
+        },
+        servicio: {
+          tipo: tipoServicio,
+          planNombre: planNombre,
+          frecuencia: esSpot ? "Visita Única" : "Plan Anual",
+          precioNumerico: precioNumerico,
+          fechaServicioProgramada: esSpot ? fechaSpotVal : null,
+          fechaServicioTexto: esSpot ? fechaSpotVal : null
+        }
+      };
+
+      const ordenJson = JSON.stringify(ordenNueva);
+      localStorage.setItem('gravecare_datos_completos', ordenJson);
+      localStorage.setItem('gravecare_last_order', ordenJson);
+
+      await enviarCorreoConfirmacionNuevaSepultura(ordenNueva);
+      window.location.href = "resumen-pago.html";
     });
 
     async function cargarSepulturas(user) {
@@ -136,21 +503,18 @@
         let sepulturasList = [];
         const ordenesRef = collection(db, "ordenes");
 
-        // 1. Respaldo Local de Emergencia (para reparar si Firestore quedó vacío)
         let localData = null;
         try {
           const rawLocal = localStorage.getItem('gravecare_datos_completos') || localStorage.getItem('gravecare_last_order');
           if (rawLocal) localData = JSON.parse(rawLocal);
         } catch(e) {}
 
-        // 2. Búsqueda en Firestore por UID
         const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
         const snapUid = await getDocs(qUid);
         snapUid.forEach(docSnap => {
           sepulturasList.push({ id: docSnap.id, ...docSnap.data() });
         });
 
-        // 3. Búsqueda por Email si no se encontró por UID
         if (sepulturasList.length === 0 && user.email) {
           const emailLower = user.email.toLowerCase();
           const qTitular = query(ordenesRef, where("titular.email", "==", emailLower));
@@ -164,38 +528,34 @@
           }
         }
 
-        // 4. Si la orden en Firestore vino vacía pero tenemos los datos locales, AUTO-REPARAR
         sepulturasList = sepulturasList.map(item => {
           if (!item.difunto && localData && (localData.difunto || localData.nombresDifunto)) {
-            console.log("🛠️ Auto-reparando orden con datos locales completos:", localData);
             const fusion = { ...localData, ...item };
-            // Intentar reparar en Firestore silenciosamente
-            try {
-              setDoc(doc(db, 'ordenes', item.id), fusion, { merge: true });
-            } catch(err) {}
+            try { setDoc(doc(db, 'ordenes', item.id), fusion, { merge: true }); } catch(err) {}
             return fusion;
           }
           return item;
         });
+
+        if (!datosTitularSesion && sepulturasList.length > 0) {
+          datosTitularSesion = sepulturasList[0].titular || null;
+        }
 
         if (sepulturasList.length === 0) {
           container.innerHTML = `
             <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300 p-8">
               <span class="material-symbols-outlined text-5xl text-gray-400 mb-3">sentiment_content</span>
               <h3 class="text-lg font-bold text-primary">Aún no tienes sepulturas asociadas</h3>
-              <p class="text-gray-600 text-sm mt-1 mb-6">Contrata un servicio spot o plan mensual para iniciar el cuidado.</p>
-              <a href="planes.html" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-xs font-bold">
+              <p class="text-gray-600 text-sm mt-1 mb-6">Contrata un servicio spot o plan para iniciar el cuidado.</p>
+              <button type="button" onclick="document.getElementById('modalNuevaSepultura').classList.remove('hidden')" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-xs font-bold cursor-pointer">
                 <span class="material-symbols-outlined text-sm">add</span> Contratar Servicio
-              </a>
+              </button>
             </div>
           `;
           return;
         }
 
         container.innerHTML = sepulturasList.map((sep, index) => {
-          console.log("Datos analizados de la sepultura:", sep);
-
-          // 1. Difunto
           let difuntoNombre = "";
           if (sep.difunto) {
             difuntoNombre = sep.difunto.nombreCompleto || 
@@ -212,13 +572,11 @@
             difuntoNombre = `Sepultura #${index + 1}`;
           }
 
-          // 2. Cementerio
           const cementerio = sep.ubicacionSepultura?.cementerio || 
                              sep.cementerio || 
                              sep.cementerioNombre || 
                              "Cementerio por coordinar";
 
-          // 3. Coordenadas
           const sector = sep.ubicacionSepultura?.sector || sep.sector || "S/I";
           const patio = sep.ubicacionSepultura?.patio || sep.patio || "S/I";
           const numero = sep.ubicacionSepultura?.numeroSepultura || 
@@ -228,16 +586,14 @@
                          "S/I";
           const ubicacionTexto = `Sector: ${sector}, Patio: ${patio}, N°: ${numero}`;
 
-          // 4. Plan
           let planNombre = sep.servicio?.planNombre || 
                            sep.planNombre || 
-                           (sep.tipoServicio === "SPOT" ? "Visita Única Spot" : "Plan Mensual");
+                           (sep.tipoServicio === "SPOT" ? "Visita Spot" : "Plan 12");
           const nivel = sep.servicio?.nivel || sep.nivel || "";
           if (nivel && !planNombre.includes(nivel)) {
             planNombre += ` (${nivel})`;
           }
 
-          // 5. Fecha
           const fechaVisita = formatearFechaChile(
             sep.servicio?.fechaServicioLegible || 
             sep.servicio?.fechaServicioTexto || 
@@ -247,34 +603,13 @@
             sep.createdAt
           );
 
-          // 6. Estado
           const estado = sep.estado || "Confirmado";
           const esActivo = estado.toLowerCase().includes("confirmado") || 
                            estado.toLowerCase().includes("activo") || 
                            estado.toLowerCase().includes("pagado");
           const badgeColor = esActivo ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
 
-          // 7. Contrato (lo genera el servidor al confirmarse el pago; ver
-          // functions/contrato.js). Solo se acepta un link de Firebase Storage:
-          // la orden es editable por su dueño y no debe poder inyectar otro esquema.
-          const urlContrato = (typeof sep.contratoUrl === "string" &&
-            sep.contratoUrl.startsWith("https://firebasestorage.googleapis.com/")) ? sep.contratoUrl : "";
-          let contratoHtml = "";
-          if (urlContrato) {
-            contratoHtml = `
-              <a href="${urlContrato}" target="_blank" rel="noopener noreferrer"
-                 class="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-full bg-primary text-white text-xs font-bold hover:opacity-90 transition-opacity">
-                <span class="material-symbols-outlined text-sm">description</span> Descargar contrato (PDF)
-              </a>`;
-          } else if (sep.contratoEstado === "error") {
-            contratoHtml = `<p class="mt-3 text-center text-xs text-gray-500">No pudimos generar tu contrato automáticamente. Escríbenos por WhatsApp y te lo enviamos.</p>`;
-          } else if (sep.contratoVersion) {
-            // Aceptó el contrato al pagar y el PDF aún no está listo.
-            contratoHtml = `<p class="mt-3 text-center text-xs text-gray-500">Tu contrato se está preparando. Aparecerá aquí en unos minutos.</p>`;
-          }
-
           const numOrden = sep.numeroOrden || sep.id || `ORD-${index + 1}`;
-          const msgWa = encodeURIComponent(`Hola GraveCare, quisiera consultar sobre la mantención de la sepultura de ${difuntoNombre} (Orden #${numOrden}).`);
 
           return `
             <div class="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm flex flex-col justify-between">
@@ -313,15 +648,13 @@
                 </div>
               </div>
 
-              <div class="pt-4 border-t border-gray-100 flex gap-3">
-                <a href="fotos.html?ordenId=${sep.id}" class="flex-1 py-2.5 text-center rounded-full bg-gray-100 text-primary text-xs font-bold hover:bg-gray-200 transition-colors">
-                  Ver Fotos
-                </a>
-                <a href="https://wa.me/56982566719?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2.5 text-center rounded-full border border-primary text-primary text-xs font-bold hover:bg-gray-50 transition-colors">
-                  Coordinar Visita
+              <!-- Solo botón Ver Fotos al ancho completo -->
+              <div class="pt-4 border-t border-gray-100">
+                <a href="fotos.html?ordenId=${sep.id}" class="w-full py-2.5 px-4 text-center rounded-full bg-gray-100 hover:bg-gray-200 text-primary text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined text-base">photo_library</span>
+                  <span>Ver Fotos</span>
                 </a>
               </div>
-              ${contratoHtml}
             </div>
           `;
         }).join("");
