@@ -60,10 +60,10 @@
   <!-- TopNavBar -->
   <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30">
     <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
-      <a href="index.html" class="flex items-center gap-2">
-        <img alt="GraveCare Logo" src="assets/logo.png" style="height: 80px; width: auto; object-fit: contain;"/>
+      <a href="dashboard.html" class="flex items-center gap-2">
+        <img alt="GraveCare Logo" src="assets/logo.png" onerror="this.onerror=null; this.src='assets/logo.webp';" style="height: 60px; width: auto; object-fit: contain;"/>
       </a>
-      <a id="nav-retorno" href="mi-cuenta.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">
+      <a id="nav-retorno" href="dashboard.html" class="text-on-surface-variant hover:text-primary transition-colors text-sm font-semibold">
         Volver al Panel
       </a>
     </div>
@@ -191,8 +191,8 @@
 
     <!-- Actions Buttons -->
     <div class="flex flex-col sm:flex-row gap-4 items-center mt-2">
-      <a id="btn-principal" href="mi-cuenta.html" class="bg-primary text-white hover:bg-primary-container transition-colors py-3.5 px-8 rounded-full text-sm font-bold w-full sm:w-auto text-center shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-        <span id="btn-action-text">Volver a Mi Cuenta</span>
+      <a id="btn-principal" href="dashboard.html" class="bg-primary text-white hover:bg-primary-container transition-colors py-3.5 px-8 rounded-full text-sm font-bold w-full sm:w-auto text-center shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+        <span id="btn-action-text">Ir a Mi Panel</span>
         <span class="material-symbols-outlined text-sm">arrow_forward</span>
       </a>
 
@@ -226,7 +226,7 @@
           error: 'Ocurrió un error al procesar el pago. No se realizó ningún cargo.',
         };
         alert(mensajes[resultadoPago] || 'No se pudo confirmar el pago.');
-        window.location.href = 'mi-cuenta.html';
+        window.location.href = 'dashboard.html';
         return;
       }
 
@@ -329,11 +329,11 @@
         const step1Desc = document.getElementById('step-1-desc');
 
         function configurarComoClienteExistente() {
-          btnPrincipal.href = 'mi-cuenta.html';
-          btnActionText.textContent = 'Volver a Mi Cuenta';
+          btnPrincipal.href = 'dashboard.html';
+          btnActionText.textContent = 'Ir a Mi Panel';
           headerDesc.textContent = 'La nueva sepultura y servicio han sido agregados a tu cuenta exitosamente.';
           step1Title.textContent = 'Servicio añadido a tu panel';
-          step1Desc.textContent = 'Puedes ver tus servicios activos y monitorear los informes desde Mi Cuenta.';
+          step1Desc.textContent = 'Puedes ver tus servicios activos y monitorear los informes desde tu Dashboard.';
           redirectNotice.classList.remove('hidden');
 
           let seg = 3;
@@ -343,7 +343,7 @@
             if (contadorEl) contadorEl.textContent = seg;
             if (seg <= 0) {
               clearInterval(timer);
-              window.location.href = 'mi-cuenta.html';
+              window.location.href = 'dashboard.html';
             }
           }, 1000);
         }

@@ -4,9 +4,29 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Contacto y Preguntas Frecuentes - GraveCare Chile</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#002d1a",
+            "primary-container": "#1a432f",
+            "on-tertiary-container": "#9ca99e",
+            "surface-container-lowest": "#ffffff"
+          }
+        }
+      }
+    }
+  </script>
 
   <!-- Google reCAPTCHA v2 -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -14,7 +34,13 @@
   <!-- SDK EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    emailjs.init("Ve7RIbDVXeGzy27hA");
+    (function(){
+      try {
+        emailjs.init("Ve7RIbDVXeGzy27hA");
+      } catch(e) {
+        console.warn("EmailJS init:", e);
+      }
+    })();
   </script>
   
   <style>
@@ -40,7 +66,7 @@
 </head>
 <body class="bg-[#f7f9f8] text-[#191c1b] min-h-screen flex flex-col">
 
-<!-- Navbar -->
+  <!-- Navbar -->
   <nav class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
     <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
       <a href="index.html" class="flex items-center h-full py-2">
@@ -56,7 +82,7 @@
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="quienes-somos.html">Quiénes Somos</a>
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="servicios.html">Servicios</a>
         <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="planes.html">Planes y Precios</a>
-        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="cementerios.html">Cementerios</a>
+        <a class="text-gray-600 hover:text-[#002d1a] transition-colors font-semibold text-sm" href="cementerios.html">Cementerios</a>
         <a class="text-[#002d1a] font-bold border-b-2 border-[#002d1a] pb-1 text-sm" href="contacto.html">Contacto y Preguntas Frecuentes</a>
       </div>
       <div class="hidden md:flex items-center gap-3">
@@ -131,7 +157,7 @@
         <div class="bg-[#d1e9d2]/30 rounded-2xl p-6 sm:p-8 border border-gray-200">
           <h2 class="text-2xl font-bold text-[#002d1a] mb-6">Canales de Atención</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <a href="https://wa.me/56998280501" target="_blank" class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 hover:border-[#002d1a] transition-all shadow-sm">
+            <a href="https://wa.me/56982566719" target="_blank" class="bg-white p-5 rounded-xl border border-gray-200 flex items-start gap-4 hover:border-[#002d1a] transition-all shadow-sm">
               <div class="bg-green-100 p-2.5 rounded-full text-[#002d1a] flex-shrink-0">
                 <span class="material-symbols-outlined">forum</span>
               </div>
@@ -210,117 +236,130 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-[#002d1a] text-white mt-auto py-12">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-      <div class="md:col-span-2">
-        <h3 class="text-2xl font-bold mb-3">GRAVECARE</h3>
-        <p class="text-sm text-gray-300">GraveCare SpA · Preservación & Memoria.<br/>Todos los derechos reservados © 2026.</p>
+  <!-- Footer Estandarizado -->
+  <footer class="bg-[#002d1a] w-full">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 px-6 py-16 max-w-7xl mx-auto border-b border-[#1a432f]">
+      <!-- Brand -->
+      <div class="col-span-1">
+        <div class="text-2xl font-bold text-white mb-4">GRAVECARE</div>
+        <p class="text-sm text-white/80 mb-6 leading-relaxed">
+          Brindando tranquilidad y respeto continuo a través del cuidado profesional de sepulturas.
+        </p>
       </div>
-      <div>
-        <h4 class="font-bold mb-3">Información</h4>
-        <ul class="space-y-2 text-sm text-gray-300">
-          <li><a href="servicios.html" class="hover:text-white transition">Servicios</a></li>
-          <li><a href="planes.html" class="hover:text-white transition">Planes y Precios</a></li>
-          <li><a class="font-body-md text-body-md text-on-tertiary-container/80 hover:text-primary-fixed-dim transition-colors" href="cementerios.html">Cementerios</a></li>
-          <li><a href="quienes-somos.html" class="hover:text-white transition">Quiénes Somos</a></li>
+      <!-- Links 1 -->
+      <div class="col-span-1">
+        <h4 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Enlaces</h4>
+        <ul class="space-y-3">
+          <li><a class="text-sm text-[#9ca99e] hover:text-[#a4d1b5] transition-colors" href="servicios.html">Servicios y Cobertura</a></li>
+          <li><a class="text-sm text-[#9ca99e] hover:text-[#a4d1b5] transition-colors" href="planes.html">Planes y Precios</a></li>
+          <li><a class="text-sm text-[#9ca99e] hover:text-[#a4d1b5] transition-colors" href="cementerios.html">Cementerios</a></li>
+          <li><a class="text-sm text-[#9ca99e] hover:text-[#a4d1b5] transition-colors" href="quienes-somos.html">Quiénes Somos</a></li>
         </ul>
       </div>
-      <div>
-        <h4 class="font-bold mb-3">Contacto</h4>
-        <ul class="space-y-2 text-sm text-gray-300">
-          <li>WhatsApp: +56 9 8256 6719</li>
-          <li>Email: contacto@gravecare.cl</li>
+      <!-- Links 2 -->
+      <div class="col-span-1">
+        <h4 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Contacto y Preguntas Frecuentes</h4>
+        <ul class="space-y-3">
+          <li class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#9ca99e] text-sm">mail</span>
+            <a class="text-sm text-[#9ca99e] hover:text-[#a4d1b5] transition-colors" href="mailto:contacto@gravecare.cl">contacto@gravecare.cl</a>
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#9ca99e] text-sm">call</span>
+            <span class="text-sm text-[#9ca99e]">+56 9 8256 6719</span>
+          </li>
         </ul>
       </div>
+      <!-- Redes Sociales -->
+      <div class="col-span-1">
+        <h4 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Síguenos</h4>
+        <div class="flex items-center gap-4">
+          <!-- Facebook -->
+          <a href="https://facebook.com/gravecare" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-[#1a432f] text-white flex items-center justify-center hover:bg-white hover:text-[#002d1a] transition-all duration-300" aria-label="Facebook GraveCare">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+            </svg>
+          </a>
+          <!-- Instagram -->
+          <a href="https://instagram.com/gravecare" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-[#1a432f] text-white flex items-center justify-center hover:bg-white hover:text-[#002d1a] transition-all duration-300" aria-label="Instagram GraveCare">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+          <!-- TikTok -->
+          <a href="https://tiktok.com/@gravecare" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-[#1a432f] text-white flex items-center justify-center hover:bg-white hover:text-[#002d1a] transition-all duration-300" aria-label="TikTok GraveCare">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.17 1.17 2.15 2.34 2.45.75.2 1.56.15 2.29-.12.83-.3 1.49-.92 1.86-1.71.24-.49.33-1.04.34-1.58.02-4.52.01-9.04.01-13.56.01-.89 0-1.77.01-2.66z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-6 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-[#9ca99e]/60">
+      <p>GraveCare SPA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
     </div>
   </footer>
 
-  <script type="module">
-    import { db } from "./js/firebaseConfig.js";
-    import {
-      collection,
-      addDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
+  <script>
     // Acordeón FAQs
-    document.querySelectorAll('#faq-accordion .faq-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const isActive = item.classList.contains('active');
-        document.querySelectorAll('#faq-accordion .faq-item').forEach(other => other.classList.remove('active'));
+    document.querySelectorAll('#faq-accordion .faq-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var isActive = item.classList.contains('active');
+        document.querySelectorAll('#faq-accordion .faq-item').forEach(function(other) {
+          other.classList.remove('active');
+        });
         if (!isActive) item.classList.add('active');
       });
     });
 
     // Formulario de Contacto
-    const form = document.getElementById('contact-form');
-    const feedback = document.getElementById('contact-feedback');
-    const errorEl = document.getElementById('contact-error');
-    const btnSubmit = document.getElementById('btn-enviar-contacto');
+    var form = document.getElementById('contact-form');
+    var feedback = document.getElementById('contact-feedback');
+    var errorEl = document.getElementById('contact-error');
+    var btnSubmit = document.getElementById('btn-enviar-contacto');
 
     if (form) {
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', async function(e) {
         e.preventDefault();
         feedback.classList.add('hidden');
         errorEl.classList.add('hidden');
 
-        // 1. Verificación Honeypot (campo invisible para personas)
-        const honeypot = document.getElementById('contact-website').value.trim();
+        // Honeypot
+        var honeypot = document.getElementById('contact-website').value.trim();
         if (honeypot !== '') {
-          console.warn('Envío descartado silenciosamente por honeypot.');
           form.reset();
           feedback.classList.remove('hidden');
           return;
         }
 
-        // 2. Verificación reCAPTCHA v2
-        const recaptchaToken = (typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
+        // reCAPTCHA
+        var recaptchaToken = (typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
         if (!recaptchaToken) {
           errorEl.textContent = '❌ Por favor, marca la casilla "No soy un robot" antes de enviar.';
           errorEl.classList.remove('hidden');
           return;
         }
 
-        const nombre = document.getElementById('contact-nombre').value.trim();
-        const email = document.getElementById('contact-email').value.trim();
-        const telefono = document.getElementById('contact-telefono').value.trim();
-        const mensaje = document.getElementById('contact-mensaje').value.trim();
+        var nombre = document.getElementById('contact-nombre').value.trim();
+        var email = document.getElementById('contact-email').value.trim();
+        var telefono = document.getElementById('contact-telefono').value.trim();
+        var mensaje = document.getElementById('contact-mensaje').value.trim();
 
         btnSubmit.disabled = true;
         btnSubmit.textContent = 'Enviando...';
 
         try {
-          // 1. Envío prioritario del correo vía EmailJS con el servicio SMTP
           await emailjs.send("service_uejxdhs", "template_0nqz4o5", {
             from_name: nombre,
             from_email: email,
-            teléfono: telefono,
+            telefono: telefono,
             mensaje: mensaje,
             'g-recaptcha-response': recaptchaToken
           });
 
-          // 2. Respaldo opcional en Firestore
-          try {
-            if (db) {
-              await addDoc(collection(db, "contacto_mensajes"), {
-                nombre: nombre,
-                email: email,
-                telefono: telefono,
-                mensaje: mensaje,
-                estado: "nuevo",
-                createdAt: serverTimestamp()
-              });
-            }
-          } catch (dbErr) {
-            console.warn("Advertencia: No se pudo respaldar en Firestore, pero el correo fue enviado:", dbErr);
-          }
-
-          // Éxito confirmado
           form.reset();
           if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
           feedback.classList.remove('hidden');
-
         } catch (err) {
           console.error("Error al enviar mensaje:", err);
           if (typeof grecaptcha !== 'undefined') grecaptcha.reset();

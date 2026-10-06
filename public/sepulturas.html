@@ -122,7 +122,7 @@
     </a>
   </nav>
 
-  <!-- MODAL: AGREGAR NUEVA SEPULTURA Y PASAR DIRECTO A PAGO -->
+  <!-- MODAL: AGREGAR NUEVA SEPULTURA -->
   <div id="modalNuevaSepultura" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-gray-100">
       <div class="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
@@ -405,7 +405,7 @@
 
       const btnIrAPago = document.getElementById("btnIrAPago");
       btnIrAPago.disabled = true;
-      btnIrAPago.innerHTML = `<span>Procesando solicitud...</span>`;
+      btnIrAPago.innerHTML = `<span>Guardando y conectando...</span>`;
 
       const tipoSel = selectTipo.value;
       const esSpot = tipoSel === "SPOT";
@@ -439,8 +439,10 @@
       const fechaSpotVal = inputFechaSpot.value;
       const titularGuardado = datosTitularSesion?.titular || datosTitularSesion || {};
 
+      const nuevoIdOrden = "ORD-" + Date.now();
+
       const ordenNueva = {
-        numeroOrden: "ORD-" + Date.now(),
+        numeroOrden: nuevoIdOrden,
         usuarioId: usuarioActual.uid,
         cuentaExistente: true,
         tipoServicio: tipoServicio,
@@ -448,6 +450,8 @@
         planNombre: planNombre,
         precioNumerico: precioNumerico,
         montoTotal: precioNumerico,
+        estado: 'iniciada',
+        creadoEl: serverTimestamp(),
         titular: {
           nombre: titularGuardado.nombreCompleto || titularGuardado.nombre || titularGuardado.nombres || usuarioActual.displayName || "Cliente GraveCare",
           nombres: titularGuardado.nombres || "",
@@ -487,12 +491,22 @@
         }
       };
 
-      const ordenJson = JSON.stringify(ordenNueva);
-      localStorage.setItem('gravecare_datos_completos', ordenJson);
-      localStorage.setItem('gravecare_last_order', ordenJson);
+      try {
+        await setDoc(doc(db, "ordenes", nuevoIdOrden), ordenNueva);
 
-      await enviarCorreoConfirmacionNuevaSepultura(ordenNueva);
-      window.location.href = "resumen-pago.html";
+        const ordenJson = JSON.stringify(ordenNueva);
+        localStorage.setItem('gravecare_datos_completos', ordenJson);
+        localStorage.setItem('gravecare_last_order', ordenJson);
+        localStorage.setItem('gravecare_orden_id', nuevoIdOrden);
+
+        await enviarCorreoConfirmacionNuevaSepultura(ordenNueva);
+        window.location.href = `resumen-pago.html?orden=${nuevoIdOrden}`;
+      } catch (err) {
+        console.error("Error al registrar la orden previa al pago:", err);
+        btnIrAPago.disabled = false;
+        btnIrAPago.innerHTML = `<span>Continuar al Pago →</span>`;
+        alert("Ocurrió un inconveniente al guardar la nueva sepultura: " + err.message);
+      }
     });
 
     async function cargarSepulturas(user) {
@@ -500,46 +514,60 @@
       if (!container) return;
 
       try {
-        let sepulturasList = [];
         const ordenesRef = collection(db, "ordenes");
+        const mapaSepulturas = new Map();
 
-        let localData = null;
-        try {
-          const rawLocal = localStorage.getItem('gravecare_datos_completos') || localStorage.getItem('gravecare_last_order');
-          if (rawLocal) localData = JSON.parse(rawLocal);
-        } catch(e) {}
-
-        const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
-        const snapUid = await getDocs(qUid);
-        snapUid.forEach(docSnap => {
-          sepulturasList.push({ id: docSnap.id, ...docSnap.data() });
-        });
-
-        if (sepulturasList.length === 0 && user.email) {
-          const emailLower = user.email.toLowerCase();
-          const qTitular = query(ordenesRef, where("titular.email", "==", emailLower));
-          const snapTitular = await getDocs(qTitular);
-          snapTitular.forEach(docSnap => sepulturasList.push({ id: docSnap.id, ...docSnap.data() }));
-
-          if (sepulturasList.length === 0) {
-            const qCliente = query(ordenesRef, where("emailCliente", "==", emailLower));
-            const snapCliente = await getDocs(qCliente);
-            snapCliente.forEach(docSnap => sepulturasList.push({ id: docSnap.id, ...docSnap.data() }));
-          }
+        let userEmail = (user.email || "").toLowerCase().trim();
+        let userRut = "";
+        if (datosTitularSesion) {
+          const tit = datosTitularSesion.titular || datosTitularSesion;
+          userRut = (tit.rut || tit.rutDni || tit.rutCliente || "").replace(/[^0-9kK]/g, '').toUpperCase();
+          if (!userEmail && tit.email) userEmail = tit.email.toLowerCase().trim();
         }
 
-        sepulturasList = sepulturasList.map(item => {
-          if (!item.difunto && localData && (localData.difunto || localData.nombresDifunto)) {
-            const fusion = { ...localData, ...item };
-            try { setDoc(doc(db, 'ordenes', item.id), fusion, { merge: true }); } catch(err) {}
-            return fusion;
+        const promesas = [];
+        promesas.push(getDocs(query(ordenesRef, where("usuarioId", "==", user.uid))));
+
+        if (userEmail) {
+          promesas.push(getDocs(query(ordenesRef, where("titular.email", "==", userEmail))));
+          promesas.push(getDocs(query(ordenesRef, where("emailCliente", "==", userEmail))));
+          promesas.push(getDocs(query(ordenesRef, where("email", "==", userEmail))));
+        }
+
+        if (userRut) {
+          promesas.push(getDocs(query(ordenesRef, where("titular.rut", "==", userRut))));
+          promesas.push(getDocs(query(ordenesRef, where("rutCliente", "==", userRut))));
+          promesas.push(getDocs(query(ordenesRef, where("rut", "==", userRut))));
+        }
+
+        const resultados = await Promise.allSettled(promesas);
+
+        resultados.forEach(res => {
+          if (res.status === "fulfilled" && res.value) {
+            res.value.forEach(docSnap => {
+              if (!mapaSepulturas.has(docSnap.id)) {
+                const data = docSnap.data();
+                mapaSepulturas.set(docSnap.id, { id: docSnap.id, ...data });
+
+                if (!data.usuarioId) {
+                  try {
+                    setDoc(doc(db, "ordenes", docSnap.id), { usuarioId: user.uid }, { merge: true });
+                  } catch (e) {
+                    console.warn("No se pudo asociar usuarioId:", e);
+                  }
+                }
+              }
+            });
           }
-          return item;
         });
 
-        if (!datosTitularSesion && sepulturasList.length > 0) {
-          datosTitularSesion = sepulturasList[0].titular || null;
-        }
+        const sepulturasList = Array.from(mapaSepulturas.values());
+
+        sepulturasList.sort((a, b) => {
+          const fA = a.creadoEl?.toMillis ? a.creadoEl.toMillis() : (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0);
+          const fB = b.creadoEl?.toMillis ? b.creadoEl.toMillis() : (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0);
+          return fB - fA;
+        });
 
         if (sepulturasList.length === 0) {
           container.innerHTML = `
@@ -588,7 +616,7 @@
 
           let planNombre = sep.servicio?.planNombre || 
                            sep.planNombre || 
-                           (sep.tipoServicio === "SPOT" ? "Visita Spot" : "Plan 12");
+                           (sep.tipoServicio === "SPOT" ? "Visita Spot" : "Plan");
           const nivel = sep.servicio?.nivel || sep.nivel || "";
           if (nivel && !planNombre.includes(nivel)) {
             planNombre += ` (${nivel})`;
@@ -603,11 +631,12 @@
             sep.createdAt
           );
 
-          const estado = sep.estado || "Confirmado";
+          const estado = sep.estado || "Completada";
           const esActivo = estado.toLowerCase().includes("confirmado") || 
                            estado.toLowerCase().includes("activo") || 
-                           estado.toLowerCase().includes("pagado");
-          const badgeColor = esActivo ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
+                           estado.toLowerCase().includes("pagado") ||
+                           estado.toLowerCase().includes("completad");
+          const badgeColor = esActivo ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800";
 
           const numOrden = sep.numeroOrden || sep.id || `ORD-${index + 1}`;
 
@@ -648,7 +677,6 @@
                 </div>
               </div>
 
-              <!-- Solo botón Ver Fotos al ancho completo -->
               <div class="pt-4 border-t border-gray-100">
                 <a href="fotos.html?ordenId=${sep.id}" class="w-full py-2.5 px-4 text-center rounded-full bg-gray-100 hover:bg-gray-200 text-primary text-xs font-bold transition-colors flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-base">photo_library</span>

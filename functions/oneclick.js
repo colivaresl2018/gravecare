@@ -1,9 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const handleCors = require('./cors');
-
-// Importar correctamente transbank-sdk v6.0.0
-const { WebpayOneClick, Environment } = require('transbank-sdk');
+const { Oneclick, Options, Environment, IntegrationCommerceCodes, IntegrationApiKeys } = require('transbank-sdk');
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -11,70 +9,67 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Credenciales Transbank (desde variables de entorno)
-const COMMERCE_CODE = process.env.TRANSBANK_ONECLICK_COMMERCE || "597055555532";
-const API_KEY = process.env.TRANSBANK_API_KEY || "579B532A7440BB0C9079DED94D31EA1615BACEB7";
+const COMMERCE_CODE = IntegrationCommerceCodes.ONECLICK_MALL || "597055555541";
+const API_KEY = IntegrationApiKeys.WEBPAY || "579B532A7440BB0C9079DED94D31EA1615BACEB7";
 const ENVIRONMENT = Environment.Integration;
 
 exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
     if (handleCors(req, res)) return;
 
     try {
-        const { ordenId, cuotas } = req.body;
+        const { ordenId, cuotas } = req.body || {};
 
         if (!ordenId) {
             return res.status(400).json({ error: 'ordenId es requerido' });
         }
 
-        // Obtener orden de Firestore
         const ordenRef = db.collection('ordenes').doc(ordenId);
         const ordenSnap = await ordenRef.get();
 
         if (!ordenSnap.exists) {
-            return res.status(404).json({ error: 'Orden no encontrada' });
+            return res.status(404).json({ error: 'Orden no encontrada en Firestore' });
         }
 
         const orden = ordenSnap.data();
-        const username = `GC-${ordenId}`;
-        const email = orden.email || 'cliente@gravecare.cl';
-        const responseUrl = `${process.env.FIREBASE_PUBLIC_URL || 'https://gravecare.cl'}/confirmar-oneclick?orden=${ordenId}`;
 
-        console.log(`Iniciando inscripción Oneclick: username=${username}, email=${email}`);
+        // Parámetros limpios para Transbank
+        const idLimpio = String(ordenId).replace(/[^a-zA-Z0-9]/g, '');
+        const username = `GC_${idLimpio}`.substring(0, 35);
+        const email = (orden.email || orden.emailCliente || orden.titular?.email || 'contacto@gravecare.cl').trim();
+        const responseUrl = `https://gravecare.cl/confirmar-oneclick?ordenId=${ordenId}`;
 
-        const response = await WebpayOneClick.Inscription.start(
-            COMMERCE_CODE,
-            API_KEY,
-            ENVIRONMENT,
-            username,
-            email,
-            responseUrl
+        console.log(`[Oneclick Mall] Iniciando inscripción: username=${username}, email=${email}, returnUrl=${responseUrl}`);
+
+        const inscription = new Oneclick.MallInscription(
+          new Options(COMMERCE_CODE, API_KEY, ENVIRONMENT)
         );
 
-        console.log('Respuesta de inscripción Oneclick:', response);
+        const response = await inscription.start(username, email, responseUrl);
+        console.log('[Oneclick Mall] Start exitoso:', response);
 
-        await db.collection('ordenes').doc(ordenId).update({
+        await ordenRef.update({
             oneclickInscripcion: {
                 username,
                 email,
                 estado: 'inscripcion_iniciada',
                 tokenWpm: response.token,
-                url: response.url,
-                fechaCreacion: admin.firestore.FieldValue.serverTimestamp(),
-                cuotasSolicitadas: cuotas || 1
+                url: response.url_webpay,
+                cuotasSolicitadas: cuotas || 1,
+                fechaCreacion: admin.firestore.FieldValue.serverTimestamp()
             }
         });
 
         return res.json({
             success: true,
-            redirect_url: response.url,
+            redirect_url: response.url_webpay,
             token: response.token
         });
 
     } catch (error) {
-        console.error('Error en iniciarInscripcionOneclick:', error);
+        console.error('[Oneclick Mall] Error en iniciarInscripcionOneclick:', error);
         return res.status(500).json({
             error: 'Error al iniciar inscripción Oneclick',
-            details: error.message
+            details: error.message || error.toString()
         });
     }
 });
@@ -83,161 +78,54 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
     if (handleCors(req, res)) return;
 
     try {
-        const { token, ordenId } = req.query;
+        const token = req.query.TBK_TOKEN || req.query.token || (req.body && (req.body.TBK_TOKEN || req.body.token));
+        const ordenId = req.query.ordenId || req.query.orden || (req.body && req.body.ordenId);
 
         if (!token) {
             return res.status(400).json({ error: 'Token no proporcionado' });
         }
 
-        console.log('Confirmando inscripción Oneclick con token:', token);
+        console.log(`[Oneclick Mall] Confirmando inscripción con token: ${token}`);
 
-        const response = await WebpayOneClick.Inscription.finish(
-            COMMERCE_CODE,
-            API_KEY,
-            ENVIRONMENT,
-            token
+        const inscription = new Oneclick.MallInscription(
+          new Options(COMMERCE_CODE, API_KEY, ENVIRONMENT)
         );
 
-        console.log('Respuesta de confirmación Oneclick:', response);
+        const response = await inscription.finish(token);
+        console.log('[Oneclick Mall] Finish exitoso:', response);
+
+        const inscripcionExitosa = (response.response_code === 0);
 
         if (ordenId) {
-            await db.collection('ordenes').doc(ordenId).update({
+            const ordenRef = db.collection('ordenes').doc(ordenId);
+            await ordenRef.update({
                 oneclickInscripcion: {
-                    estado: 'inscripcion_completada',
-                    tbk_user: response.tbk_user,
+                    estado: inscripcionExitosa ? 'inscripcion_completada' : 'inscripcion_rechazada',
+                    tbk_user: response.tbk_user || null,
                     responseCode: response.response_code,
-                    authorizationCode: response.authorization_code,
-                    cardNumber: response.card_number,
+                    authorizationCode: response.authorization_code || null,
+                    cardNumber: response.card_number || null,
+                    cardType: response.card_type || null,
                     fechaConfirmacion: admin.firestore.FieldValue.serverTimestamp()
                 },
-                estado: 'oneclick_inscrito'
+                estado: inscripcionExitosa ? 'oneclick_inscrito' : 'error_inscripcion'
             });
         }
 
         return res.json({
-            success: true,
-            message: 'Inscripción completada correctamente',
+            success: inscripcionExitosa,
+            response_code: response.response_code,
             tbk_user: response.tbk_user,
-            card_number: response.card_number
+            card_number: response.card_number,
+            message: inscripcionExitosa ? 'Inscripción completada' : 'Inscripción rechazada'
         });
 
     } catch (error) {
-        console.error('Error en confirmarInscripcionOneclick:', error);
+        console.error('[Oneclick Mall] Error en confirmarInscripcionOneclick:', error);
         return res.status(500).json({
-            error: 'Error al confirmar inscripción Oneclick',
-            details: error.message
-        });
-    }
-});
-
-exports.cargarOneclick = functions.https.onRequest(async (req, res) => {
-    if (handleCors(req, res)) return;
-
-    try {
-        const { ordenId, cuotas } = req.body;
-
-        if (!ordenId) {
-            return res.status(400).json({ error: 'ordenId es requerido' });
-        }
-
-        const ordenRef = db.collection('ordenes').doc(ordenId);
-        const ordenSnap = await ordenRef.get();
-
-        if (!ordenSnap.exists) {
-            return res.status(404).json({ error: 'Orden no encontrada' });
-        }
-
-        const orden = ordenSnap.data();
-        
-        if (!orden.oneclickInscripcion || orden.oneclickInscripcion.estado !== 'inscripcion_completada') {
-            return res.status(400).json({ error: 'La tarjeta no está inscrita en Oneclick' });
-        }
-
-        const montoTotal = orden.montoTotal;
-        if (!montoTotal || montoTotal <= 0) {
-            return res.status(400).json({ error: 'Monto total inválido' });
-        }
-
-        const buyOrder = `GC-ONECLICK-${ordenId}-${Date.now()}`;
-        const tbkUser = orden.oneclickInscripcion.tbk_user;
-        const installmentsNumber = (cuotas && cuotas > 1) ? cuotas : null;
-
-        console.log(`Realizando cargo Oneclick: buyOrder=${buyOrder}, monto=${montoTotal}, cuotas=${installmentsNumber || 1}`);
-
-        const response = await WebpayOneClick.Transaction.authorize(
-            COMMERCE_CODE,
-            API_KEY,
-            ENVIRONMENT,
-            buyOrder,
-            tbkUser,
-            montoTotal,
-            installmentsNumber
-        );
-
-        console.log('Respuesta de cargo Oneclick:', response);
-
-        await db.collection('ordenes').doc(ordenId).update({
-            oneclickCargo: {
-                buyOrder,
-                montoTotal,
-                cuotas: installmentsNumber || 1,
-                codigoAutorizacion: response.authorization_code,
-                codigoTransaccion: response.transaction_date,
-                estado: 'completado',
-                fechaCargo: admin.firestore.FieldValue.serverTimestamp(),
-                detalles: response
-            },
-            estado: 'pagado'
-        });
-
-        return res.json({
-            success: true,
-            message: 'Cargo realizado exitosamente',
-            buyOrder: buyOrder,
-            codigoAutorizacion: response.authorization_code
-        });
-
-    } catch (error) {
-        console.error('Error en cargarOneclick:', error);
-        return res.status(500).json({
-            error: 'Error al realizar el cargo',
-            details: error.message
-        });
-    }
-});
-
-exports.reversarOneclick = functions.https.onRequest(async (req, res) => {
-    if (handleCors(req, res)) return;
-
-    try {
-        const { buyOrder } = req.body;
-
-        if (!buyOrder) {
-            return res.status(400).json({ error: 'buyOrder es requerido' });
-        }
-
-        console.log(`Reversando transacción Oneclick: buyOrder=${buyOrder}`);
-
-        const response = await WebpayOneClick.Transaction.reverse(
-            COMMERCE_CODE,
-            API_KEY,
-            ENVIRONMENT,
-            buyOrder
-        );
-
-        console.log('Respuesta de reversa:', response);
-
-        return res.json({
-            success: true,
-            message: 'Reversa realizada exitosamente',
-            detalles: response
-        });
-
-    } catch (error) {
-        console.error('Error en reversarOneclick:', error);
-        return res.status(500).json({
-            error: 'Error al reversar la transacción',
-            details: error.message
+            success: false,
+            error: 'Error interno al confirmar inscripción',
+            details: error.message || error.toString()
         });
     }
 });

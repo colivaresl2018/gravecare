@@ -17,6 +17,20 @@ service cloud.firestore {
       return estaAutenticado() && request.auth.uid == userId;
     }
 
+    // --- GASTOS E INGRESOS (CONTABILIDAD Y TRIBUTARIO) ---
+    match /gastos_ingresos/{docId} {
+      allow read: if true;
+      allow create, update: if estaAutenticado() || esStaff() || true;
+      allow delete: if estaAutenticado() || esStaff();
+    }
+
+    // Colección de respaldo 'gastos'
+    match /gastos/{docId} {
+      allow read: if true;
+      allow create, update: if estaAutenticado() || esStaff() || true;
+      allow delete: if estaAutenticado() || esStaff();
+    }
+
     // --- USUARIOS ---
     match /usuarios/{userId} {
       allow read: if esDueno(userId) || esStaff() || true;
@@ -25,13 +39,13 @@ service cloud.firestore {
       allow delete: if esStaff();
     }
 
-    // --- STAFF (Operadores y Administradores) ---
+    // --- STAFF ---
     match /staff/{staffId} {
       allow read: if estaAutenticado() || true;
       allow write: if esStaff();
     }
 
-    // --- RUT LOOKUP (Verificación de existencia) ---
+    // --- RUT LOOKUP ---
     match /rut_lookup/{rut} {
       allow read: if true;
       allow create, update: if estaAutenticado() || true;
@@ -45,25 +59,23 @@ service cloud.firestore {
       allow delete: if esStaff();
     }
 
-    // --- INFORMES DE VISITA Y CERTIFICADOS (CLAVE) ---
+    // --- INFORMES Y CERTIFICADOS ---
     match /informes/{informeId} {
-      // Lectura pública para que cualquier cliente pueda abrir su certificado sin login
       allow read: if true;
-      // Creación y actualización permitida para guardar desde la app/portal
       allow create, update: if true;
       allow delete: if esStaff();
     }
 
     // --- PAGOS ---
     match /pagos/{pagoId} {
-      allow read: if esStaff() || (estaAutenticado() && resource.data.usuarioId == request.auth.uid);
+      allow read: if true;
       allow write: if false;
     }
 
-    // --- TRABAJOS / OPERACIONES ---
+    // --- TRABAJOS ---
     match /trabajos/{trabajoId} {
-      allow read: if esStaff() || (estaAutenticado() && resource.data.clienteUid == request.auth.uid);
-      allow write: if esStaff();
+      allow read: if true;
+      allow write: if estaAutenticado() || esStaff();
     }
 
   }

@@ -10,6 +10,14 @@
       ],
       "rewrites": [
         {
+          "source": "/confirmar-oneclick",
+          "destination": "/confirmar-oneclick.html"
+        },
+        {
+          "source": "/confirmar-oneclick.html",
+          "destination": "/confirmar-oneclick.html"
+        },
+        {
           "source": "/crearTransaccionWebpay",
           "function": "crearTransaccionWebpay"
         },

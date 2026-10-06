@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Reportes Fotográficos | GraveCare Chile</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <script id="tailwind-config">
     tailwind.config = {
@@ -17,6 +17,7 @@
             "primary-container": "#1a432f",
             "on-primary-container": "#84b096",
             "secondary": "#4e6451",
+            "secondary-container": "#d1e9d2",
             "surface": "#f8faf8",
             "surface-container": "#eceeec",
             "surface-container-low": "#f2f4f2",
@@ -49,7 +50,7 @@
   <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
     <div class="mb-10 flex items-center justify-center">
       <a href="dashboard.html">
-        <h2 class="text-2xl font-black text-primary tracking-tight">GraveCare</h2>
+        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.png" onerror="this.onerror=null; this.src='assets/logo.webp';">
       </a>
     </div>
     <nav class="flex flex-col space-y-2 flex-grow">
@@ -61,11 +62,15 @@
         <span class="material-symbols-outlined">account_balance</span>
         <span class="text-sm font-semibold">Mis Sepulturas</span>
       </a>
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="contratos.html">
+        <span class="material-symbols-outlined">description</span>
+        <span class="text-sm font-semibold">Contratos</span>
+      </a>
       <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
         <span class="material-symbols-outlined">receipt_long</span>
         <span class="text-sm font-semibold">Pagos & Suscripción</span>
       </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-white font-bold" href="fotos.html">
+      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary text-white font-bold" href="fotos.html">
         <span class="material-symbols-outlined">photo_library</span>
         <span class="text-sm font-semibold">Fotos</span>
       </a>
@@ -75,7 +80,7 @@
       </a>
     </nav>
     <div class="mt-auto pt-6 border-t border-outline-variant/30">
-      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left font-semibold text-sm">
+      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left font-semibold text-sm cursor-pointer">
         <span class="material-symbols-outlined">logout</span>
         <span>Cerrar Sesión</span>
       </button>
@@ -105,10 +110,13 @@
   </main>
 
   <!-- Modal Lightbox -->
-  <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onclick="cerrarLightbox()">
-    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
-      <img id="img-ampliada" src="" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
-      <p id="pie-foto" class="text-white text-xs mt-2 font-semibold"></p>
+  <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4" onclick="cerrarLightbox()">
+    <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="cerrarLightbox()" class="absolute -top-10 right-0 text-white text-2xl hover:text-gray-300">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <img id="img-ampliada" src="" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl">
+      <p id="pie-foto" class="text-white text-xs mt-3 font-semibold text-center"></p>
     </div>
   </div>
 
@@ -122,34 +130,41 @@
       <span class="material-symbols-outlined">account_balance</span>
       <span class="text-[10px] mt-1">Sepulturas</span>
     </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
-      <span class="material-symbols-outlined">receipt_long</span>
-      <span class="text-[10px] mt-1">Pagos</span>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="contratos.html">
+      <span class="material-symbols-outlined">description</span>
+      <span class="text-[10px] mt-1">Contratos</span>
     </a>
     <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="fotos.html">
       <span class="material-symbols-outlined">photo_library</span>
       <span class="text-[10px] mt-1">Fotos</span>
     </a>
-    <button id="btn-logout-mobile" class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-error">
-      <span class="material-symbols-outlined">logout</span>
-      <span class="text-[10px] mt-1">Salir</span>
-    </button>
+    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] mt-1">Perfil</span>
+    </a>
   </nav>
 
- <script type="module">
-    import { observeAuthState, logoutUser } from "./js/auth.js";
-    import { db } from "./js/firebaseConfig.js";
+  <script type="module">
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import { 
       collection, 
       query,
       where,
-      getDocs 
+      getDocs,
+      doc,
+      getDoc 
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { auth, db } from "./js/firebaseConfig.js";
 
     function formatFecha(str) {
-      if (!str) return "Fecha sin registrar";
-      const f = new Date(str);
-      return f.toLocaleDateString("es-CL", { day: "2-digit", month: "long", year: "numeric" });
+      if (!str) return "Fecha reciente";
+      try {
+        const d = str?.toDate ? str.toDate() : new Date(str);
+        if (isNaN(d.getTime())) return "Fecha reciente";
+        return d.toLocaleDateString("es-CL", { day: "2-digit", month: "long", year: "numeric" });
+      } catch (e) {
+        return "Fecha reciente";
+      }
     }
 
     window.ampliarFoto = function(url, pie) {
@@ -170,120 +185,152 @@
       if (!contenedor) return;
 
       try {
-        console.log("Consultando fotos para usuario:", user.email, user.uid);
         const emailCliente = (user.email || "").toLowerCase().trim();
         const ordenesIds = new Set();
+        const mapaOrdenes = new Map();
         const ordenesRef = collection(db, "ordenes");
 
-        // 1. Rescatar órdenes asociadas al cliente.
-        //    Firestore rechaza un getDocs() sin filtro sobre toda la
-        //    colección cuando las reglas son por documento (esDuenoDeOrden()),
-        //    así que se consulta con where() por cada campo posible, igual
-        //    que en sepulturas.html — nunca un getDocs(collection(...)) plano.
+        // 1. Obtener órdenes asociadas al usuario
         try {
           const qUid = query(ordenesRef, where("usuarioId", "==", user.uid));
           const snapUid = await getDocs(qUid);
-          snapUid.forEach((docSnap) => ordenesIds.add(docSnap.id));
+          snapUid.forEach((d) => {
+            ordenesIds.add(d.id);
+            mapaOrdenes.set(d.id, d.data());
+          });
 
           if (emailCliente) {
             const qTitular = query(ordenesRef, where("titular.email", "==", emailCliente));
             const snapTitular = await getDocs(qTitular);
-            snapTitular.forEach((docSnap) => ordenesIds.add(docSnap.id));
+            snapTitular.forEach((d) => {
+              ordenesIds.add(d.id);
+              mapaOrdenes.set(d.id, d.data());
+            });
 
             const qCliente = query(ordenesRef, where("emailCliente", "==", emailCliente));
             const snapCliente = await getDocs(qCliente);
-            snapCliente.forEach((docSnap) => ordenesIds.add(docSnap.id));
+            snapCliente.forEach((d) => {
+              ordenesIds.add(d.id);
+              mapaOrdenes.set(d.id, d.data());
+            });
           }
-          console.log("Órdenes del cliente encontradas:", Array.from(ordenesIds));
         } catch (e) {
           console.warn("Aviso al consultar órdenes:", e);
         }
 
-        // 2. Rescatar informes técnicos aprobados.
-        //    Mismo motivo: se filtra por clienteEmail en la query (coincide
-        //    con lo que permite esDuenoDeOrden() en las reglas de "informes")
-        //    en vez de traer toda la colección.
-        const informesAprobados = [];
+        // 2. Rescatar Informes Fotográficos
+        const informesMap = new Map();
+        const informesRef = collection(db, "informes");
+
+        // Búsqueda A: por email del cliente
         if (emailCliente) {
-          const qInformes = query(collection(db, "informes"), where("clienteEmail", "==", emailCliente));
-          const snapInformes = await getDocs(qInformes);
-          snapInformes.forEach((docSnap) => {
-            const inf = { id: docSnap.id, ...docSnap.data() };
-            const estado = (inf.estado || "").toLowerCase().trim();
-            if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
-              informesAprobados.push(inf);
-            }
-          });
+          try {
+            const qInfEmail = query(informesRef, where("clienteEmail", "==", emailCliente));
+            const snapInfEmail = await getDocs(qInfEmail);
+            snapInfEmail.forEach(d => informesMap.set(d.id, { id: d.id, ...d.data() }));
+          } catch(e) {
+            console.warn("Aviso informe por email:", e);
+          }
         }
 
-        informesAprobados.sort((a, b) => {
-          const fa = new Date(a.fechaCaptura || a.fechaAprobacion || 0).getTime();
-          const fb = new Date(b.fechaCaptura || b.fechaAprobacion || 0).getTime();
+        // Búsqueda B: por cada ordenId que pertenece al cliente
+        for (const oId of ordenesIds) {
+          try {
+            const qInfOrden = query(informesRef, where("ordenId", "==", oId));
+            const snapInfOrden = await getDocs(qInfOrden);
+            snapInfOrden.forEach(d => informesMap.set(d.id, { id: d.id, ...d.data() }));
+          } catch (e) {}
+        }
+
+        // Filtrar informes válidos que contengan fotos reales
+        const listaInformes = Array.from(informesMap.values()).filter(inf => {
+          const f = inf.fotos || {};
+          return Boolean(f.antes?.url || f.despues?.url || f.flores?.url || f.general?.url || inf.fotoAntes || inf.fotoDespues);
+        });
+
+        // Ordenar del más nuevo al más antiguo
+        listaInformes.sort((a, b) => {
+          const fa = new Date(a.fechaCaptura || a.fechaAprobacion || a.createdAt || 0).getTime();
+          const fb = new Date(b.fechaCaptura || b.fechaAprobacion || b.createdAt || 0).getTime();
           return fb - fa;
         });
 
-        if (informesAprobados.length === 0) {
+        // 3. SI NO ENCUENTRA FOTOS DISPONIBLES:
+        if (listaInformes.length === 0) {
           contenedor.innerHTML = `
-            <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-12 text-center shadow-sm">
-              <span class="material-symbols-outlined text-5xl text-outline-variant mb-3">photo_library</span>
-              <h3 class="text-base font-bold text-primary mb-1">Aún no hay reportes fotográficos aprobados</h3>
-              <p class="text-xs text-on-surface-variant max-w-sm mx-auto">
-                Las fotografías del mantenimiento aparecerán aquí una vez que el equipo de terreno complete la visita y sea validada técnicamente por supervisión.
+            <div class="bg-surface-container-lowest rounded-2xl border border-dashed border-gray-300 p-12 text-center shadow-sm">
+              <div class="w-16 h-16 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl">photo_library</span>
+              </div>
+              <h3 class="text-lg font-bold text-primary mb-2">Aún no hay fotografías disponibles</h3>
+              <p class="text-xs text-on-surface-variant max-w-md mx-auto leading-relaxed">
+                Las fotografías del mantenimiento aparecerán aquí una vez que nuestro equipo en terreno realice la visita técnica programada y sea validada con supervisión.
               </p>
+              <div class="mt-6">
+                <a href="sepulturas.html" class="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full text-xs font-bold hover:bg-primary-container transition">
+                  <span class="material-symbols-outlined text-sm">account_balance</span>
+                  Ver Mis Sepulturas
+                </a>
+              </div>
             </div>
           `;
           return;
         }
 
-        contenedor.innerHTML = informesAprobados.map((inf) => {
+        // 4. SI EXISTEN FOTOS: Renderizar las evidencias
+        contenedor.innerHTML = listaInformes.map((inf) => {
           const fotos = inf.fotos || {};
-          const fAntes = fotos.antes?.url;
-          const fDespues = fotos.despues?.url;
-          const fFlores = fotos.flores?.url;
-          const fGeneral = fotos.general?.url;
+          const fAntes = fotos.antes?.url || inf.fotoAntes;
+          const fDespues = fotos.despues?.url || inf.fotoDespues;
+          const fFlores = fotos.flores?.url || inf.fotoFlores;
+          const fGeneral = fotos.general?.url || inf.fotoGeneral;
+
+          const ordenVinculada = mapaOrdenes.get(inf.ordenId) || {};
+          const serQuerido = ordenVinculada.difunto?.nombre || inf.nombreDifunto || "Ser Querido";
+          const cementerio = inf.cementerio || ordenVinculada.ubicacionSepultura?.cementerio || "Camposanto";
 
           return `
             <div class="bg-surface-container-lowest rounded-2xl border border-secondary/20 p-6 md:p-8 shadow-sm">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-outline-variant/30 pb-4 mb-6">
                 <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-primary text-2xl">event</span>
+                  <span class="material-symbols-outlined text-primary text-2xl">verified</span>
                   <div>
-                    <h2 class="text-lg font-bold text-primary">Servicio del ${formatFecha(inf.fechaCaptura || inf.fechaAprobacion)}</h2>
-                    <p class="text-xs text-on-surface-variant">${inf.cementerio || 'Cementerio'} — Sector: ${inf.sector || 'S/S'}, Sepultura: #${inf.lote || 'S/N'}</p>
+                    <h2 class="text-lg font-bold text-primary">Servicio en ${cementerio}</h2>
+                    <p class="text-xs text-on-surface-variant">Ser Querido: <strong>${serQuerido}</strong> · Fecha: ${formatFecha(inf.fechaCaptura || inf.fechaAprobacion)}</p>
                   </div>
                 </div>
                 <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold self-start sm:self-auto">
-                  ✓ Completada y Aprobada
+                  ✓ Visita Certificada
                 </span>
               </div>
 
-              ${inf.nota ? `<p class="text-xs font-semibold text-on-surface-variant mb-4 bg-surface-container-low p-3 rounded-lg"><strong class="text-primary">Observaciones de terreno:</strong> ${inf.nota}</p>` : ''}
+              ${inf.nota ? `<p class="text-xs text-on-surface-variant mb-4 bg-surface-container-low p-3 rounded-xl border border-outline-variant/20"><strong class="text-primary font-bold">Observaciones en terreno:</strong> ${inf.nota}</p>` : ''}
 
               <!-- 4 Fotos de Terreno -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="space-y-1.5">
-                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">1. Antes</span>
+                  <span class="inline-block px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">1. Antes</span>
                   <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
                     ${fAntes ? `<img src="${fAntes}" alt="Antes" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fAntes}', '1. Estado Inicial - Antes')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
                   </div>
                 </div>
 
                 <div class="space-y-1.5">
-                  <span class="inline-block px-2 py-0.5 rounded bg-primary-container text-white text-[11px] font-bold uppercase">2. Después</span>
+                  <span class="inline-block px-2.5 py-0.5 rounded bg-primary text-white text-[11px] font-bold uppercase">2. Después</span>
                   <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
                     ${fDespues ? `<img src="${fDespues}" alt="Después" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fDespues}', '2. Mantención Finalizada - Después')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
                   </div>
                 </div>
 
                 <div class="space-y-1.5">
-                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">3. Flores</span>
+                  <span class="inline-block px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">3. Flores</span>
                   <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
-                    ${fFlores ? `<img src="${fFlores}" alt="Flores" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fFlores}', '3. Ornamentación Floral')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
+                    ${fFlores ? `<img src="${fFlores}" alt="Flores" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fFlores}', '3. Ornamentación Floral Fresca')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
                   </div>
                 </div>
 
                 <div class="space-y-1.5">
-                  <span class="inline-block px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">4. General</span>
+                  <span class="inline-block px-2.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-[11px] font-bold uppercase">4. General</span>
                   <div class="rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container">
                     ${fGeneral ? `<img src="${fGeneral}" alt="General" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" onclick="ampliarFoto('${fGeneral}', '4. Vista Panorámica del Lote')">` : '<div class="w-full h-full flex items-center justify-center text-xs text-outline-variant">Sin foto</div>'}
                   </div>
@@ -293,7 +340,7 @@
               <div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
                 <a href="informe.html?ordenId=${inf.ordenId || ''}&informeId=${inf.id}" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
                   <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
-                  Ver Informe Oficial
+                  Descargar Informe Georreferenciado
                 </a>
               </div>
             </div>
@@ -303,14 +350,15 @@
       } catch (err) {
         console.error("Error al cargar fotos:", err);
         contenedor.innerHTML = `
-          <div class="bg-red-50 text-error p-6 rounded-xl text-center text-sm font-semibold">
-            Error al consultar los registros fotográficos: ${err.message || err}
+          <div class="bg-surface-container-lowest rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+            <h3 class="text-base font-bold text-primary mb-1">Aún no hay fotografías disponibles</h3>
+            <p class="text-xs text-gray-500">Tus fotos aparecerán aquí al concluir la primera visita.</p>
           </div>
         `;
       }
     }
 
-    observeAuthState(async (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
@@ -319,12 +367,12 @@
     });
 
     async function ejecutarLogout() {
-      await logoutUser();
+      await signOut(auth);
+      sessionStorage.clear();
       window.location.href = "login.html";
     }
 
     document.getElementById("btn-logout-sidebar")?.addEventListener("click", ejecutarLogout);
-    document.getElementById("btn-logout-mobile")?.addEventListener("click", ejecutarLogout);
   </script>
 </body>
 </html>

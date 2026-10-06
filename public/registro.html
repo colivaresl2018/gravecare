@@ -15,7 +15,7 @@
   <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
     <div class="bg-[#002d1a] text-white p-6 sm:p-8 text-center">
       <div class="flex justify-center mb-3">
-        <img src="assets/logo.jpg" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.jpg';">
+        <img src="assets/logo.png" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.webp';">
       </div>
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Crea tu Cuenta en GraveCare</h1>
       <p class="text-gray-300 text-sm mt-2">Completa tu clave de acceso para activar tu plan y gestionar tus sepulturas.</p>
@@ -157,35 +157,50 @@
       let ordenIdDetectada = null;
 
       async function rescatarDatosFirebase() {
-        const local = sessionStorage.getItem('gravecare_registro_datos') ||
-                      localStorage.getItem('gravecare_last_order') ||
-                      localStorage.getItem('gravecare_datos_completos');
+        // 1. Revisar de forma exhaustiva los almacenamientos locales
+        const storageKeys = [
+          'gravecare_datos_completos',
+          'gravecare_last_order',
+          'gravecare_registro_datos',
+          'gravecare_nueva_orden',
+          'gravecare_orden_pendiente'
+        ];
 
-        if (local) {
-          try {
-            const parsed = JSON.parse(local);
-            if (parsed) {
-              addLog('✅ Usando datos de la orden reciente (Local/Session)');
-              if (parsed.numeroOrden) ordenIdDetectada = parsed.numeroOrden;
-              return parsed;
-            }
-          } catch(e) {
-            console.error(e);
+        for (const k of storageKeys) {
+          const raw = sessionStorage.getItem(k) || localStorage.getItem(k);
+          if (raw) {
+            try {
+              const p = JSON.parse(raw);
+              if (p && (p.titular || p.email || p.emailCliente || p.nombres || p.nombreCompleto)) {
+                addLog(`✅ Datos encontrados en storage clave: ${k}`);
+                if (p.numeroOrden || p.id) ordenIdDetectada = p.numeroOrden || p.id;
+                return p;
+              }
+            } catch(e) {}
           }
         }
 
+        // 2. Revisar parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
-        const idParam = urlParams.get('id') || urlParams.get('orden');
+        const idParam = urlParams.get('id') || urlParams.get('orden') || urlParams.get('ordenId');
         const emailParam = urlParams.get('email');
 
         if (idParam) {
           ordenIdDetectada = idParam;
           try {
+            // Consulta directa por ID de documento
             let snap = await getDoc(doc(db, 'ordenes', idParam));
-            if (!snap.exists()) snap = await getDoc(doc(db, 'solicitudes', idParam));
             if (snap.exists()) {
-              addLog(`✅ Datos encontrados en Firestore por ID: ${idParam}`);
+              addLog(`✅ Orden encontrada por Document ID: ${idParam}`);
               return snap.data();
+            }
+
+            // Consulta por campo numeroOrden
+            const qNum = query(collection(db, 'ordenes'), where('numeroOrden', '==', idParam));
+            const snapNum = await getDocs(qNum);
+            if (!snapNum.empty) {
+              addLog(`✅ Orden encontrada por campo numeroOrden: ${idParam}`);
+              return snapNum.docs[0].data();
             }
           } catch (e) {
             addLog(`⚠️ Error búsqueda ID: ${e.message}`);
@@ -223,6 +238,33 @@
         const titular = datos.titular || {};
         const dir = datos.direccionTitular || {};
 
+        // Manejo inteligente de nombres y apellidos si venían concatenados
+        let nombresVal = datos.nombres || titular.nombres || '';
+        let apPatVal = datos.apellidoPaterno || titular.apellidoPaterno || '';
+        let apMatVal = datos.apellidoMaterno || titular.apellidoMaterno || '';
+
+        if (!nombresVal) {
+          const nombreCompleto = datos.nombreCompleto || titular.nombreCompleto || datos.nombre || titular.nombre || '';
+          if (nombreCompleto) {
+            const partes = nombreCompleto.trim().split(/\s+/);
+            if (partes.length === 1) {
+              nombresVal = partes[0];
+            } else if (partes.length === 2) {
+              nombresVal = partes[0];
+              apPatVal = partes[1];
+            } else if (partes.length === 3) {
+              nombresVal = partes[0];
+              apPatVal = partes[1];
+              apMatVal = partes[2];
+            } else {
+              nombresVal = partes.slice(0, 2).join(' ');
+              apPatVal = partes[2] || '';
+              apMatVal = partes.slice(3).join(' ') || '';
+            }
+          }
+        }
+
+        // Manejo de dirección
         let direccionFormateada = datos.direccion || dir.direccion || titular.direccion || '';
         const numCalle = dir.numero || titular.numero || '';
         const deptoCalle = dir.departamento || titular.departamento || '';
@@ -235,19 +277,24 @@
         }
 
         const correoRescatado = titular.email || datos.emailCliente || datos.email || titular.emailCliente || '';
+        const rutRescatado = datos.rut || titular.rut || titular.rutDni || datos.rutDni || '';
+        const telefonoRescatado = datos.telefono || titular.telefono || '';
+        const comunaRescatada = datos.comuna || dir.comuna || titular.comuna || '';
+        const regionRescatada = datos.region || dir.region || titular.region || 'Metropolitana';
+        const paisRescatado = datos.pais || dir.pais || titular.pais || 'Chile';
 
         const valores = {
-          nombres: datos.nombres || titular.nombres || datos.nombre || titular.nombre || '',
-          apellidoPaterno: datos.apellidoPaterno || titular.apellidoPaterno || '',
-          apellidoMaterno: datos.apellidoMaterno || titular.apellidoMaterno || '',
+          nombres: nombresVal,
+          apellidoPaterno: apPatVal,
+          apellidoMaterno: apMatVal,
           email: correoRescatado,
-          telefono: datos.telefono || titular.telefono || '',
-          rut: datos.rut || titular.rutDni || titular.rut || '',
+          telefono: telefonoRescatado,
+          rut: rutRescatado,
           direccion: direccionFormateada.trim(),
-          comuna: datos.comuna || dir.comuna || titular.comuna || '',
-          region: datos.region || dir.region || titular.region || '',
-          pais: datos.pais || dir.pais || titular.pais || 'Chile',
-          fechaNacimiento: datos.fechaNacimiento || ''
+          comuna: comunaRescatada,
+          region: regionRescatada,
+          pais: paisRescatado,
+          fechaNacimiento: datos.fechaNacimiento || titular.fechaNacimiento || ''
         };
 
         Object.keys(valores).forEach(id => {
@@ -256,14 +303,14 @@
             elem.value = valores[id];
             addLog(`  ✓ ${id}: ${valores[id]}`);
             
-            // Solo bloquea si el valor realmente existe y no está vacío
-            if (valores[id].trim() !== '') {
-              elem.readOnly = true;
-              elem.classList.add('bg-gray-100', 'text-gray-700', 'cursor-not-allowed');
+            // Si el dato ya fue completado en el proceso de compra, dejarlo listo
+            if (typeof valores[id] === 'string' && valores[id].trim() !== '') {
+              elem.classList.add('bg-gray-50');
             }
           }
         });
 
+        // Foco automático en el campo que falta
         const fechaEl = document.getElementById('fechaNacimiento');
         if (fechaEl && !fechaEl.value) {
           fechaEl.focus();
@@ -330,7 +377,7 @@
             await updateProfile(user, { displayName: nombreCompleto });
 
             const sesionDatos = JSON.parse(localStorage.getItem('gravecare_last_order') || '{}');
-            const nombrePlanFinal = sesionDatos.planNombre || sesionDatos.servicio?.planNombre || 'Servicio Spot';
+            const nombrePlanFinal = sesionDatos.planNombre || sesionDatos.servicio?.planNombre || 'Servicio Contratado';
 
             const userData = {
               uid,
