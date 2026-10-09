@@ -37,13 +37,6 @@
             "xl": "0.75rem",
             "full": "9999px"
           },
-          "spacing": {
-            "gutter": "24px",
-            "card-gap": "32px",
-            "container-max-width": "1200px",
-            "section-padding-desktop": "80px",
-            "section-padding-mobile": "48px"
-          },
           "fontFamily": {
             "body": ["Plus Jakarta Sans", "sans-serif"]
           }
@@ -57,9 +50,8 @@
 </head>
 <body class="bg-background text-on-surface min-h-screen flex flex-col font-body">
 
-  <!-- TopNavBar -->
   <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30">
-    <div class="flex justify-between items-center w-full px-gutter max-w-container-max-width mx-auto h-20">
+    <div class="flex justify-between items-center w-full px-6 max-w-6xl mx-auto h-20">
       <a href="dashboard.html" class="flex items-center gap-2">
         <img alt="GraveCare Logo" src="assets/logo.png" onerror="this.onerror=null; this.src='assets/logo.webp';" style="height: 60px; width: auto; object-fit: contain;"/>
       </a>
@@ -69,23 +61,21 @@
     </div>
   </header>
 
-  <main class="flex-grow flex flex-col items-center justify-center py-12 md:py-16 px-gutter">
-    
+  <main class="flex-grow flex flex-col items-center justify-center py-12 md:py-16 px-6">
     <div class="max-w-3xl w-full flex flex-col items-center text-center mb-10">
-      <div class="w-20 h-20 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mb-4 shadow-sm">
-        <span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">
+      <div id="icon-container" class="w-20 h-20 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mb-4 shadow-sm">
+        <span id="icon-symbol" class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">
           check_circle
         </span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">¡Servicio Contratado con Éxito!</h1>
+      <h1 id="conf-main-title" class="text-3xl md:text-4xl font-bold text-primary mb-3">¡Servicio Contratado con Éxito!</h1>
       <p id="conf-header-desc" class="text-on-surface-variant text-base max-w-xl">
-        Hemos registrado tu pago y la nueva sepultura para tu ser querido.
+        Hemos registrado tu pago y la sepultura para tu ser querido.
       </p>
       
-      <!-- Aviso de Redirección Automática para Clientes Registrados -->
       <div id="conf-redirect-notice" class="hidden mt-4 bg-emerald-50 border border-emerald-300 text-emerald-900 px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm animate-pulse">
         <span class="material-symbols-outlined text-emerald-700 text-lg">sync</span>
-        <span id="txt-redirect-msg">Volviendo a tu portal en <strong id="segundos-contador">3</strong> segundos...</span>
+        <span id="txt-redirect-msg">Guardando información y redirigiendo...</span>
       </div>
 
       <div id="conf-order-badge" class="mt-4 inline-block bg-secondary-container px-4 py-1.5 rounded-full text-xs font-bold text-primary tracking-wider">
@@ -93,9 +83,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-card-gap w-full max-w-container-max-width mb-10">
-      
-      <!-- Summary Card -->
+    <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mb-10">
       <div class="bg-surface-container-lowest border border-secondary/30 rounded-2xl p-8 flex flex-col gap-6 shadow-sm">
         <div class="border-b border-primary/20 pb-4 mb-2">
           <h2 class="text-xl font-bold text-primary">Resumen del Servicio</h2>
@@ -152,7 +140,6 @@
         </div>
       </div>
 
-      <!-- Next Steps -->
       <div class="bg-surface-container-lowest border border-secondary/30 rounded-2xl p-8 flex flex-col gap-6 shadow-sm">
         <div class="border-b border-primary/20 pb-4 mb-2">
           <h2 class="text-xl font-bold text-primary">¿Qué sigue ahora?</h2>
@@ -164,8 +151,8 @@
           <div class="flex items-start gap-4 relative z-10">
             <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold">1</div>
             <div>
-              <h3 id="step-1-title" class="text-sm font-bold text-on-surface mb-1">Servicio Vinculado a tu Cuenta</h3>
-              <p id="step-1-desc" class="text-xs text-on-surface-variant">La nueva sepultura ya aparece disponible en tu panel personal.</p>
+              <h3 id="step-1-title" class="text-sm font-bold text-on-surface mb-1">Acceso a tu Cuenta</h3>
+              <p id="step-1-desc" class="text-xs text-on-surface-variant">Revisa tus sepulturas y monitorea los reportes fotográficos.</p>
             </div>
           </div>
 
@@ -181,190 +168,335 @@
             <div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline flex items-center justify-center shrink-0 text-on-surface font-bold">3</div>
             <div>
               <h3 class="text-sm font-bold text-on-surface mb-1">Reporte de Visita y Certificación</h3>
-              <p class="text-xs text-on-surface-variant">Recibirás el informe fotográfico georreferenciado con las 4 evidencias.</p>
+              <p class="text-xs text-on-surface-variant">Recibirás el informe fotográfico georreferenciado con las evidencias.</p>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- Actions Buttons -->
     <div class="flex flex-col sm:flex-row gap-4 items-center mt-2">
       <a id="btn-principal" href="dashboard.html" class="bg-primary text-white hover:bg-primary-container transition-colors py-3.5 px-8 rounded-full text-sm font-bold w-full sm:w-auto text-center shadow-lg flex items-center justify-center gap-2 cursor-pointer">
-        <span id="btn-action-text">Ir a Mi Panel</span>
+        <span id="btn-action-text">Continuar</span>
         <span class="material-symbols-outlined text-sm">arrow_forward</span>
       </a>
 
-      <a href="https://wa.me/56982566719?text=Hola%20GraveCare,%20acabo%20de%20contratar%20un%20nuevo%20servicio%20para%20un%20ser%20querido%20desde%20mi%20cuenta." target="_blank" rel="noopener noreferrer" class="bg-transparent border border-secondary text-secondary hover:bg-surface-container-low transition-colors py-3.5 px-8 rounded-full flex items-center justify-center gap-2 text-sm font-semibold w-full sm:w-auto text-center">
+      <a href="https://wa.me/56982566719?text=Hola%20GraveCare,%20acabo%20de%20contratar%20un%20nuevo%20servicio%20para%20un%20ser%20querido." target="_blank" rel="noopener noreferrer" class="bg-transparent border border-secondary text-secondary hover:bg-surface-container-low transition-colors py-3.5 px-8 rounded-full flex items-center justify-center gap-2 text-sm font-semibold w-full sm:w-auto text-center">
         <span class="material-symbols-outlined text-sm">chat</span>
         Contactar por WhatsApp
       </a>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="bg-primary text-on-primary py-6 text-center text-xs mt-auto">
     <p>© 2026 GraveCare Chile SpA. Preservación &amp; Memoria. Todos los derechos reservados.</p>
   </footer>
 
-  <!-- Script Unificado -->
   <script type="module">
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import { db, auth } from "./js/firebaseConfig.js";
 
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const resultadoPago = urlParams.get('resultado');
-      const numeroOrdenUrl = urlParams.get('orden');
+      const numeroOrdenUrl = urlParams.get('orden') || urlParams.get('ordenId');
 
       if (resultadoPago && resultadoPago !== 'exito') {
-        const mensajes = {
-          rechazado: 'Tu pago fue rechazado por el banco. No se realizó ningún cargo.',
-          anulado: 'Cancelaste el pago antes de completarlo. No se realizó ningún cargo.',
-          error: 'Ocurrió un error al procesar el pago. No se realizó ningún cargo.',
-        };
-        alert(mensajes[resultadoPago] || 'No se pudo confirmar el pago.');
-        window.location.href = 'dashboard.html';
+        const iconContainer = document.getElementById('icon-container');
+        const iconSymbol = document.getElementById('icon-symbol');
+        const mainTitle = document.getElementById('conf-main-title');
+        const headerDesc = document.getElementById('conf-header-desc');
+        const btnPrincipal = document.getElementById('btn-principal');
+        const btnActionText = document.getElementById('btn-action-text');
+
+        iconContainer.className = "w-20 h-20 bg-red-100 text-red-700 rounded-full flex items-center justify-center mb-4 shadow-sm";
+        iconSymbol.textContent = "cancel";
+        mainTitle.textContent = "Pago No Realizado";
+        headerDesc.textContent = "La transacción fue rechazada o cancelada por el banco. No se generó ningún cobro ni registro.";
+        
+        // Reintento conservando la orden y los datos ingresados
+        btnPrincipal.href = numeroOrdenUrl ? `resumen-pago.html?orden=${encodeURIComponent(numeroOrdenUrl)}` : "resumen-pago.html";
+        btnActionText.textContent = "Reintentar Pago";
+        document.getElementById('cards-container').style.display = 'none';
+
+        const orderBadge = document.getElementById('conf-order-badge');
+        if (orderBadge && numeroOrdenUrl) {
+          orderBadge.textContent = `Nº DE ORDEN: ${numeroOrdenUrl}`;
+        }
         return;
       }
 
-      let orderData = null;
+      const ordenStr = sessionStorage.getItem('gravecare_orden_activa') ||
+                       localStorage.getItem('gravecare_datos_completos') ||
+                       sessionStorage.getItem('gravecare_registro_datos');
 
-      if (numeroOrdenUrl) {
+      let orderData = null;
+      if (ordenStr) {
+        try { orderData = JSON.parse(ordenStr); } catch (e) {}
+      }
+
+      const usuarioStr = sessionStorage.getItem('gravecare_usuario_pendiente');
+      let userData = null;
+      if (usuarioStr) {
+        try { userData = JSON.parse(usuarioStr); } catch (e) {}
+      }
+
+      const contratoStr = sessionStorage.getItem('gravecare_contrato_activo');
+      let contratoData = null;
+      if (contratoStr) {
+        try { contratoData = JSON.parse(contratoStr); } catch (e) {}
+      }
+
+      const numOrden = orderData?.numeroOrden || orderData?.ordenId || numeroOrdenUrl || ('ORD-' + Date.now());
+
+      let tieneCuentaConClavePrevia = false;
+      let uidExistenteReal = null;
+
+      try {
+        const titularObj = orderData?.titular || userData?.titular || {};
+        const rutLimpio = String(titularObj.rut || orderData?.rut || '').toLowerCase().replace(/[^0-9k]/g, '');
+        const rutOriginal = titularObj.rut || orderData?.rut || '';
+        const emailTitular = String(titularObj.email || orderData?.email || '').toLowerCase().trim();
+        const planNombreDetectado = orderData?.planNombre || orderData?.servicio?.planNombre || 'Servicio GraveCare';
+
+        if (rutLimpio) {
+          try {
+            const snapLookup = await getDoc(doc(db, 'rut_lookup', rutLimpio));
+            if (snapLookup.exists()) {
+              const dL = snapLookup.data();
+              if (dL.uid && !dL.uid.startsWith('cliente_')) {
+                tieneCuentaConClavePrevia = true;
+                uidExistenteReal = dL.uid;
+              }
+              if (dL.estadoCuenta === 'activada') {
+                tieneCuentaConClavePrevia = true;
+              }
+            }
+
+            if (!tieneCuentaConClavePrevia) {
+              const qUsers = query(collection(db, 'usuarios'), where('rut', '==', rutOriginal));
+              const snapQ = await getDocs(qUsers);
+              snapQ.forEach(docU => {
+                const uData = docU.data();
+                if (uData.fechaNacimiento || uData.estadoCuenta === 'activada') {
+                  tieneCuentaConClavePrevia = true;
+                  uidExistenteReal = docU.id;
+                }
+              });
+            }
+          } catch(e) {
+            console.warn("Error en verificación de cuenta previa:", e);
+          }
+        }
+
+        const uidCliente = uidExistenteReal || (rutLimpio ? `cliente_${rutLimpio}` : (orderData?.usuarioId || userData?.uid || 'cliente_temp'));
+
+        if (orderData) {
+          orderData.numeroOrden = numOrden;
+          orderData.estado = 'Confirmado';
+          orderData.pagoConfirmado = true;
+          orderData.fechaPago = serverTimestamp();
+          orderData.usuarioId = uidCliente;
+          orderData.clienteUid = uidCliente;
+
+          await setDoc(doc(db, 'ordenes', numOrden), orderData, { merge: true });
+        }
+
+        if (userData || titularObj.nombreCompleto || emailTitular) {
+          const docUsuario = {
+            uid: uidCliente,
+            email: emailTitular,
+            authEmail: `${rutLimpio}@gravecare.cl`,
+            nombreCompleto: titularObj.nombreCompleto || orderData?.nombreCliente || '',
+            nombres: titularObj.nombres || '',
+            apellidoPaterno: titularObj.apellidoPaterno || '',
+            apellidoMaterno: titularObj.apellidoMaterno || '',
+            rut: titularObj.rut || orderData?.rut || '',
+            telefono: titularObj.telefono || orderData?.telefono || '',
+            direccion: titularObj.direccion || orderData?.direccion || '',
+            comuna: titularObj.comuna || orderData?.comuna || '',
+            region: titularObj.region || orderData?.region || 'Metropolitana de Santiago',
+            pais: titularObj.pais || 'Chile',
+            rol: 'cliente',
+            estadoSuscripcion: 'Activo',
+            planNombre: planNombreDetectado,
+            actualizadoEn: serverTimestamp()
+          };
+
+          if (tieneCuentaConClavePrevia) {
+            docUsuario.estadoCuenta = 'activada';
+          } else {
+            docUsuario.estadoCuenta = 'pendiente';
+          }
+
+          await setDoc(doc(db, 'usuarios', uidCliente), docUsuario, { merge: true });
+
+          const difunto = orderData?.difunto || {};
+          const sepultura = orderData?.ubicacionSepultura || {};
+
+          const cem = sepultura.cementerio || orderData?.cementerio || '';
+          const sec = sepultura.sector || orderData?.sector || '';
+          const pat = sepultura.patio || orderData?.patio || '';
+          const num = sepultura.numeroSepultura || sepultura.numero || orderData?.numeroSepultura || '';
+
+          const normalizarClave = (txt) => String(txt || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+          const idSepultura = (cem && num)
+            ? `sep_${normalizarClave(cem)}_${normalizarClave(sec)}_${normalizarClave(pat)}_${normalizarClave(num)}`
+            : `sep_${numOrden}`;
+
+          await setDoc(doc(db, 'usuarios', uidCliente, 'sepulturas', idSepultura), {
+            id: idSepultura,
+            ultimaOrden: numOrden,
+            numeroOrden: numOrden,
+            nombreDifunto: difunto.nombre || orderData?.nombreDifunto || 'Ser Querido',
+            difunto: difunto,
+            cementerio: cem,
+            sector: sec,
+            patio: pat,
+            numeroSepultura: num,
+            referencias: sepultura.referencias || orderData?.referencias || '',
+            estado: 'Activa',
+            planActivo: planNombreDetectado,
+            actualizadoEn: serverTimestamp()
+          }, { merge: true });
+        }
+
+        if (contratoData) {
+          const idContrato = contratoData.idContrato || `CTR-${numOrden}`;
+          contratoData.estado = 'vigente';
+          contratoData.usuarioId = uidCliente;
+          contratoData.clienteUid = uidCliente;
+          contratoData.fechaAprobacion = serverTimestamp();
+
+          await setDoc(doc(db, 'contratos', idContrato), contratoData, { merge: true });
+        }
+
+        if (rutLimpio) {
+          await setDoc(doc(db, 'rut_lookup', rutLimpio), {
+            rut: rutLimpio,
+            email: emailTitular,
+            authEmail: `${rutLimpio}@gravecare.cl`,
+            uid: uidCliente,
+            estadoCuenta: tieneCuentaConClavePrevia ? 'activada' : 'pendiente'
+          }, { merge: true });
+        }
+
+        // Limpieza de claves únicamente si la confirmación de pago fue exitosa
+        sessionStorage.removeItem('gravecare_orden_activa');
+        sessionStorage.removeItem('gravecare_usuario_pendiente');
+        sessionStorage.removeItem('gravecare_contrato_activo');
+
+      } catch (errPersistencia) {
+        console.error('Error persistiendo en Firestore:', errPersistencia);
+      }
+
+      if (!orderData && numeroOrdenUrl) {
         try {
           const snap = await getDoc(doc(db, 'ordenes', numeroOrdenUrl));
-          if (snap.exists()) {
-            orderData = snap.data();
-          }
-        } catch (errFirestore) {
-          console.warn('Lectura Firestore:', errFirestore);
-        }
+          if (snap.exists()) orderData = snap.data();
+        } catch (e) {}
       }
 
       if (!orderData) {
-        const ordenStr = localStorage.getItem('gravecare_datos_completos') ||
-                         sessionStorage.getItem('gravecare_registro_datos') ||
-                         localStorage.getItem('gravecare_last_order') ||
-                         sessionStorage.getItem('gravecare_nueva_orden');
-        if (ordenStr) {
-          try {
-            orderData = JSON.parse(ordenStr);
-          } catch (e) {}
-        }
-      }
-
-      if (!orderData) {
-        document.getElementById('conf-plan-name').textContent = 'Plan 12 (Mensual)';
+        document.getElementById('conf-plan-name').textContent = 'Plan Contratado';
         document.getElementById('conf-deceased-name').textContent = 'Ser Querido';
-        document.getElementById('conf-cemetery-name').textContent = 'Cementerio por confirmar';
-        document.getElementById('conf-sepultura-location').textContent = 'Por coordinar';
-        document.getElementById('conf-price').textContent = '$38.990 (IVA incluido)';
+        document.getElementById('conf-cemetery-name').textContent = 'Cementerio Registrado';
+        document.getElementById('conf-sepultura-location').textContent = 'Por coordinar en terreno';
+        document.getElementById('conf-price').textContent = '—';
         return;
       }
 
       try {
-        // 1. Número de Orden
-        const numOrden = orderData.numeroOrden || numeroOrdenUrl || ('GC-' + Math.random().toString(36).substring(2, 8).toUpperCase());
         document.getElementById('conf-order-badge').textContent = `Nº DE ORDEN: ${numOrden}`;
+        document.getElementById('conf-plan-name').textContent = orderData.planNombre || orderData.servicio?.planNombre || 'Servicio GraveCare';
+        document.getElementById('conf-deceased-name').textContent = orderData.nombreDifunto || orderData.difunto?.nombre || 'Ser Querido';
 
-        // 2. Nombre del Plan
-        let planTexto = 'Plan 12 (Mensual)';
-        if (orderData.servicio?.planNombre) {
-          planTexto = orderData.servicio.planNombre;
-        } else if (orderData.planNombre) {
-          planTexto = orderData.planNombre;
-        } else if (orderData.plan) {
-          const mapaPlanes = {
-            'plan_12': 'Plan 12 (Mensual — 12 visitas/año)',
-            'plan_6': 'Plan 6 (Bimestral — 6 visitas/año)',
-            'plan_4': 'Plan 4 (Trimestral — 4 visitas/año)',
-            'visita_spot': 'Visita Spot (Fecha Única / Especial)',
-            '12': 'Plan 12 (Mensual)',
-            '6': 'Plan 6 (Bimestral)',
-            '4': 'Plan 4 (Trimestral)',
-            'spot': 'Visita Spot (Fecha Única)'
-          };
-          planTexto = mapaPlanes[orderData.plan] || `Plan ${orderData.plan}`;
-        }
-        document.getElementById('conf-plan-name').textContent = planTexto;
-
-        // 3. Ser Querido / Difunto
-        let difuntoPartes = [];
-        if (orderData.difunto) {
-          if (orderData.difunto.nombres) difuntoPartes.push(orderData.difunto.nombres);
-          if (orderData.difunto.apellidoPaterno) difuntoPartes.push(orderData.difunto.apellidoPaterno);
-          if (orderData.difunto.apellidoMaterno) difuntoPartes.push(orderData.difunto.apellidoMaterno);
-        } else if (orderData.nombreFallecido) {
-          difuntoPartes.push(orderData.nombreFallecido);
-        }
-        document.getElementById('conf-deceased-name').textContent = difuntoPartes.length > 0 ? difuntoPartes.join(' ') : 'Ser Querido';
-
-        // 4. Cementerio
         const cementerio = orderData.ubicacionSepultura?.cementerio || orderData.cementerio || 'Cementerio no especificado';
         document.getElementById('conf-cemetery-name').textContent = cementerio;
 
-        // 5. Ubicación
-        const sector = orderData.ubicacionSepultura?.sector || orderData.sector || '';
-        const patio = orderData.ubicacionSepultura?.patio || orderData.patio || '';
-        const sep = orderData.ubicacionSepultura?.numeroSepultura || orderData.numeroSepultura || '';
-        let partesUbicacion = [];
-        if (sector) partesUbicacion.push(`Sector: ${sector}`);
-        if (patio) partesUbicacion.push(`Patio: ${patio}`);
-        if (sep) partesUbicacion.push(`N°: ${sep}`);
+        const ub = orderData.ubicacionSepultura || {};
+        const partesUbicacion = [];
+        if (ub.sector || orderData.sector) partesUbicacion.push(`Sector: ${ub.sector || orderData.sector}`);
+        if (ub.patio || orderData.patio) partesUbicacion.push(`Patio: ${ub.patio || orderData.patio}`);
+        if (ub.numeroSepultura || orderData.numeroSepultura) partesUbicacion.push(`N°: ${ub.numeroSepultura || orderData.numeroSepultura}`);
+        
         document.getElementById('conf-sepultura-location').textContent = partesUbicacion.length > 0 ? partesUbicacion.join(' | ') : 'Por coordinar en terreno';
 
-        // 6. Monto Total
-        let total = orderData.valores?.total || orderData.precioNumerico || orderData.precioBase || 38990;
-        if (typeof total === 'string') total = Number(total.replace(/\D/g, '')) || 38990;
+        const total = orderData.montoTotal || orderData.total || orderData.precioNumerico || 38990;
         document.getElementById('conf-price').textContent = `$${Number(total).toLocaleString('es-CL')} (IVA incluido)`;
 
-        // 7. COMPROBACIÓN: ¿EL USUARIO YA ES CLIENTE REGISTRADO?
         const btnPrincipal = document.getElementById('btn-principal');
         const btnActionText = document.getElementById('btn-action-text');
         const headerDesc = document.getElementById('conf-header-desc');
         const redirectNotice = document.getElementById('conf-redirect-notice');
+        const txtRedirectMsg = document.getElementById('txt-redirect-msg');
         const step1Title = document.getElementById('step-1-title');
         const step1Desc = document.getElementById('step-1-desc');
 
-        function configurarComoClienteExistente() {
-          btnPrincipal.href = 'dashboard.html';
-          btnActionText.textContent = 'Ir a Mi Panel';
-          headerDesc.textContent = 'La nueva sepultura y servicio han sido agregados a tu cuenta exitosamente.';
-          step1Title.textContent = 'Servicio añadido a tu panel';
-          step1Desc.textContent = 'Puedes ver tus servicios activos y monitorear los informes desde tu Dashboard.';
+        function iniciarCuentaRegresiva(urlDestino) {
           redirectNotice.classList.remove('hidden');
-
           let seg = 3;
-          const contadorEl = document.getElementById('segundos-contador');
           const timer = setInterval(() => {
             seg--;
-            if (contadorEl) contadorEl.textContent = seg;
             if (seg <= 0) {
               clearInterval(timer);
-              window.location.href = 'dashboard.html';
+              window.location.replace(urlDestino);
             }
           }, 1000);
         }
 
-        // Si la orden ya venía identificada desde el panel del cliente
-        if (orderData.cuentaExistente === true || orderData.clienteRegistrado === true || orderData.usuarioId) {
-          configurarComoClienteExistente();
-          return;
-        }
+        onAuthStateChanged(auth, async (user) => {
+          const titularObj = orderData?.titular || {};
+          const emailTitular = String(titularObj.email || orderData?.email || orderData?.emailCliente || '').toLowerCase().trim();
+          const rutRaw = titularObj.rut || orderData?.rut || '';
+          const cleanRutTitular = String(rutRaw).toLowerCase().replace(/[^0-9k]/g, '');
 
-        // Verificar sesión activa en Firebase Auth
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            configurarComoClienteExistente();
+          const userAuthEmail = (user?.email || '').toLowerCase();
+          const userAuthRut = userAuthEmail.includes('@gravecare.cl') ? userAuthEmail.split('@')[0] : '';
+          
+          const esMismoEmail = user && emailTitular && userAuthEmail === emailTitular;
+          const esMismoRut = user && cleanRutTitular && (userAuthRut === cleanRutTitular);
+          const esMismoUsuario = esMismoEmail || esMismoRut;
+
+          if (user && esMismoUsuario) {
+            btnPrincipal.href = 'dashboard.html';
+            btnActionText.textContent = 'Ir a Mi Panel';
+            headerDesc.textContent = 'Tu nuevo servicio ha sido agregado a tu cuenta exitosamente.';
+            step1Title.textContent = 'Servicio añadido a tu panel';
+            step1Desc.textContent = 'Puedes ver tus servicios activos y monitorear los informes desde tu Dashboard.';
+            txtRedirectMsg.textContent = 'Volviendo a tu portal en 3 segundos...';
+            iniciarCuentaRegresiva('dashboard.html');
+            return;
+          }
+
+          if (user && !esMismoUsuario) {
+            try { await signOut(auth); } catch (e) {}
+          }
+
+          if (tieneCuentaConClavePrevia) {
+            const urlLogin = `login.html?rut=${encodeURIComponent(rutRaw)}`;
+            btnPrincipal.href = urlLogin;
+            btnActionText.textContent = 'Iniciar Sesión en Mi Cuenta';
+            headerDesc.textContent = 'Tu compra ha sido asociada a tu cuenta existente de GraveCare.';
+            step1Title.textContent = 'Ingresa con tu contraseña';
+            step1Desc.textContent = 'Tu cuenta ya está activa. Ingresa tu clave habitual para revisar la nueva orden.';
+            txtRedirectMsg.textContent = 'Redirigiendo a inicio de sesión en 3 segundos...';
+            iniciarCuentaRegresiva(urlLogin);
           } else {
-            // Si no hay sesión iniciada pero es un cliente nuevo:
-            const emailTitular = orderData.titular?.email || orderData.email || '';
-            btnPrincipal.href = emailTitular ? `registro.html?email=${encodeURIComponent(emailTitular)}` : 'registro.html';
-            btnActionText.textContent = 'Completar Registro';
+            const p = new URLSearchParams();
+            if (numOrden) p.set('orden', numOrden);
+            if (emailTitular) p.set('email', emailTitular);
+            if (rutRaw) p.set('rut', rutRaw);
+
+            const urlRegistro = `registro.html?${p.toString()}`;
+            btnPrincipal.href = urlRegistro;
+            btnActionText.textContent = 'Completar Registro y Crear Clave';
+            headerDesc.textContent = 'Hemos registrado tu pago. Por favor crea tu clave de acceso para activar tu cuenta.';
             step1Title.textContent = 'Crea tu contraseña';
-            step1Desc.textContent = 'Con tu cuenta podrás acceder a los informes fotográficos.';
+            step1Desc.textContent = 'Ingresa tu fecha de nacimiento y define tu clave de acceso para activar tu cuenta.';
+            txtRedirectMsg.textContent = 'Redirigiendo a crear tu clave en 3 segundos...';
+            iniciarCuentaRegresiva(urlRegistro);
           }
         });
 

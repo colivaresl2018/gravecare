@@ -1,777 +1,735 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraveCare - Contratación</title>
-    <style>
-        :root {
-          --primary-color: #1a3636;
-          --secondary-color: #40534c;
-          --accent-gold: #c19a5b;
-          --bg-light: #f7f9f8;
-          --surface-color: #ffffff;
-          --text-main: #222222;
-          --text-muted: #666666;
-          --border-color: #dcdfdc;
-          --radius-sm: 6px;
-          --radius-md: 10px;
-          --radius-lg: 16px;
-          --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-          --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>Contratación de Plan | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#002d1a",
+            "primary-container": "#1a432f",
+            "on-primary-container": "#84b096",
+            secondary: "#4e6451",
+            "surface-container": "#f8faf8"
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: var(--font-family); background-color: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-        .page-header { background-color: var(--surface-color); border-bottom: 1px solid var(--border-color); padding: 2rem; text-align: center; }
-        .page-header h1 { font-size: 1.85rem; color: var(--primary-color); margin-bottom: 0.5rem; }
-        .service-badge { display: inline-block; background-color: var(--primary-color); color: white; padding: 0.7rem 1.5rem; border-radius: 50px; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; margin-bottom: 1.5rem; }
-        .main-container { flex: 1; padding: 2rem; }
-        .form-container { max-width: 1000px; margin: 0 auto; }
-        .form-card { background-color: var(--surface-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); }
-        .form-section-title { font-size: 0.9rem; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; margin-bottom: 1rem; margin-top: 1.5rem; }
-        .form-section-title:first-child { margin-top: 0; }
-        .form-group { margin-bottom: 1.25rem; }
-        .form-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .form-group-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-        .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.4rem; }
-        .form-input, .form-select { width: 100%; padding: 0.7rem 0.9rem; font-size: 0.95rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; }
-        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-gold); }
-        .form-input.error { border-color: #dc2626; background-color: #fee2e2; }
-        .form-input.valid { border-color: #16a34a; background-color: #f0fdf4; }
-        .error-message { color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem; display: none; font-weight: 500; }
-        .error-message.show { display: block; }
-        .valid-message { color: #16a34a; font-size: 0.8rem; margin-top: 0.3rem; display: none; font-weight: 500; }
-        .valid-message.show { display: block; }
-        .hidden { display: none !important; }
-        .footer { background-color: var(--primary-color); color: #e2e8f0; padding: 2rem; margin-top: auto; text-align: center; }
-        @media (max-width: 768px) { .form-group-grid, .form-group-grid.cols-3 { grid-template-columns: 1fr; } }
-    </style>
+      }
+    }
+  </script>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <div class="page-header">
-        <span class="service-badge" id="serviceBadge">Plan Mensual</span>
-        <h1 id="pageTitle">Datos de Contratación</h1>
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-40">
+    <a href="dashboard.html" class="flex items-center gap-3">
+      <img src="assets/logo.png" alt="GraveCare" class="h-10 w-auto" onerror="this.src='assets/logo.png'">
+    </a>
+    <a href="dashboard.html" class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline">
+      <span class="material-symbols-outlined text-sm">arrow_back</span>
+      Volver al Portal
+    </a>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8 flex-grow w-full">
+    <div class="mb-8">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-primary">Contratación de Servicio</h1>
+      <p class="text-xs md:text-sm text-gray-500 mt-1">Ingresa los datos del ser querido y la ubicación de la sepultura.</p>
     </div>
 
-    <div class="main-container">
-        <div class="form-container">
-            <form id="contratacion-form" class="form-card">
-                <div style="background-color: #f0f8f6; border-left: 4px solid var(--primary-color); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
-                    <strong style="color: var(--primary-color); font-size: 1rem;">📋 Paso 1 - Datos del Servicio</strong>
-                    <p style="color: var(--primary-color); margin-top: 0.5rem; font-size: 0.95rem;">Ingresa los datos del ser querido, ubicación de la sepultura y titular</p>
-                </div>
+    <form id="formContratacion" class="space-y-6" autocomplete="off">
 
-                <div id="banner-datos-precargados" class="hidden" style="background-color: #ecfdf5; border-left: 4px solid #059669; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; color: #065f46;">
-                    <strong style="font-size: 0.95rem;">✓ Datos de cuenta existente cargados automáticamente</strong>
-                    <p style="margin-top: 0.25rem; font-size: 0.85rem;">Esta contratación se vinculará directamente a tu perfil registrado.</p>
-                </div>
-
-                <!-- Ser Querido -->
-                <h2 class="form-section-title">Datos del Ser Querido</h2>
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Nombres *</label>
-                        <input type="text" id="nombresDifunto" class="form-input" placeholder="María" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaternoDifunto" class="form-input" placeholder="González" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Materno</label>
-                        <input type="text" id="apellidoMaternoDifunto" class="form-input" placeholder="Soto">
-                    </div>
-                </div>
-
-                <!-- Ubicación Sepultura -->
-                <h2 class="form-section-title">Ubicación de la Sepultura</h2>
-                <div class="form-group">
-                    <label class="form-label">Cementerio (Fijado según selección previa) *</label>
-                    <input type="text" id="cementerio" class="form-input" style="background-color: #e9ecef; cursor: not-allowed; font-weight: 600;" readonly required>
-                </div>
-
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Sector</label>
-                        <input type="text" id="sector" class="form-input" placeholder="Sector / Cuadro">
-                    </div>
-                    <div>
-                        <label class="form-label">Patio</label>
-                        <input type="text" id="patio" class="form-input" placeholder="Patio">
-                    </div>
-                    <div>
-                        <label class="form-label">Nº Sepultura</label>
-                        <input type="text" id="numeroSepultura" class="form-input" placeholder="Nº de tumba">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Referencias de ubicación en terreno</label>
-                    <textarea id="referenciasSepultura" class="form-input" rows="3" placeholder="Lápida gris, cerca de la entrada norte, etc."></textarea>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">*Si no recuerdas la ubicación de tu ser querido, ingresa a la página web del cementerio y busca la ubicación.</p>
-                </div>
-
-                <!-- Titular -->
-                <h2 class="form-section-title">Datos del Titular</h2>
-                <div class="form-group-grid cols-3">
-                    <div>
-                        <label class="form-label">Nombres *</label>
-                        <input type="text" id="nombresTitular" class="form-input" placeholder="Juan" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Paterno *</label>
-                        <input type="text" id="apellidoPaternoTitular" class="form-input" placeholder="Pérez" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Apellido Materno</label>
-                        <input type="text" id="apellidoMaternoTitular" class="form-input" placeholder="García">
-                    </div>
-                </div>
-
-                <!-- Contacto -->
-                <h2 class="form-section-title">Datos de Contacto</h2>
-                <div class="form-group">
-                    <label class="form-label">País *</label>
-                    <select id="pais" class="form-select" required>
-                        <option value="Chile" selected>Chile</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Estados Unidos">Estados Unidos</option>
-                        <option value="España">España</option>
-                        <option value="Suecia">Suecia</option>
-                        <option value="Canadá">Canadá</option>
-                        <option value="Australia">Australia</option>
-                        <option value="Francia">Francia</option>
-                        <option value="Alemania">Alemania</option>
-                        <option value="Venezuela">Venezuela</option>
-                        <option value="Brasil">Brasil</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                </div>
-
-                <div class="form-group-grid">
-                    <div>
-                        <label class="form-label" id="labelDocumento">RUT del Titular *</label>
-                        <input type="text" id="rut" class="form-input" placeholder="12.345.678-9 o 12345678-K" required>
-                        <span class="error-message" id="rutError"></span>
-                        <span class="valid-message" id="rutValid">✓ RUT válido</span>
-
-                        <!-- Checkbox extranjero: Solo visible si NO vive en Chile -->
-                        <div id="contenedorExtranjero" class="hidden" style="margin-top: 0.6rem; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" id="checkExtranjero" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-color);">
-                            <label for="checkExtranjero" style="font-size: 0.82rem; color: var(--secondary-color); cursor: pointer; font-weight: 600;">
-                                No tengo Rut Chileno, soy extranjero
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">Email *</label>
-                        <input type="email" id="email" class="form-input" placeholder="correo@ejemplo.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group-grid">
-                    <div>
-                        <label class="form-label">Teléfono *</label>
-                        <input type="tel" id="telefono" class="form-input" placeholder="+56912345678" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Región *</label>
-                        <select id="region" class="form-select" required>
-                            <option disabled selected value="">Selecciona región</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group-grid">
-                    <div>
-                        <label class="form-label">Comuna *</label>
-                        <select id="comuna" class="form-select" required>
-                            <option disabled selected value="">Selecciona comuna</option>
-                        </select>
-                    </div>
-                    <div style="display: none;">
-                        <label class="form-label">Región (Extranjero)</label>
-                        <input type="text" id="regionText" class="form-input" placeholder="Región/Provincia">
-                    </div>
-                </div>
-
-                <div class="form-group-grid" style="display: none;">
-                    <div>
-                        <label class="form-label">Comuna (Extranjero)</label>
-                        <input type="text" id="comunaText" class="form-input" placeholder="Ciudad/Localidad">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Dirección (Calle y Número) *</label>
-                    <input type="text" id="direccion" class="form-input" placeholder="Av. Providencia" required>
-                </div>
-
-                <div class="form-group-grid">
-                    <div>
-                        <label class="form-label">Número</label>
-                        <input type="text" id="numero" class="form-input" placeholder="1245">
-                    </div>
-                    <div>
-                        <label class="form-label">Depto. / Casa (Opcional)</label>
-                        <input type="text" id="departamento" class="form-input" placeholder="Depto. 402">
-                    </div>
-                </div>
-
-                <div style="margin-top: 2rem;">
-                    <button type="submit" id="submitBtn" style="width: 100%; padding: 1rem; background-color: var(--primary-color); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 700; cursor: pointer; transition: background-color 0.3s;">
-                        Continuar a Resumen de Pago →
-                    </button>
-                </div>
-            </form>
+      <!-- DATOS DEL SER QUERIDO -->
+      <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-primary uppercase tracking-wider border-b border-gray-100 pb-2">Datos del Ser Querido</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1">Nombres *</label>
+            <input type="text" id="nombresDifunto" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+          </div>
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1">Apellido Paterno *</label>
+            <input type="text" id="apPaternoDifunto" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+          </div>
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1">Apellido Materno</label>
+            <input type="text" id="apMaternoDifunto" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Modal de Decisión RUT -->
-    <div id="modal-decision-rut" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
-        <div style="background: white; border-radius: 16px; padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
-                <strong style="color: #92400e; font-size: 0.95rem;">⚠️ Identificación Ya Registrada</strong>
+      <!-- UBICACIÓN DE LA SEPULTURA -->
+      <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+        <h2 class="text-sm font-bold text-primary uppercase tracking-wider border-b border-gray-100 pb-2">Ubicación de la Sepultura</h2>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1.5">Cementerio Seleccionado</label>
+            <div class="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+              <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary text-xl">location_on</span>
+                <div>
+                  <p id="txt-cementerio-display" class="font-bold text-sm text-primary">Cargando cementerio...</p>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
+                    <span class="material-symbols-outlined text-[13px]">lock</span>
+                    Fijado en el paso anterior
+                  </span>
+                </div>
+              </div>
+              <a href="suscribirme-Plan.html" class="text-xs font-semibold text-gray-500 hover:text-primary underline">Cambiar</a>
             </div>
-            <p style="color: #374151; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
-                Esta identificación ya figura en nuestro sistema. <strong>¿Deseas incorporar esta compra a esa cuenta?</strong>
-            </p>
-            <div id="modal-datos-resumen" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; font-size: 0.85rem; color: #475569; margin-bottom: 1.25rem;"></div>
-            <div style="display: flex; gap: 0.75rem;">
-                <button type="button" id="btnModalNoRut" style="flex: 1; padding: 0.75rem; background: #e2e8f0; color: #1e293b; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">No, Otro Documento</button>
-                <button type="button" id="btnModalSiRut" style="flex: 1; padding: 0.75rem; background: #1a3636; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Sí, Esta Cuenta</button>
+            <input type="hidden" id="cementerio" name="cementerio" value="">
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Sector</label>
+              <input type="text" id="sector" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
             </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Patio</label>
+              <input type="text" id="patio" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Nº Sepultura</label>
+              <input type="text" id="numeroSepultura" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-gray-600 font-semibold mb-1">Referencias de ubicación en terreno</label>
+            <textarea id="referencias" rows="2" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary"></textarea>
+          </div>
         </div>
+      </div>
+
+      <!-- SECCIÓN DEL TITULAR -->
+      <div id="seccion-titular-completa" class="space-y-6">
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+          <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+            <h2 class="text-sm font-bold text-primary uppercase tracking-wider">Identificación del Titular</h2>
+            <span id="badge-rut-estado" class="text-[11px] text-gray-400">Ingresa tu RUT</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="sm:col-span-1">
+              <label class="block text-gray-600 font-semibold mb-1">RUT / DNI / Pasaporte *</label>
+              <input type="text" id="rutTitular" required placeholder="Ej: 12.345.678-9" maxlength="12" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary font-mono">
+              <span id="errorRutMsg" class="text-[11px] text-red-500 font-semibold hidden mt-1 block"></span>
+            </div>
+            <div class="sm:col-span-1">
+              <label class="block text-gray-600 font-semibold mb-1">Email *</label>
+              <input type="email" id="emailTitular" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2">
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Nombres *</label>
+              <input type="text" id="nombresTitular" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Apellido Paterno *</label>
+              <input type="text" id="apPaternoTitular" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Apellido Materno</label>
+              <input type="text" id="apMaternoTitular" placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+          <h2 class="text-sm font-bold text-primary uppercase tracking-wider border-b border-gray-100 pb-2">Datos de Contacto y Dirección</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Teléfono Móvil *</label>
+              <input type="tel" id="telefonoTitular" required placeholder="+56 9..." class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">País *</label>
+              <select id="paisTitular" required class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary bg-white">
+                <option value="Chile" selected>Chile</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="España">España</option>
+                <option value="Suecia">Suecia</option>
+                <option value="Canadá">Canadá</option>
+                <option value="Australia">Australia</option>
+                <option value="Francia">Francia</option>
+                <option value="Alemania">Alemania</option>
+                <option value="Venezuela">Venezuela</option>
+                <option value="Brasil">Brasil</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Región *</label>
+              <select id="regionTitular" required class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary bg-white">
+                <option value="" disabled selected>Selecciona una región</option>
+              </select>
+              <input type="text" id="regionTitularText" placeholder="Región/Provincia" class="hidden w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-gray-600 font-semibold mb-1">Comuna *</label>
+              <select id="comunaTitular" required class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary bg-white">
+                <option value="" disabled selected>Selecciona una comuna</option>
+              </select>
+              <input type="text" id="comunaTitularText" placeholder="Ciudad/Localidad" class="hidden w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-gray-600 font-semibold mb-1">Dirección (Calle y Número) *</label>
+              <input type="text" id="direccionTitular" required placeholder="" class="w-full rounded-xl border-gray-300 py-2 px-3 text-xs focus:ring-primary focus:border-primary">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="btnContinuar" class="w-full py-4 bg-primary hover:bg-primary-container text-white rounded-2xl font-bold transition flex items-center justify-center gap-2 shadow-md cursor-pointer text-sm">
+        <span id="txtBtnContinuar">Continuar a Resumen de Pago →</span>
+      </button>
+    </form>
+  </main>
+
+  <!-- Modal Aviso RUT Existente -->
+  <div id="modalRutExiste" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+      <div class="flex items-center gap-3 text-amber-600 mb-3">
+        <span class="material-symbols-outlined text-3xl">verified_user</span>
+        <h3 class="font-bold text-base text-slate-800">Cliente Identificado</h3>
+      </div>
+      <p class="text-xs text-slate-700 leading-relaxed mb-4">
+        <strong>"Este rut ya está ingresado como cliente"</strong><br>
+        ¿Desea agregar este nuevo servicio a este cliente?
+      </p>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-5 text-xs text-amber-900 space-y-1">
+        <p><strong>Titular:</strong> <span id="modalTitularNombre">-</span></p>
+        <p><strong>Email:</strong> <span id="modalTitularEmail">-</span></p>
+        <p><strong>Teléfono:</strong> <span id="modalTitularTelefono">-</span></p>
+        <p class="text-[11px] text-amber-700 pt-2 border-t border-amber-200/60 mt-2">
+          Al aceptar, se rellenarán automáticamente tus datos y avanzarás al resumen de pago.
+        </p>
+      </div>
+      <div class="flex gap-3 justify-end text-xs">
+        <button type="button" id="btnCancelarModalRut" class="px-4 py-2.5 rounded-xl border border-slate-300 font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnConfirmarModalRut" class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-container font-bold text-white transition flex items-center gap-1.5 shadow-md cursor-pointer">
+          <span>Sí, Usar estos datos y Continuar</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <div class="footer">
-        <p>&copy; 2026 GraveCare SpA - Preservación & Memoria · contacto@gravecare.cl</p>
-    </div>
+  <footer class="bg-white border-t border-gray-200 py-6 text-center text-xs text-gray-500">
+    GraveCare SpA · Preservación Ornamental & Cuidado de Sepulturas en Chile
+  </footer>
 
-    <!-- Firebase SDK Modular Oficial -->
-    <script type="module">
-        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getAuth, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <script type="module">
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { db } from "./js/firebaseConfig.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
-            authDomain: "gravecare-2e8d2.firebaseapp.com",
-            projectId: "gravecare-2e8d2",
-            storageBucket: "gravecare-2e8d2.appspot.com",
-            messagingSenderId: "160012946248",
-            appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
-        };
+    const regionesComunas = {
+      "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
+      "Tarapacá": ["Iquique", "Alto Hospicio", "Camiña", "Colchane", "Huara", "Pica", "Pozo Almonte"],
+      "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "San Pedro de Atacama", "Tocopilla"],
+      "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña"],
+      "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo", "Coquimbo"],
+      "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Santo Domingo", "Viña del Mar", "Los Andes", "San Felipe", "Santa María", "Putaendo"],
+      "Metropolitana de Santiago": ["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "Lampa", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"],
+      "Libertador General Bernardo O'Higgins": ["Rancagua", "Machalí", "Mostazal", "Graneros", "Doñihue", "Requínoa", "Olivar", "Peumo", "Pichidegua"],
+      "Maule": ["Talca", "Constitución", "San Javier", "Parral", "Linares", "Curicó", "Teno", "Rauco", "Romeral", "Curepto", "Pencahue"],
+      "Ñuble": ["Chillán", "Chillán Viejo", "Pemuco", "Bulnes", "Quillón", "San Ignacio", "Yungay", "Ránquil", "Treguaco", "El Carmen"],
+      "Biobío": ["Concepción", "Talcahuano", "Huachipato", "Penco", "Tomé", "Lota", "Santa Juana", "Arauco"],
+      "La Araucanía": ["Temuco", "Padre Las Casas", "Nueva Imperial", "Traiguén", "Villarrica", "Pucón", "Curarrehue"],
+      "Los Ríos": ["Valdivia", "Corral", "Lanco", "Panguipulli", "La Unión", "Río Bueno"],
+      "Los Lagos": ["Puerto Montt", "Puerto Varas", "Frutillar", "Llanquihue", "Ancud", "Castro", "Dalcahue", "Quellón"],
+      "Aysén del General Carlos Ibáñez del Campo": ["Coyhaique", "Puyuhuapi", "Cisnes", "Guaitecas"],
+      "Magallanes y la Antártica Chilena": ["Punta Arenas", "Puerto Natales", "Río Verde", "Laguna Blanca"]
+    };
 
-        const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    const paisSel = document.getElementById("paisTitular");
+    const regSel = document.getElementById("regionTitular");
+    const regTxt = document.getElementById("regionTitularText");
+    const comSel = document.getElementById("comunaTitular");
+    const comTxt = document.getElementById("comunaTitularText");
+    const inputRut = document.getElementById("rutTitular");
+    const errorRutMsg = document.getElementById("errorRutMsg");
 
-        window.gcFirebase = { db, auth, doc, getDoc, fetchSignInMethodsForEmail };
-    </script>
-
-    <script>
-        // Función de capitalización estándar para nombres y apellidos (Title Case)
-        function capitalizarTexto(texto) {
-            if (!texto) return '';
-            return texto
-                .trim()
-                .toLowerCase()
-                .split(/\s+/)
-                .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-                .join(' ');
-        }
-
-        // Eventos blur para auto-corregir nombres y apellidos al salir del campo
-        const camposNombres = [
-            'nombresTitular',
-            'apellidoPaternoTitular',
-            'apellidoMaternoTitular',
-            'nombresDifunto',
-            'apellidoPaternoDifunto',
-            'apellidoMaternoDifunto'
-        ];
-
-        camposNombres.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('blur', function() {
-                    this.value = capitalizarTexto(this.value);
-                });
-            }
+    function inicializarRegionesYComunas() {
+      if (regSel) {
+        regSel.innerHTML = '<option value="" disabled selected>Selecciona una región</option>';
+        Object.keys(regionesComunas).forEach(reg => {
+          const opt = document.createElement("option");
+          opt.value = reg;
+          opt.textContent = reg;
+          regSel.appendChild(opt);
         });
+      }
+    }
 
-        // Limpia a solo números y 'k'
-        function normalizarRut(r) {
-            return (r || '').toLowerCase().replace(/[^0-9k]/g, '');
-        }
+    inicializarRegionesYComunas();
 
-        // Formatea cualquier entrada a puntos y guion: 12.345.678-9
-        function formatearRutConPuntosYGuion(rut) {
-            const limpio = (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
-            if (limpio.length < 2) return rut;
-            const cuerpo = limpio.slice(0, -1);
-            const dv = limpio.slice(-1);
-            const cuerpoConPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            return `${cuerpoConPuntos}-${dv}`;
-        }
+    paisSel?.addEventListener("change", function() {
+      const isChile = this.value === "Chile";
+      if (regSel) {
+        regSel.classList.toggle("hidden", !isChile);
+        regSel.required = isChile;
+      }
+      if (regTxt) {
+        regTxt.classList.toggle("hidden", isChile);
+        regTxt.required = !isChile;
+      }
+      if (comSel) {
+        comSel.classList.toggle("hidden", !isChile);
+        comSel.required = isChile;
+      }
+      if (comTxt) {
+        comTxt.classList.toggle("hidden", isChile);
+        comTxt.required = !isChile;
+      }
+      if (!isChile && errorRutMsg) {
+        errorRutMsg.classList.add("hidden");
+      }
+    });
 
-        // Valida RUT chileno admitiendo cualquier formato
-        function validarRutChileno(rut) {
-            const limpio = (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
-            if (limpio.length < 2 || limpio.length > 9) {
-                return { valido: false, mensaje: 'Ingresa un RUT válido (ej: 12.345.678-9 o 12345678-K)' };
-            }
-            const cuerpo = limpio.slice(0, -1);
-            const dv = limpio.slice(-1);
-
-            if (!/^\d+$/.test(cuerpo)) {
-                return { valido: false, mensaje: 'El cuerpo del RUT debe contener solo números' };
-            }
-
-            let suma = 0;
-            let multiplicador = 2;
-            for (let i = cuerpo.length - 1; i >= 0; i--) {
-                suma += parseInt(cuerpo[i], 10) * multiplicador;
-                multiplicador++;
-                if (multiplicador > 7) multiplicador = 2;
-            }
-            const resto = 11 - (suma % 11);
-            const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
-            if (dv !== dvEsperado) {
-                return { valido: false, mensaje: `RUT inválido. Dígito verificador debe ser ${dvEsperado}` };
-            }
-            return { valido: true, mensaje: 'RUT válido' };
-        }
-
-        const rutInput = document.getElementById('rut');
-        const rutError = document.getElementById('rutError');
-        const rutValid = document.getElementById('rutValid');
-        const checkExtranjero = document.getElementById('checkExtranjero');
-        const contenedorExtranjero = document.getElementById('contenedorExtranjero');
-        const labelDocumento = document.getElementById('labelDocumento');
-
-        function activarModoRutChileno() {
-            labelDocumento.textContent = 'RUT del Titular *';
-            rutInput.placeholder = '12.345.678-9 o 12345678-K';
-            rutInput.classList.remove('valid', 'error');
-            rutError.classList.remove('show');
-            rutValid.classList.remove('show');
-        }
-
-        checkExtranjero.addEventListener('change', function() {
-            if (this.checked) {
-                labelDocumento.textContent = 'DNI / Pasaporte / Documento Extranjero *';
-                rutInput.placeholder = 'Nº Pasaporte o ID Extranjero';
-                rutError.classList.remove('show');
-                if (rutInput.value.trim().length >= 4) {
-                    rutInput.classList.remove('error');
-                    rutInput.classList.add('valid');
-                    rutValid.classList.add('show');
-                    rutValid.textContent = '✓ Documento extranjero ingresado';
-                } else {
-                    rutInput.classList.remove('valid', 'error');
-                    rutValid.classList.remove('show');
-                }
-            } else {
-                activarModoRutChileno();
-                if (rutInput.value.trim()) {
-                    rutInput.dispatchEvent(new Event('input'));
-                }
-            }
+    regSel?.addEventListener("change", function() {
+      if (!comSel) return;
+      comSel.innerHTML = '<option value="" disabled selected>Selecciona una comuna</option>';
+      const comunas = regionesComunas[this.value];
+      if (comunas) {
+        comunas.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.textContent = c;
+          comSel.appendChild(opt);
         });
+      }
+    });
 
-        // Validación reactiva
-        rutInput.addEventListener('input', function() {
-            const esExtranjeroSinRut = (document.getElementById('pais').value !== 'Chile') && checkExtranjero.checked;
+    // Helper robusto para armar nombres completos sin espacios duplicados o faltantes
+    function armarNombreCompleto(nombres, apPaterno, apMaterno) {
+      return [nombres, apPaterno, apMaterno]
+        .map(s => String(s || "").trim())
+        .filter(Boolean)
+        .join(" ");
+    }
 
-            if (esExtranjeroSinRut) {
-                if (this.value.trim().length >= 4) {
-                    this.classList.remove('error');
-                    this.classList.add('valid');
-                    rutError.classList.remove('show');
-                    rutValid.classList.add('show');
-                    rutValid.textContent = '✓ Documento extranjero ingresado';
-                } else {
-                    this.classList.remove('valid');
-                    rutValid.classList.remove('show');
-                }
-                return;
-            }
+    // --- FORMATEADOR Y VALIDADOR DE RUT CHILENO ---
+    function limpiarRut(r) {
+      return String(r || "").replace(/[^0-9kK]/g, "").toUpperCase();
+    }
 
-            const val = this.value.trim();
-            if (val === '') {
-                this.classList.remove('error', 'valid');
-                rutError.classList.remove('show');
-                rutValid.classList.remove('show');
-                return;
-            }
+    function formatearRut(rut) {
+      let valor = limpiarRut(rut);
+      if (valor.length <= 1) return valor;
+      const dv = valor.slice(-1);
+      let cuerpo = valor.slice(0, -1);
+      cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return `${cuerpo}-${dv}`;
+    }
 
-            const resultado = validarRutChileno(val);
-            if (resultado.valido) {
-                this.classList.remove('error');
-                this.classList.add('valid');
-                rutError.classList.remove('show');
-                rutValid.classList.add('show');
-                rutValid.textContent = '✓ RUT válido';
-            } else {
-                this.classList.remove('valid');
-                this.classList.add('error');
-                rutError.classList.add('show');
-                rutError.textContent = resultado.mensaje;
-                rutValid.classList.remove('show');
-            }
+    function validarRutChileno(rut) {
+      const rutLimpio = limpiarRut(rut);
+      if (rutLimpio.length < 8 || rutLimpio.length > 9) return false;
+      const cuerpo = rutLimpio.slice(0, -1);
+      const dv = rutLimpio.slice(-1);
+      let suma = 0;
+      let multiplo = 2;
+      for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
+        multiplo = (multiplo < 7) ? multiplo + 1 : 2;
+      }
+      const resto = 11 - (suma % 11);
+      let dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+      return dv === dvEsperado;
+    }
+
+    let clienteEncontradoPorRut = null;
+    const params = new URLSearchParams(window.location.search);
+
+    function fijarCementerioFijo() {
+      const pedido = JSON.parse(sessionStorage.getItem("gravecare_pedido") || localStorage.getItem("gravecare_pedido") || "{}");
+      const cemFinal = params.get("cementerio") || sessionStorage.getItem("gravecare_cementerio_seleccionado") || pedido.cementerio || "Parque del Recuerdo Padre Hurtado";
+
+      const txtDisplay = document.getElementById("txt-cementerio-display");
+      const hiddenInput = document.getElementById("cementerio");
+
+      if (txtDisplay) txtDisplay.textContent = cemFinal;
+      if (hiddenInput) hiddenInput.value = cemFinal;
+      sessionStorage.setItem("gravecare_cementerio_seleccionado", cemFinal);
+    }
+
+    fijarCementerioFijo();
+    document.addEventListener("DOMContentLoaded", fijarCementerioFijo);
+
+    async function buscarClientePorRut(rutLimpio) {
+      if (!rutLimpio || rutLimpio.length < 7) return null;
+      try {
+        const snap = await getDocs(collection(db, "usuarios"));
+        let hallado = null;
+        snap.forEach(d => {
+          const u = d.data();
+          const tit = u.titular || u;
+          const r1 = limpiarRut(tit.rut || tit.rutCliente || tit.rutDni);
+          if (r1 && r1 === rutLimpio) {
+            hallado = { uid: d.id, ...u, titular: tit };
+          }
         });
+        return hallado;
+      } catch (e) {
+        return null;
+      }
+    }
 
-        // Auto-formateo a puntos y guion en blur si es chileno
-        rutInput.addEventListener('blur', function() {
-            const esExtranjeroSinRut = (document.getElementById('pais').value !== 'Chile') && checkExtranjero.checked;
-            if (!esExtranjeroSinRut && this.value.trim()) {
-                const res = validarRutChileno(this.value);
-                if (res.valido) {
-                    this.value = formatearRutConPuntosYGuion(this.value);
-                }
-            }
-        });
+    function rellenarFormularioConDatos(tit) {
+      if (!tit) return;
 
-        let datosDelPlanGlobal = {};
+      const nombresInp = document.getElementById("nombresTitular");
+      const apPatInp = document.getElementById("apPaternoTitular");
+      const apMatInp = document.getElementById("apMaternoTitular");
+      const emailInp = document.getElementById("emailTitular");
+      const telInp = document.getElementById("telefonoTitular");
+      const dirInp = document.getElementById("direccionTitular");
 
-        const regionesComunas = {
-            "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
-            "Tarapacá": ["Iquique", "Alto Hospicio", "Camiña", "Colchane", "Huara", "Pica", "Pozo Almonte"],
-            "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "San Pedro de Atacama", "Tocopilla"],
-            "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña"],
-            "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo"],
-            "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Santo Domingo", "Viña del Mar", "Los Andes", "San Felipe", "Santa María", "Putaendo"],
-            "Metropolitana de Santiago": ["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "Lampa", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"],
-            "Libertador General Bernardo O'Higgins": ["Rancagua", "Machalí", "Mostazal", "Graneros", "Doñihue", "Requínoa", "Olivar", "Peumo", "Pichidegua"],
-            "Maule": ["Talca", "Constitución", "San Javier", "Parral", "Linares", "Curicó", "Teno", "Rauco", "Romeral", "Curepto", "Pencahue"],
-            "Ñuble": ["Chillán", "Chillán Viejo", "Pemuco", "Bulnes", "Quillón", "San Ignacio", "Yungay", "Ránquil", "Treguaco", "El Carmen"],
-            "Biobío": ["Concepción", "Talcahuano", "Huachipato", "Penco", "Tomé", "Lota", "Santa Juana", "Arauco"],
-            "La Araucanía": ["Temuco", "Padre Las Casas", "Nueva Imperial", "Traiguén", "Villarrica", "Pucón", "Curarrehue"],
-            "Los Ríos": ["Valdivia", "Corral", "Lanco", "Panguipulli", "La Unión", "Río Bueno"],
-            "Los Lagos": ["Puerto Montt", "Puerto Varas", "Frutillar", "Llanquihue", "Ancud", "Castro", "Dalcahue", "Quellón"],
-            "Aysén del General Carlos Ibáñez del Campo": ["Coyhaique", "Puyuhuapi", "Cisnes", "Guaitecas"],
-            "Magallanes y la Antártica Chilena": ["Punta Arenas", "Puerto Natales", "Río Verde", "Laguna Blanca"]
-        };
+      if (tit.nombres) nombresInp.value = tit.nombres;
+      else if (tit.nombreCompleto) {
+        const partes = tit.nombreCompleto.trim().split(/\s+/);
+        nombresInp.value = partes[0] || "";
+      }
 
-        const regionSelect = document.getElementById('region');
-        const paisSelect = document.getElementById('pais');
-        const regionText = document.getElementById('regionText');
-        const comunaSelect = document.getElementById('comuna');
-        const comunaText = document.getElementById('comunaText');
+      if (tit.apellidoPaterno) apPatInp.value = tit.apellidoPaterno;
+      else if (tit.nombreCompleto) {
+        const partes = tit.nombreCompleto.trim().split(/\s+/);
+        apPatInp.value = partes[1] || "";
+      }
 
-        function inicializarRegionesYComunas() {
-            regionSelect.innerHTML = '<option disabled selected value="">Selecciona región</option>';
-            Object.keys(regionesComunas).forEach(reg => {
-                const opt = document.createElement('option');
-                opt.value = reg;
-                opt.textContent = reg;
-                regionSelect.appendChild(opt);
-            });
+      if (tit.apellidoMaterno) apMatInp.value = tit.apellidoMaterno;
+      else if (tit.nombreCompleto) {
+        const partes = tit.nombreCompleto.trim().split(/\s+/);
+        apMatInp.value = partes.slice(2).join(" ") || "";
+      }
+
+      if (emailInp) emailInp.value = tit.email || "";
+      if (telInp) telInp.value = tit.telefono || "";
+      if (dirInp) dirInp.value = tit.direccion || "";
+
+      if (paisSel) {
+        paisSel.value = tit.pais || "Chile";
+        paisSel.dispatchEvent(new Event("change"));
+      }
+
+      if (tit.pais && tit.pais !== "Chile") {
+        if (regTxt) regTxt.value = tit.region || "";
+        if (comTxt) comTxt.value = tit.comuna || "";
+      } else {
+        if (regSel) {
+          regSel.value = tit.region || "Metropolitana de Santiago";
+          regSel.dispatchEvent(new Event("change"));
         }
+        if (comSel) comSel.value = tit.comuna || "";
+      }
 
-        inicializarRegionesYComunas();
+      const badge = document.getElementById("badge-rut-estado");
+      if (badge) {
+        badge.textContent = "✓ Cliente Registrado";
+        badge.className = "text-[11px] text-emerald-700 font-bold";
+      }
+    }
 
-        paisSelect.addEventListener('change', function() {
-            const isChile = this.value === 'Chile';
-            regionSelect.classList.toggle('hidden', !isChile);
-            regionSelect.required = isChile;
-            regionText.classList.toggle('hidden', isChile);
-            regionText.required = !isChile;
-            comunaSelect.classList.toggle('hidden', !isChile);
-            comunaSelect.required = isChile;
-            comunaText.classList.toggle('hidden', isChile);
-            comunaText.required = !isChile;
+    inputRut?.addEventListener("input", () => {
+      const pais = paisSel?.value || "Chile";
+      if (pais === "Chile") {
+        inputRut.value = formatearRut(inputRut.value);
+      }
+      if (errorRutMsg) errorRutMsg.classList.add("hidden");
+    });
 
-            // Restricción estricta de residencia: extranjeros solo si no viven en Chile
-            if (isChile) {
-                contenedorExtranjero.classList.add('hidden');
-                contenedorExtranjero.style.display = 'none';
-                checkExtranjero.checked = false;
-                activarModoRutChileno();
-            } else {
-                contenedorExtranjero.classList.remove('hidden');
-                contenedorExtranjero.style.display = 'flex';
-            }
+    inputRut?.addEventListener("blur", async () => {
+      const rutVal = inputRut.value.trim();
+      const pais = paisSel?.value || "Chile";
+      const rutLimpio = limpiarRut(rutVal);
 
-            if (rutInput.value.trim()) {
-                rutInput.dispatchEvent(new Event('input'));
-            }
-        });
-
-        regionSelect.addEventListener('change', function() {
-            comunaSelect.innerHTML = '<option disabled selected value="">Selecciona comuna</option>';
-            const coms = regionesComunas[this.value];
-            if (coms) {
-                coms.forEach(c => {
-                    const o = document.createElement('option');
-                    o.value = c;
-                    o.textContent = c;
-                    comunaSelect.appendChild(o);
-                });
-            }
-        });
-
-        function cargarDatosPrevios() {
-            const raw = localStorage.getItem('gravecare_last_order') ||
-                        localStorage.getItem('gravecare_datos_completos') ||
-                        sessionStorage.getItem('gravecare_registro_datos');
-
-            if (raw) {
-                try {
-                    datosDelPlanGlobal = JSON.parse(raw);
-                    const nomPlan = datosDelPlanGlobal.servicio?.planNombre || datosDelPlanGlobal.planNombre || 'Plan Mensual';
-                    document.getElementById('serviceBadge').textContent = nomPlan;
-                    document.getElementById('pageTitle').textContent = 'Contratación ' + nomPlan;
-
-                    const cemFijo = datosDelPlanGlobal.cementerio || 
-                                   datosDelPlanGlobal.ubicacionSepultura?.cementerio || 
-                                   'Parque del Recuerdo Américo Vespucio';
-                    document.getElementById('cementerio').value = cemFijo;
-                } catch(e) {
-                    console.error(e);
-                }
-            }
+      if (pais === "Chile" && rutLimpio.length > 0) {
+        if (!validarRutChileno(rutLimpio)) {
+          if (errorRutMsg) {
+            errorRutMsg.textContent = "El RUT ingresado no es válido. Revisa el dígito verificador.";
+            errorRutMsg.classList.remove("hidden");
+          }
+          return;
+        } else {
+          if (errorRutMsg) errorRutMsg.classList.add("hidden");
         }
+      }
 
-        function preguntarModalRut(rut, datos) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('modal-decision-rut');
-                const boxResumen = document.getElementById('modal-datos-resumen');
-                boxResumen.innerHTML = `
-                    <p><strong>Identificación:</strong> ${rut}</p>
-                    <p><strong>Nombre:</strong> ${datos.nombreCompleto || datos.nombres || 'Usuario Registrado'}</p>
-                    <p><strong>Email:</strong> ${datos.email || 'No disponible'}</p>
-                `;
-                modal.classList.remove('hidden');
+      if (rutLimpio.length >= 7) {
+        const cliente = await buscarClientePorRut(rutLimpio);
+        if (cliente) {
+          clienteEncontradoPorRut = cliente;
+          const tit = cliente.titular || cliente;
 
-                const btnNo = document.getElementById('btnModalNoRut');
-                const btnSi = document.getElementById('btnModalSiRut');
+          const nombreModal = tit.nombreCompleto || armarNombreCompleto(tit.nombres, tit.apellidoPaterno, tit.apellidoMaterno) || "Cliente Registrado";
+          document.getElementById("modalTitularNombre").textContent = nombreModal;
+          document.getElementById("modalTitularEmail").textContent = tit.email || cliente.email || "-";
+          document.getElementById("modalTitularTelefono").textContent = tit.telefono || "-";
 
-                const cleanup = () => {
-                    modal.classList.add('hidden');
-                    btnNo.onclick = null;
-                    btnSi.onclick = null;
-                };
-
-                btnNo.onclick = () => { cleanup(); resolve(false); };
-                btnSi.onclick = () => { cleanup(); resolve(true); };
-            });
+          document.getElementById("modalRutExiste").classList.remove("hidden");
         }
+      }
+    });
 
-        function precargarDatosTitular(datos) {
-            if (datos.nombres) document.getElementById('nombresTitular').value = capitalizarTexto(datos.nombres);
-            else if (datos.nombreCompleto) document.getElementById('nombresTitular').value = capitalizarTexto(datos.nombreCompleto);
-            if (datos.apellidoPaterno) document.getElementById('apellidoPaternoTitular').value = capitalizarTexto(datos.apellidoPaterno);
-            if (datos.apellidoMaterno) document.getElementById('apellidoMaternoTitular').value = capitalizarTexto(datos.apellidoMaterno);
+    document.getElementById("btnCancelarModalRut")?.addEventListener("click", () => {
+      document.getElementById("modalRutExiste").classList.add("hidden");
+      clienteEncontradoPorRut = null;
+      inputRut.value = "";
+      inputRut.focus();
+    });
 
-            if (datos.email) {
-                const elEmail = document.getElementById('email');
-                elEmail.value = datos.email;
-                elEmail.readOnly = true;
-                elEmail.style.backgroundColor = '#f1f5f9';
-            }
-            if (datos.telefono) document.getElementById('telefono').value = datos.telefono;
-            if (datos.direccion) document.getElementById('direccion').value = datos.direccion;
-            if (datos.numero) document.getElementById('numero').value = datos.numero;
-            if (datos.departamento) document.getElementById('departamento').value = datos.departamento;
+    document.getElementById("btnConfirmarModalRut")?.addEventListener("click", () => {
+      if (!clienteEncontradoPorRut) return;
+      const tit = clienteEncontradoPorRut.titular || clienteEncontradoPorRut;
+      rellenarFormularioConDatos(tit);
+      document.getElementById("modalRutExiste").classList.add("hidden");
+      prepararYContinuar(tit, clienteEncontradoPorRut.uid);
+    });
 
-            if (datos.region && regionSelect) {
-                regionSelect.value = datos.region;
-                regionSelect.dispatchEvent(new Event('change'));
-                if (datos.comuna && comunaSelect) comunaSelect.value = datos.comuna;
-            }
+    // ESTRATEGIA B: PREPARAR TODO EN MEMORIA SIN ESCRIBIR EN FIRESTORE TODAVÍA
+    function prepararYContinuar(datosFinalesTitular, uidAsignado) {
+      const nombresDif = document.getElementById("nombresDifunto").value.trim();
+      const apPatDif = document.getElementById("apPaternoDifunto").value.trim();
+      const apMatDif = document.getElementById("apMaternoDifunto").value.trim();
+      const nombreCompletoDifunto = armarNombreCompleto(nombresDif, apPatDif, apMatDif);
 
-            document.getElementById('banner-datos-precargados').classList.remove('hidden');
+      const cementerio = document.getElementById("cementerio").value;
+      const sector = document.getElementById("sector").value.trim();
+      const patio = document.getElementById("patio").value.trim();
+      const numSep = document.getElementById("numeroSepultura").value.trim();
+      const referencias = document.getElementById("referencias").value.trim();
+
+      const pedidoGuardado = JSON.parse(sessionStorage.getItem("gravecare_pedido") || localStorage.getItem("gravecare_pedido") || "{}");
+      const totalCalculado = Number(pedidoGuardado.montoTotal || pedidoGuardado.total || sessionStorage.getItem("gravecare_total_pagar") || 467880);
+      const planNombreFinal = pedidoGuardado.planNombre || "Plan 12";
+      
+      const nuevoIdOrden = "ORD-" + Date.now();
+      const nuevoIdContrato = "CTR-" + nuevoIdOrden;
+      const urlContratoPdf = `contratos/Contrato-GraveCare-${nuevoIdOrden}.pdf`;
+
+      const nombreTitularFinal = armarNombreCompleto(
+        datosFinalesTitular.nombres,
+        datosFinalesTitular.apellidoPaterno,
+        datosFinalesTitular.apellidoMaterno
+      ) || (datosFinalesTitular.nombreCompleto || "").trim();
+
+      // Estructura completa de Usuario (Pendiente de persistir post-pago)
+      const usuarioDoc = {
+        uid: uidAsignado,
+        email: datosFinalesTitular.email,
+        nombreCompleto: nombreTitularFinal,
+        rol: "cliente",
+        titular: {
+          rut: datosFinalesTitular.rut,
+          nombres: datosFinalesTitular.nombres || "",
+          apellidoPaterno: datosFinalesTitular.apellidoPaterno || "",
+          apellidoMaterno: datosFinalesTitular.apellidoMaterno || "",
+          nombreCompleto: nombreTitularFinal,
+          email: datosFinalesTitular.email,
+          telefono: datosFinalesTitular.telefono || "",
+          pais: datosFinalesTitular.pais || "Chile",
+          direccion: datosFinalesTitular.direccion || "",
+          comuna: datosFinalesTitular.comuna || "",
+          region: datosFinalesTitular.region || "Metropolitana de Santiago"
         }
+      };
 
-        document.getElementById('contratacion-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+      // Estructura de Contrato
+      const contratoDoc = {
+        idContrato: nuevoIdContrato,
+        numeroContrato: nuevoIdContrato,
+        numeroOrden: nuevoIdOrden,
+        ordenId: nuevoIdOrden,
+        usuarioId: uidAsignado,
+        clienteUid: uidAsignado,
+        estado: "pendiente_pago",
+        planNombre: planNombreFinal,
+        tipoServicio: "PLAN",
+        montoTotal: totalCalculado,
+        urlContrato: urlContratoPdf,
+        contratoUrl: urlContratoPdf,
+        titular: {
+          nombreCompleto: nombreTitularFinal,
+          nombres: datosFinalesTitular.nombres || "",
+          apellidoPaterno: datosFinalesTitular.apellidoPaterno || "",
+          apellidoMaterno: datosFinalesTitular.apellidoMaterno || "",
+          rut: datosFinalesTitular.rut,
+          email: datosFinalesTitular.email,
+          telefono: datosFinalesTitular.telefono || "",
+          pais: datosFinalesTitular.pais || "Chile",
+          direccion: datosFinalesTitular.direccion || "",
+          comuna: datosFinalesTitular.comuna || "",
+          region: datosFinalesTitular.region || "Metropolitana de Santiago"
+        },
+        difunto: {
+          nombre: nombreCompletoDifunto,
+          nombres: nombresDif,
+          apellidoPaterno: apPatDif,
+          apellidoMaterno: apMatDif
+        },
+        ubicacionSepultura: {
+          cementerio: cementerio,
+          sector: sector,
+          patio: patio,
+          numeroSepultura: numSep,
+          numero: numSep,
+          referencias: referencias
+        }
+      };
 
-            // 1. Estandarización de nombres y apellidos (Title Case)
-            const nombresTit = capitalizarTexto(document.getElementById('nombresTitular').value);
-            const apPatTit   = capitalizarTexto(document.getElementById('apellidoPaternoTitular').value);
-            const apMatTit   = capitalizarTexto(document.getElementById('apellidoMaternoTitular').value);
-            const nombreCompletoTitular = `${nombresTit} ${apPatTit} ${apMatTit}`.trim();
+      // Estructura de Orden
+      const ordenData = {
+        numeroOrden: nuevoIdOrden,
+        numeroContrato: nuevoIdContrato,
+        contratoId: nuevoIdContrato,
+        urlContrato: urlContratoPdf,
+        contratoUrl: urlContratoPdf,
+        usuarioId: uidAsignado,
+        clienteUid: uidAsignado,
+        estado: "pendiente_pago",
+        pagoConfirmado: false,
+        tipoServicio: "PLAN",
+        planNombre: planNombreFinal,
+        precioNumerico: totalCalculado,
+        montoTotal: totalCalculado,
+        total: totalCalculado,
+        ramosAdicionales: pedidoGuardado.ramosAdicionalesTotales || pedidoGuardado.ramosAdicionalesPorVisita || 0,
+        nombreCliente: nombreTitularFinal,
+        clienteNombre: nombreTitularFinal,
+        rut: datosFinalesTitular.rut,
+        email: datosFinalesTitular.email,
+        telefono: datosFinalesTitular.telefono || "",
+        pais: datosFinalesTitular.pais || "Chile",
+        direccion: datosFinalesTitular.direccion || "",
+        comuna: datosFinalesTitular.comuna || "",
+        region: datosFinalesTitular.region || "Metropolitana de Santiago",
+        cementerio: cementerio,
+        sector: sector,
+        patio: patio,
+        numeroSepultura: numSep,
+        referencias: referencias,
+        nombreDifunto: nombreCompletoDifunto,
+        difuntoNombre: nombreCompletoDifunto,
+        titular: {
+          nombreCompleto: nombreTitularFinal,
+          nombres: datosFinalesTitular.nombres || "",
+          apellidoPaterno: datosFinalesTitular.apellidoPaterno || "",
+          apellidoMaterno: datosFinalesTitular.apellidoMaterno || "",
+          rut: datosFinalesTitular.rut,
+          email: datosFinalesTitular.email,
+          telefono: datosFinalesTitular.telefono || "",
+          pais: datosFinalesTitular.pais || "Chile",
+          direccion: datosFinalesTitular.direccion || "",
+          comuna: datosFinalesTitular.comuna || "",
+          region: datosFinalesTitular.region || "Metropolitana de Santiago"
+        },
+        difunto: {
+          nombre: nombreCompletoDifunto,
+          nombres: nombresDif,
+          apellidoPaterno: apPatDif,
+          apellidoMaterno: apMatDif
+        },
+        ubicacionSepultura: {
+          cementerio: cementerio,
+          sector: sector,
+          patio: patio,
+          numeroSepultura: numSep,
+          numero: numSep,
+          referencias: referencias
+        }
+      };
 
-            const nombresDif = capitalizarTexto(document.getElementById('nombresDifunto').value);
-            const apPatDif   = capitalizarTexto(document.getElementById('apellidoPaternoDifunto').value);
-            const apMatDif   = capitalizarTexto(document.getElementById('apellidoMaternoDifunto').value);
-            const nombreCompletoDifunto = `${nombresDif} ${apPatDif} ${apMatDif}`.trim();
+      // GUARDADO EN SESSIONSTORAGE PARA RESUMEN DE PAGO
+      sessionStorage.setItem("gravecare_usuario_pendiente", JSON.stringify(usuarioDoc));
+      sessionStorage.setItem("gravecare_orden_activa", JSON.stringify(ordenData));
+      sessionStorage.setItem("gravecare_contrato_activo", JSON.stringify(contratoDoc));
+      sessionStorage.setItem("gravecare_total_pagar", String(totalCalculado));
+      sessionStorage.setItem("gravecare_cementerio_seleccionado", cementerio);
+      sessionStorage.setItem("gravecare_email_login_sugerido", datosFinalesTitular.email || "");
 
-            document.getElementById('nombresTitular').value = nombresTit;
-            document.getElementById('apellidoPaternoTitular').value = apPatTit;
-            document.getElementById('apellidoMaternoTitular').value = apMatTit;
-            document.getElementById('nombresDifunto').value = nombresDif;
-            document.getElementById('apellidoPaternoDifunto').value = apPatDif;
-            document.getElementById('apellidoMaternoDifunto').value = apMatDif;
+      // Redirigir a resumen de pago
+      window.location.href = `resumen-pago.html?orden=${nuevoIdOrden}`;
+    }
 
-            // 2. Validación de Identificación (RUT Chileno vs Extranjero)
-            const paisVal = document.getElementById('pais').value;
-            const esExtranjeroSinRut = (paisVal !== 'Chile') && checkExtranjero.checked;
-            const inputRutVal = document.getElementById('rut').value.trim();
+    document.getElementById("formContratacion")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-            let rutFinalGuardado = inputRutVal;
+      const paisVal = paisSel?.value || "Chile";
+      const rutIngresado = inputRut.value.trim();
+      const rutLimpio = limpiarRut(rutIngresado);
 
-            if (!esExtranjeroSinRut) {
-                const resultadoRut = validarRutChileno(inputRutVal);
-                if (!resultadoRut.valido) {
-                    alert(resultadoRut.mensaje);
-                    document.getElementById('rut').focus();
-                    return;
-                }
-                rutFinalGuardado = formatearRutConPuntosYGuion(inputRutVal);
-                document.getElementById('rut').value = rutFinalGuardado;
-            } else {
-                if (inputRutVal.length < 4) {
-                    alert('Por favor, ingresa un número de Pasaporte o DNI válido');
-                    document.getElementById('rut').focus();
-                    return;
-                }
-            }
+      if (paisVal === "Chile") {
+        if (!validarRutChileno(rutLimpio)) {
+          if (errorRutMsg) {
+            errorRutMsg.textContent = "Por favor, ingresa un RUT chileno válido antes de continuar.";
+            errorRutMsg.classList.remove("hidden");
+          }
+          inputRut.focus();
+          return;
+        }
+      }
 
-            const btnSubmit = document.getElementById('submitBtn');
-            const textoOriginal = 'Continuar a Resumen de Pago →';
-            btnSubmit.textContent = 'Verificando datos...';
-            btnSubmit.disabled = true;
+      const btn = document.getElementById("btnContinuar");
+      btn.disabled = true;
+      btn.innerHTML = `<span>Preparando resumen...</span>`;
 
-            const email = document.getElementById('email').value.trim().toLowerCase();
-            const cleanRut = normalizarRut(rutFinalGuardado);
-            let cuentaPreexistenteAceptada = false;
+      if (!clienteEncontradoPorRut) {
+        const clienteExistente = await buscarClientePorRut(rutLimpio);
+        if (clienteExistente) {
+          clienteEncontradoPorRut = clienteExistente;
+          const tit = clienteExistente.titular || clienteExistente;
+          const nombreModal = tit.nombreCompleto || armarNombreCompleto(tit.nombres, tit.apellidoPaterno, tit.apellidoMaterno) || "Cliente Registrado";
+          document.getElementById("modalTitularNombre").textContent = nombreModal;
+          document.getElementById("modalTitularEmail").textContent = tit.email || clienteExistente.email || "-";
+          document.getElementById("modalTitularTelefono").textContent = tit.telefono || "-";
+          document.getElementById("modalRutExiste").classList.remove("hidden");
+          btn.disabled = false;
+          btn.innerHTML = `<span>Continuar a Resumen de Pago →</span>`;
+          return;
+        }
+      }
 
-            try {
-                let intentos = 0;
-                while ((!window.gcFirebase || !window.gcFirebase.db) && intentos < 20) {
-                    await new Promise(r => setTimeout(r, 100));
-                    intentos++;
-                }
+      const regionVal = (paisVal === "Chile") ? document.getElementById("regionTitular").value : document.getElementById("regionTitularText").value.trim();
+      const comunaVal = (paisVal === "Chile") ? document.getElementById("comunaTitular").value : document.getElementById("comunaTitularText").value.trim();
 
-                if (window.gcFirebase && window.gcFirebase.db) {
-                    try {
-                        const rutLimpioSinPuntos = rutFinalGuardado.replace(/\./g, '').trim().toLowerCase();
-                        const formatosABuscar = [
-                            rutFinalGuardado,
-                            rutLimpioSinPuntos,
-                            cleanRut,
-                            inputRutVal.trim().toLowerCase()
-                        ];
+      const nomTit = document.getElementById("nombresTitular").value.trim();
+      const apPatTit = document.getElementById("apPaternoTitular").value.trim();
+      const apMatTit = document.getElementById("apMaternoTitular").value.trim();
 
-                        let snapRut = null;
-                        for (const fId of formatosABuscar) {
-                            if (!fId) continue;
-                            const refDoc = window.gcFirebase.doc(window.gcFirebase.db, 'rut_lookup', fId);
-                            const res = await window.gcFirebase.getDoc(refDoc);
-                            if (res.exists()) {
-                                snapRut = res;
-                                break;
-                            }
-                        }
+      const nuevoTitular = {
+        nombreCompleto: armarNombreCompleto(nomTit, apPatTit, apMatTit),
+        nombres: nomTit,
+        apellidoPaterno: apPatTit,
+        apellidoMaterno: apMatTit,
+        rut: (paisVal === "Chile") ? formatearRut(rutIngresado) : rutIngresado,
+        email: document.getElementById("emailTitular").value.trim().toLowerCase(),
+        telefono: document.getElementById("telefonoTitular").value.trim(),
+        pais: paisVal,
+        comuna: comunaVal,
+        direccion: document.getElementById("direccionTitular").value.trim(),
+        region: regionVal
+      };
 
-                        if (snapRut && snapRut.exists()) {
-                            const datosEncontrados = snapRut.data();
-                            const aceptaIncorporar = await preguntarModalRut(rutFinalGuardado, datosEncontrados);
-
-                            if (!aceptaIncorporar) {
-                                btnSubmit.textContent = textoOriginal;
-                                btnSubmit.disabled = false;
-                                document.getElementById('rut').value = '';
-                                document.getElementById('rut').focus();
-                                alert('Por favor, ingresa una nueva identificación para continuar.');
-                                return;
-                            }
-
-                            cuentaPreexistenteAceptada = true;
-                            precargarDatosTitular(datosEncontrados);
-                        }
-                    } catch (fsErr) {
-                        console.error('Error consultando rut_lookup:', fsErr);
-                    }
-                }
-
-                if (!cuentaPreexistenteAceptada && window.gcFirebase && window.gcFirebase.auth && email) {
-                    try {
-                        const metodos = await window.gcFirebase.fetchSignInMethodsForEmail(window.gcFirebase.auth, email);
-                        if (metodos && metodos.length > 0) {
-                            btnSubmit.textContent = textoOriginal;
-                            btnSubmit.disabled = false;
-                            alert('Este correo electrónico ya está registrado. Debes ingresar uno diferente o iniciar sesión.');
-                            document.getElementById('email').focus();
-                            return;
-                        }
-                    } catch (authErr) {
-                        console.warn('Aviso en validación auth:', authErr);
-                    }
-                }
-
-            } catch (err) {
-                console.error('Aviso general durante validación:', err);
-            }
-
-            const region = (paisVal === 'Chile') ? document.getElementById('region').value : document.getElementById('regionText').value;
-            const comuna = (paisVal === 'Chile') ? document.getElementById('comuna').value : document.getElementById('comunaText').value;
-
-            const dirCalle = document.getElementById('direccion').value.trim();
-            const dirNum = document.getElementById('numero').value.trim();
-            const dirDepto = document.getElementById('departamento').value.trim();
-
-            const ordenActualizada = {
-                ...datosDelPlanGlobal,
-                numeroOrden: datosDelPlanGlobal.numeroOrden || ('ORD-' + Date.now()),
-                tipoServicio: 'PLAN',
-                tipoSuscripcion: 'PLAN',
-                cuentaExistente: cuentaPreexistenteAceptada,
-                esExtranjero: esExtranjeroSinRut,
-                titular: {
-                    nombre: nombreCompletoTitular,
-                    nombres: nombresTit,
-                    apellidoPaterno: apPatTit,
-                    apellidoMaterno: apMatTit,
-                    email: email,
-                    rut: rutFinalGuardado,
-                    rutDni: rutFinalGuardado,
-                    rutLimpio: cleanRut,
-                    telefono: document.getElementById('telefono').value.trim(),
-                    pais: paisVal,
-                    direccion: dirCalle,
-                    numero: dirNum,
-                    departamento: dirDepto,
-                    region: region,
-                    comuna: comuna
-                },
-                direccionTitular: {
-                    pais: paisVal,
-                    direccion: dirCalle,
-                    numero: dirNum,
-                    departamento: dirDepto,
-                    region: region,
-                    comuna: comuna
-                },
-                difunto: {
-                    nombre: nombreCompletoDifunto,
-                    nombres: nombresDif,
-                    apellidoPaterno: apPatDif,
-                    apellidoMaterno: apMatDif
-                },
-                ubicacionSepultura: {
-                    cementerio: document.getElementById('cementerio').value,
-                    sector: document.getElementById('sector').value.trim(),
-                    patio: document.getElementById('patio').value.trim(),
-                    numero: document.getElementById('numeroSepultura').value.trim(),
-                    numeroSepultura: document.getElementById('numeroSepultura').value.trim(),
-                    referencias: document.getElementById('referenciasSepultura').value.trim()
-                }
-            };
-
-            const jsonFinal = JSON.stringify(ordenActualizada);
-            localStorage.setItem('gravecare_datos_completos', jsonFinal);
-            localStorage.setItem('gravecare_last_order', jsonFinal);
-
-            window.location.href = 'resumen-pago.html';
-        });
-
-        cargarDatosPrevios();
-    </script>
+      const uidFinal = clienteEncontradoPorRut ? clienteEncontradoPorRut.uid : ("cliente_" + rutLimpio);
+      prepararYContinuar(nuevoTitular, uidFinal);
+    });
+  </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /**
- * generarContratoPDF.js
+ * contratoGravecare.js
  * ============================================================================
  * Generador en PDF oficial de GraveCare Chile SpA (12 Cláusulas Legales).
  * Paginación dinámica y automática para evitar desbordes o cortes de texto.
@@ -36,14 +36,50 @@ export function generarContratoPDF(orden = {}) {
   const planNombre = orden.servicio?.planNombre || orden.planNombre || (tipo === "Plan" ? "Plan Mensual" : "Servicio Spot");
 
   const titular = orden.titular || {};
-  const nombreTitular = titular.nombre || `${titular.nombres || ''} ${titular.apellidoPaterno || ''} ${titular.apellidoMaterno || ''}`.trim() || orden.nombreTitular || "Christian Olivares Lizama";
+
+  // Normalización limpia de nombres y apellidos (evita palabras pegadas)
+  const partesNombreTitular = [
+    titular.nombres || titular.nombre || '',
+    titular.apellidoPaterno || '',
+    titular.apellidoMaterno || ''
+  ]
+    .map(s => String(s || '').trim())
+    .filter(Boolean);
+
+  const nombreTitular = partesNombreTitular.length > 0 
+    ? partesNombreTitular.join(' ') 
+    : (orden.nombreTitular || "Christian Olivares Lizama");
+
   const rutTitular = titular.rut || titular.rutDni || "12.722.847-7";
-  const direccionTitular = titular.direccionCompleta || `${titular.direccion || 'Evaristo Lillo'}, ${titular.numero || '111'}${titular.departamento ? ', ' + titular.departamento : ''}, ${titular.comuna || 'Las Condes'}, ${titular.region || 'Metropolitana'}`;
+  
+  // Normalización de dirección
+  const partesDireccion = [
+    titular.direccion || 'Evaristo Lillo',
+    titular.numero ? `${titular.numero}` : '111',
+    titular.departamento ? `Depto ${titular.departamento}` : '',
+    titular.comuna || 'Las Condes',
+    titular.region || 'Metropolitana'
+  ]
+    .map(s => String(s || '').trim())
+    .filter(Boolean);
+
+  const direccionTitular = titular.direccionCompleta || partesDireccion.join(', ');
   const emailTitular = titular.email || "colivaresl@hotmail.com";
   const telefonoTitular = titular.telefono || "+56991788588";
 
+  // Normalización de difunto
   const difunto = orden.difunto || {};
-  const nombreDifunto = difunto.nombre || `${difunto.nombres || ''} ${difunto.apellidoPaterno || ''}`.trim() || orden.nombreDifunto || "Ser Querido";
+  const partesNombreDifunto = [
+    difunto.nombres || difunto.nombre || '',
+    difunto.apellidoPaterno || '',
+    difunto.apellidoMaterno || ''
+  ]
+    .map(s => String(s || '').trim())
+    .filter(Boolean);
+
+  const nombreDifunto = partesNombreDifunto.length > 0 
+    ? partesNombreDifunto.join(' ') 
+    : (orden.nombreDifunto || "Ser Querido");
 
   const sepultura = orden.ubicacionSepultura || {};
   const cementerio = sepultura.cementerio || orden.cementerio || "Parque del Recuerdo";

@@ -35,7 +35,7 @@
       background-color: #f8fafc;
     }
     .contrato-scroll {
-      max-height: 250px;
+      max-height: 280px;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #1a3636 #e2e8f0;
@@ -54,7 +54,6 @@
 </head>
 <body class="bg-[#f8faf8] text-[#191c1b] min-h-screen flex flex-col">
 
-  <!-- Navbar con logo centrado y enlace a la derecha -->
   <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
     <div class="grid grid-cols-3 items-center w-full px-6 max-w-5xl mx-auto h-20">
       <div></div>
@@ -69,7 +68,6 @@
     </div>
   </header>
 
-  <!-- Contenedor Principal -->
   <main class="flex-grow flex items-center justify-center px-4 py-10">
     <div class="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10">
       
@@ -78,7 +76,6 @@
         <p class="text-gray-500 text-sm mt-1.5">Revisa el detalle de tu contratación y formaliza el servicio</p>
       </div>
 
-      <!-- Resumen del Servicio -->
       <div class="bg-[#f2f6f4] rounded-2xl p-5 sm:p-6 mb-8 border border-[#d2e2db]">
         <div class="flex justify-between items-center pb-3 border-b border-[#c2d7ce]">
           <span class="text-xs font-bold uppercase tracking-wider text-gray-600">Detalle de Contratación</span>
@@ -105,35 +102,35 @@
         </div>
 
         <div class="mt-5 pt-3 border-t border-[#c2d7ce] flex justify-between items-center">
-          <span class="text-sm font-bold text-gray-700">Total a Pagar (IVA inc.):</span>
+          <div>
+            <span class="text-sm font-bold text-gray-700 block">Total a Pagar (IVA inc.):</span>
+            <span class="text-[11px] text-gray-500 font-medium">Hasta en 12 cuotas precio contado</span>
+          </div>
           <span id="txtMontoTotal" class="text-2xl font-extrabold text-[#1a3636]">$0</span>
         </div>
       </div>
 
-      <!-- Métodos de Pago -->
       <div class="mb-8">
         <h2 class="text-sm font-bold uppercase tracking-wider text-gray-700 mb-3">Selecciona un medio de pago:</h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Webpay Plus -->
           <div class="metodo-card metodo-pago rounded-2xl p-4 flex items-center justify-between" data-metodo="webpay-plus">
             <div class="flex items-center gap-3">
               <span class="material-symbols-outlined text-2xl text-[#1a3636]">credit_card</span>
               <div>
                 <p class="text-sm font-bold text-gray-900">Webpay Plus</p>
-                <p class="text-xs text-gray-500">Débito y Crédito</p>
+                <p class="text-xs text-gray-500">Débito y Crédito (Pago total o en cuotas)</p>
               </div>
             </div>
             <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">DISPONIBLE</span>
           </div>
 
-          <!-- Webpay Oneclick -->
           <div class="metodo-card metodo-pago rounded-2xl p-4 flex items-center justify-between" data-metodo="webpay-oneclick">
             <div class="flex items-center gap-3">
               <span class="material-symbols-outlined text-2xl text-[#1a3636]">autorenew</span>
               <div>
                 <p class="text-sm font-bold text-gray-900">Webpay Oneclick</p>
-                <p class="text-xs text-gray-500">Suscripción y cargo mensual</p>
+                <p class="text-xs text-gray-500">Suscripción y cargo mensual automático</p>
               </div>
             </div>
             <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">DISPONIBLE</span>
@@ -141,11 +138,10 @@
         </div>
       </div>
 
-      <!-- Cuadro del Contrato con los Datos Dinámicos del Cliente -->
       <div class="mb-8">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-xs font-bold uppercase tracking-wider text-gray-700">Contrato de Prestación de Servicios & Mandato Especial</h2>
-          <span class="text-[11px] text-gray-500">Versión 2026-09-v1</span>
+          <span class="text-[11px] text-gray-500">Versión 2026-10-v3</span>
         </div>
 
         <div class="contrato-scroll bg-gray-50 border border-gray-300 rounded-2xl p-4 text-xs text-gray-700 leading-relaxed select-text space-y-3">
@@ -155,16 +151,26 @@
             En Santiago de Chile, a <span id="contratoFecha" class="font-semibold text-gray-900">...</span>, entre <strong>GraveCare SpA</strong>, RUT N° 78.498.653-5, con domicilio en Av. El Carmen 1397, Of. 301, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) <strong id="contratoClienteNombre" class="text-gray-900">[Nombre Cliente]</strong>, RUT N° <strong id="contratoClienteRut" class="text-gray-900">[RUT]</strong>, con domicilio en <span id="contratoClienteDireccion">[Dirección]</span>, correo electrónico <span id="contratoClienteEmail">[Email]</span> y teléfono <span id="contratoClienteFono">[Teléfono]</span>, en adelante el «Cliente», se ha convenido el siguiente contrato:
           </p>
 
-          <p>
-            <strong>PRIMERO (Objeto del Servicio y Mandato Especial):</strong> La Empresa se compromete a prestar las labores de aseo, preservación ornamental y mantención de sepulturas conforme al plan seleccionado (<span id="contratoPlanNombre" class="font-semibold text-gray-900">...</span>). El Cliente declara bajo su responsabilidad ser titular o contar con las facultades legales sobre la sepultura individualizada (<span id="contratoSepulturaUbicacion" class="font-semibold text-gray-900">...</span>, sepultura de <strong id="contratoDifuntoNombre" class="text-gray-900">...</strong>) y confiere a GraveCare SpA y a su personal mandato especial y suficiente para ingresar al cementerio y ejecutar exclusivamente las labores contratadas.
-          </p>
+          <div class="p-3.5 bg-white rounded-xl border border-gray-200 space-y-1.5 shadow-sm">
+            <p class="font-bold text-[#1a3636]">PRIMERO (Objeto del Servicio y Mandato Especial):</p>
+            <p>La Empresa se compromete a prestar las labores de aseo, mantención y preservación ornamental de sepulturas conforme a los términos específicos contratados:</p>
+            <ul class="list-disc pl-5 space-y-1 text-gray-800 font-medium">
+              <li><strong>Plan:</strong> <span id="contratoPlanNombre">...</span></li>
+              <li><strong>Frecuencia:</strong> <span id="contratoFrecuencia">...</span></li>
+              <li><strong>Nivel de Servicio:</strong> <span id="contratoNivel">...</span></li>
+              <li><strong>Ramos Adicionales:</strong> <span id="contratoRamos">...</span></li>
+            </ul>
+            <p class="pt-1.5 leading-relaxed">
+              El Cliente declara bajo su responsabilidad ser titular o contar con las facultades legales sobre la sepultura individualizada (<span id="contratoSepulturaUbicacion" class="font-semibold text-gray-900">...</span>, sepultura de <strong id="contratoDifuntoNombre" class="text-gray-900">...</strong>) y confiere a GraveCare SpA y a su personal mandato especial y suficiente para ingresar al cementerio y ejecutar exclusivamente las labores contratadas.
+            </p>
+          </div>
 
-          <p><strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de placas, lápidas y cruces, retiro de flores secas, desmalezado y arreglo floral fresco. Se excluyen obras mayores de albañilería, restauración estructural profunda o movimiento de restos.</p>
+          <p><strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de placas, lápidas y cruces, retiro de flores secas, desmalezado y arreglo floral fresco conforme al plan y nivel seleccionados. Se excluyen obras mayores de albañilería, restauración estructural profunda o movimiento de restos.</p>
 
           <p><strong>TERCERO (Reporte y Verificación Digital):</strong> Cada intervención en terreno generará un reporte fotográfico de respaldo ("Antes" y "Después"), remitido al Cliente dentro de las 24 horas hábiles posteriores vía WhatsApp o correo electrónico.</p>
 
           <p>
-            <strong>CUARTO (Honorarios y Forma de Pago):</strong> El Cliente pagará la suma de <strong id="contratoMonto" class="text-gray-900">$0</strong> (IVA incluido) por los servicios contratados, abonados por adelantado mediante pasarelas autorizadas (Webpay Plus o suscripción recurrente Webpay Oneclick de Transbank).
+            <strong>CUARTO (Honorarios y Forma de Pago):</strong> El Cliente pagará la suma de <strong id="contratoMonto" class="text-gray-900">$0</strong> (IVA incluido) por los servicios contratados, abonados mediante pasarelas autorizadas (Webpay Plus o suscripción recurrente Webpay Oneclick de Transbank).
           </p>
 
           <p><strong>QUINTO (Plazo y Vigencia):</strong> El presente contrato rige desde el momento en que se confirme el pago de la orden y se mantendrá vigente durante la periodicidad del plan contratado.</p>
@@ -193,7 +199,6 @@
         </div>
       </div>
 
-      <!-- Botones de Acción -->
       <div id="botonesSeccion" style="display: none;">
         <button type="button" id="btnWebpay" style="display: none;" 
                 class="w-full py-4 px-6 bg-[#1a3636] hover:bg-[#234949] text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-base cursor-pointer">
@@ -211,7 +216,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="text-center text-xs text-gray-500 py-6 border-t border-gray-200">
     GraveCare SpA · Preservación & Memoria · 2026
   </footer>
@@ -222,7 +226,6 @@
     let metodoPagoSeleccionado = null;
     let db = null;
 
-    // Inicializar Firebase para asegurar escritura en Firestore
     try {
       if (!firebase.apps.length) {
         firebase.initializeApp({
@@ -234,35 +237,161 @@
       console.warn("Inicialización de Firebase Firestore:", e);
     }
 
-    function obtenerDatosOrden() {
-      const datosStr = localStorage.getItem('gravecare_datos_completos') ||
-                       sessionStorage.getItem('gravecare_registro_datos') ||
-                       localStorage.getItem('gravecare_last_order');
-      if (!datosStr) return null;
-      try {
-        return JSON.parse(datosStr);
-      } catch (e) {
-        console.warn('Error al parsear orden:', e);
-        return null;
+    function obtenerDatosOrdenLocal() {
+      const keys = [
+        'gravecare_orden_activa',
+        'gravecare_datos_completos',
+        'gravecare_registro_datos',
+        'gravecare_last_order',
+        'gravecare_nueva_orden'
+      ];
+      for (const k of keys) {
+        const val = sessionStorage.getItem(k) || localStorage.getItem(k);
+        if (val) {
+          try {
+            const parsed = JSON.parse(val);
+            if (parsed && typeof parsed === 'object') return parsed;
+          } catch(e) {}
+        }
       }
+      return null;
     }
 
-    async function asegurarOrdenEnFirestore(orden, id) {
+    async function obtenerDatosOrdenTotal(id) {
+      let datosLocal = obtenerDatosOrdenLocal();
+
+      if (db && id) {
+        try {
+          const docSnap = await db.collection('ordenes').doc(id).get();
+          if (docSnap.exists) {
+            const datosRemotos = docSnap.data();
+            return Object.assign({}, datosLocal || {}, datosRemotos);
+          }
+        } catch (e) {
+          console.warn("Error leyendo orden desde Firestore:", e);
+        }
+      }
+
+      return datosLocal;
+    }
+
+    function calcularMontoTotalDefensivo(orden, planNombre) {
+      let monto = Number(orden?.montoTotal || orden?.total || orden?.valores?.total || 0);
+
+      const pedido = JSON.parse(sessionStorage.getItem('gravecare_pedido') || localStorage.getItem('gravecare_pedido') || '{}');
+      const valores = JSON.parse(sessionStorage.getItem('gravecare_valores') || localStorage.getItem('gravecare_valores') || '{}');
+      const totalStorage = Number(valores.total || pedido.total || pedido.montoTotal || sessionStorage.getItem('gravecare_total_pagar') || 0);
+
+      if (totalStorage > 0 && (monto <= 44990 || totalStorage > monto)) {
+        return totalStorage;
+      }
+
+      if (monto > 44990) return monto;
+
+      const pNombre = String(planNombre || orden?.planNombre || '').toLowerCase();
+      if (pNombre.includes('12')) return 659880;
+      if (pNombre.includes('6')) return 269940;
+      if (pNombre.includes('4')) return 187960;
+      if (pNombre.includes('spot')) return 58990;
+
+      return monto > 0 ? monto : 371940;
+    }
+
+    function extraerConfiguracionServicio(orden) {
+      const servicio = orden?.servicio || {};
+      const pedido = JSON.parse(sessionStorage.getItem('gravecare_pedido') || localStorage.getItem('gravecare_pedido') || '{}');
+
+      const planRaw = String(servicio.planNombre || orden?.planNombre || pedido.planNombre || orden?.plan || '').trim();
+      let nombrePlan = 'Plan 6';
+      let frecuencia = '6 visitas anuales, 1 cada 2 meses';
+      let visitasTotales = 6;
+      let esSpot = false;
+
+      const pLower = planRaw.toLowerCase();
+      if (pLower.includes('12')) {
+        nombrePlan = 'Plan 12';
+        frecuencia = '12 visitas anuales (1 cada mes)';
+        visitasTotales = 12;
+      } else if (pLower.includes('4')) {
+        nombrePlan = 'Plan 4';
+        frecuencia = '4 visitas anuales (1 cada 3 meses)';
+        visitasTotales = 4;
+      } else if (pLower.includes('spot') || pLower.includes('única') || pLower.includes('unica')) {
+        nombrePlan = 'Visita Spot';
+        frecuencia = 'Fecha única / Conmemorativa';
+        visitasTotales = 1;
+        esSpot = true;
+      } else if (pLower.includes('6')) {
+        nombrePlan = 'Plan 6';
+        frecuencia = '6 visitas anuales, 1 cada 2 meses';
+        visitasTotales = 6;
+      }
+
+      const nivel = servicio.nivel || orden?.nivel || pedido.nivel || 'Standard';
+
+      // 1. Extraer unitario por visita (sin confundir con total anual)
+      let ramosPorVisita = Number(
+        orden?.ramosPorVisita || 
+        pedido?.ramosPorVisita || 
+        servicio?.ramosPorVisita || 
+        orden?.ramosAdicionalesPorVisita ||
+        0
+      );
+
+      if (ramosPorVisita === 0) {
+        let candidato = Number(orden?.ramosAdicionales || pedido?.ramosAdicionales || servicio?.ramosAdicionales || orden?.ramosExtra || 0);
+        if (candidato === visitasTotales && candidato > 2) {
+          ramosPorVisita = 1;
+        } else if (candidato > visitasTotales && candidato % visitasTotales === 0) {
+          ramosPorVisita = candidato / visitasTotales;
+        } else {
+          ramosPorVisita = candidato;
+        }
+      }
+
+      // 2. Construir la glosa del contrato idéntica a suscribirme-Plan.html
+      let textoRamos = 'Sin ramos adicionales (incluye arreglo floral de temporada por visita)';
+      if (ramosPorVisita > 0) {
+        if (esSpot) {
+          textoRamos = `${ramosPorVisita} ramo(s) adicional(es) para la visita`;
+        } else {
+          const totalAnual = ramosPorVisita * visitasTotales;
+          textoRamos = `${ramosPorVisita} por visita (${totalAnual} al año en total)`;
+        }
+      }
+
+      return {
+        nombrePlan,
+        frecuencia,
+        nivel,
+        ramosPorVisita,
+        textoRamos
+      };
+    }
+
+    async function asegurarOrdenEnFirestore(orden, id, montoFinal) {
       if (!db || !id || !orden) return;
       try {
         const docRef = db.collection('ordenes').doc(id);
         const docSnap = await docRef.get();
         if (!docSnap.exists) {
-          console.log(`Guardando orden ${id} en Firestore...`);
           const ordenParaGuardar = {
             ...orden,
             numeroOrden: id,
+            montoTotal: montoFinal,
+            precioNumerico: montoFinal,
             estado: orden.estado || 'iniciada',
             creadoEl: firebase.firestore.FieldValue.serverTimestamp(),
             terminosAceptados: true
           };
           await docRef.set(ordenParaGuardar, { merge: true });
-          console.log(`Orden ${id} guardada exitosamente en Firestore.`);
+        } else {
+          await docRef.update({
+            montoTotal: montoFinal,
+            precioNumerico: montoFinal,
+            terminosAceptados: true,
+            actualizadoEl: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(() => {});
         }
       } catch (err) {
         console.error("Error al asegurar orden en Firestore:", err);
@@ -270,68 +399,106 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      ordenGlobal = obtenerDatosOrden();
-      
       const urlParams = new URLSearchParams(window.location.search);
-      ordenId = ordenGlobal?.numeroOrden || ordenGlobal?.id || ordenGlobal?.ordenId || localStorage.getItem('gravecare_orden_id') || urlParams.get('orden');
+      ordenId = urlParams.get('orden') || 
+                urlParams.get('ordenId') || 
+                sessionStorage.getItem('gravecare_orden_id') ||
+                localStorage.getItem('gravecare_orden_id');
+
+      ordenGlobal = await obtenerDatosOrdenTotal(ordenId);
+      
+      if (!ordenId && ordenGlobal) {
+        ordenId = ordenGlobal.numeroOrden || ordenGlobal.id || ordenGlobal.ordenId;
+      }
 
       if (ordenGlobal) {
         document.getElementById('ordenBadge').textContent = `ORDEN: ${ordenId || 'GC-PROV'}`;
         
-        // 1. Plan
-        const plan = ordenGlobal.servicio?.planNombre || ordenGlobal.planNombre || ordenGlobal.plan || 'Plan Standard';
-        document.getElementById('txtPlan').textContent = plan;
-        if (document.getElementById('contratoPlanNombre')) {
-          document.getElementById('contratoPlanNombre').textContent = plan;
+        // 1. Configuración del Servicio (Plan, Frecuencia, Nivel, Ramos)
+        const configServicio = extraerConfiguracionServicio(ordenGlobal);
+
+        document.getElementById('txtPlan').textContent = `${configServicio.nombrePlan} (${configServicio.nivel})`;
+        document.getElementById('contratoPlanNombre').textContent = configServicio.nombrePlan;
+        document.getElementById('contratoFrecuencia').textContent = configServicio.frecuencia;
+        document.getElementById('contratoNivel').textContent = configServicio.nivel;
+        document.getElementById('contratoRamos').textContent = configServicio.textoRamos;
+
+        // 2. Ser Querido / Difunto
+        let difunto = '';
+        if (typeof ordenGlobal.difunto === 'string' && ordenGlobal.difunto.trim() !== '') {
+          difunto = ordenGlobal.difunto.trim();
+        } else if (ordenGlobal.difunto && typeof ordenGlobal.difunto === 'object') {
+          const nom = ordenGlobal.difunto.nombres || ordenGlobal.difunto.nombre || '';
+          const apPat = ordenGlobal.difunto.apellidoPaterno || ordenGlobal.difunto.apellidos || ordenGlobal.difunto.apellido || '';
+          const apMat = ordenGlobal.difunto.apellidoMaterno || '';
+          difunto = [nom, apPat, apMat].filter(Boolean).join(' ');
         }
 
-        // 2. Difunto
-        let difunto = 'Ser Querido';
-        if (ordenGlobal.difunto) {
-          difunto = [ordenGlobal.difunto.nombres, ordenGlobal.difunto.apellidoPaterno, ordenGlobal.difunto.apellidoMaterno].filter(Boolean).join(' ');
-        } else if (ordenGlobal.nombreFallecido) {
-          difunto = ordenGlobal.nombreFallecido;
+        if (!difunto) {
+          difunto = ordenGlobal.nombreCompletoDifunto || 
+                    ordenGlobal.nombreFallecido || 
+                    ordenGlobal.nombreDifunto || 
+                    'Ser Querido';
         }
         document.getElementById('txtDifunto').textContent = difunto;
         if (document.getElementById('contratoDifuntoNombre')) {
           document.getElementById('contratoDifuntoNombre').textContent = difunto;
         }
 
-        // 3. Cementerio y Ubicación
-        const cementerio = ordenGlobal.ubicacionSepultura?.cementerio || ordenGlobal.cementerio || 'Cementerio';
+        // 3. Cementerio
+        const cementerio = ordenGlobal.ubicacionSepultura?.cementerio || 
+                           ordenGlobal.cementerio || 
+                           'Cementerio Registrado';
         document.getElementById('txtCementerio').textContent = cementerio;
 
-        const patio = ordenGlobal.ubicacionSepultura?.patio || ordenGlobal.patio || '';
-        const num = ordenGlobal.ubicacionSepultura?.numeroSepultura || ordenGlobal.numeroSepultura || '';
-        const ubicacionTexto = patio || num ? `Patio: ${patio} | N°: ${num}` : 'Por coordinar';
+        // 4. Ubicación
+        let ubicacionTexto = '';
+        if (typeof ordenGlobal.ubicacionSepultura === 'string' && ordenGlobal.ubicacionSepultura.trim() !== '') {
+          ubicacionTexto = ordenGlobal.ubicacionSepultura.trim();
+        } else {
+          const ub = ordenGlobal.ubicacionSepultura || {};
+          const sector = ub.sector || ordenGlobal.sector || '';
+          const patio = ub.patio || ordenGlobal.patio || '';
+          const sep = ub.numeroSepultura || ub.numero || ordenGlobal.numeroSepultura || '';
+          
+          let partes = [];
+          if (sector) partes.push(`Sector: ${sector}`);
+          if (patio) partes.push(`Patio: ${patio}`);
+          if (sep) partes.push(`N°: ${sep}`);
+
+          ubicacionTexto = partes.length > 0 ? partes.join(' | ') : 'Por coordinar en terreno';
+        }
         document.getElementById('txtUbicacion').textContent = ubicacionTexto;
 
         if (document.getElementById('contratoSepulturaUbicacion')) {
           document.getElementById('contratoSepulturaUbicacion').textContent = `${cementerio}, ${ubicacionTexto}`;
         }
 
-        // 4. Monto
-        let monto = Number(ordenGlobal.montoTotal || ordenGlobal.precioNumerico || ordenGlobal.valores?.total || 34990);
-        const montoFormateado = `$${monto.toLocaleString('es-CL')}`;
+        // 5. Monto Total
+        const montoFinal = calcularMontoTotalDefensivo(ordenGlobal, configServicio.nombrePlan);
+        ordenGlobal.montoTotal = montoFinal;
+        ordenGlobal.precioNumerico = montoFinal;
+
+        const montoFormateado = `$${montoFinal.toLocaleString('es-CL')}`;
         document.getElementById('txtMontoTotal').textContent = montoFormateado;
         if (document.getElementById('contratoMonto')) {
           document.getElementById('contratoMonto').textContent = montoFormateado;
         }
 
-        // 5. Datos del Cliente / Titular
+        // 6. Datos del Titular
         const titular = ordenGlobal.titular || {};
-        let nombreCliente = titular.nombre || ordenGlobal.nombreCliente || '';
+        let nombreCliente = titular.nombreCompleto || titular.nombre || ordenGlobal.nombreCliente || '';
         if (!nombreCliente && (titular.nombres || titular.apellidoPaterno)) {
           nombreCliente = [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(' ');
         }
-        if (!nombreCliente) nombreCliente = 'Cliente Titular';
+        nombreCliente = nombreCliente || 'Cliente Titular';
 
-        const rutCliente = titular.rut || ordenGlobal.rut || ordenGlobal.rutCliente || 'No registrado';
-        const emailCliente = titular.email || ordenGlobal.email || ordenGlobal.emailCliente || 'No registrado';
-        const fonoCliente = titular.telefono || ordenGlobal.telefono || ordenGlobal.telefonoCliente || 'No registrado';
+        const rutCliente = titular.rut || ordenGlobal.rut || titular.rutDni || ordenGlobal.rutTitular || '—';
+        const emailCliente = titular.email || ordenGlobal.email || ordenGlobal.emailCliente || '—';
+        const fonoCliente = titular.telefono || ordenGlobal.telefono || '+56 9 8256 6719';
         
-        const dir = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : '', titular.comuna, titular.region]
-          .filter(Boolean).join(', ') || 'Dirección registrada';
+        const dir = [titular.direccion || ordenGlobal.direccion, titular.numero, titular.comuna, titular.region]
+          .filter(Boolean).join(', ') || 'Dirección registrada por coordinar';
 
         if (document.getElementById('contratoClienteNombre')) document.getElementById('contratoClienteNombre').textContent = nombreCliente;
         if (document.getElementById('contratoClienteRut')) document.getElementById('contratoClienteRut').textContent = rutCliente;
@@ -340,7 +507,6 @@
         if (document.getElementById('contratoClienteFono')) document.getElementById('contratoClienteFono').textContent = fonoCliente;
         if (document.getElementById('contratoFirmaCliente')) document.getElementById('contratoFirmaCliente').textContent = `${nombreCliente} (RUT: ${rutCliente})`;
 
-        // Fecha actual
         if (document.getElementById('contratoFecha')) {
           document.getElementById('contratoFecha').textContent = new Date().toLocaleDateString('es-CL', {
             day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Santiago'
@@ -348,7 +514,7 @@
         }
 
         if (ordenId) {
-          await asegurarOrdenEnFirestore(ordenGlobal, ordenId);
+          await asegurarOrdenEnFirestore(ordenGlobal, ordenId, montoFinal);
         }
       }
 
@@ -379,7 +545,6 @@
         });
       });
 
-      // Botón Webpay Plus
       const btnWebpay = document.getElementById('btnWebpay');
       if (btnWebpay) {
         btnWebpay.addEventListener('click', async function() {
@@ -390,8 +555,9 @@
             return;
           }
 
-          const ordenActual = obtenerDatosOrden();
+          const ordenActual = ordenGlobal || obtenerDatosOrdenLocal();
           const idParaEnviar = ordenId || ordenActual?.numeroOrden || ordenActual?.id;
+          const montoTotalPagar = ordenActual?.montoTotal || 371940;
 
           if (!idParaEnviar) {
             alert('No se encontró el ID de la orden. Por favor vuelve al paso anterior.');
@@ -399,15 +565,18 @@
           }
 
           btnWebpay.disabled = true;
-          btnWebpay.innerHTML = '<span>Verificando y conectando con Transbank...</span>';
+          btnWebpay.innerHTML = '<span>Conectando con Transbank Webpay...</span>';
 
           try {
-            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar);
+            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar, montoTotalPagar);
 
             const response = await fetch('https://creartransaccionwebpay-f4mre7bfoa-uc.a.run.app', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ordenId: idParaEnviar })
+              body: JSON.stringify({ 
+                ordenId: idParaEnviar,
+                monto: montoTotalPagar
+              })
             });
 
             const data = await response.json();
@@ -427,7 +596,6 @@
         });
       }
 
-      // Botón Oneclick (Con Form POST hacia Transbank)
       const btnOneclick = document.getElementById('btnOneclick');
       if (btnOneclick) {
         btnOneclick.addEventListener('click', async function() {
@@ -438,8 +606,9 @@
             return;
           }
 
-          const ordenActual = obtenerDatosOrden();
+          const ordenActual = ordenGlobal || obtenerDatosOrdenLocal();
           const idParaEnviar = ordenId || ordenActual?.numeroOrden || ordenActual?.id;
+          const montoTotalPagar = ordenActual?.montoTotal || 371940;
 
           if (!idParaEnviar) {
             alert('No se encontró el ID de la orden. Por favor vuelve al paso anterior.');
@@ -450,7 +619,7 @@
           btnOneclick.innerHTML = '<span>Iniciando Oneclick...</span>';
 
           try {
-            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar);
+            await asegurarOrdenEnFirestore(ordenActual, idParaEnviar, montoTotalPagar);
 
             const response = await fetch('/iniciarInscripcionOneclick', {
               method: 'POST',
@@ -463,7 +632,6 @@
             const token = data.token;
 
             if (targetUrl && token) {
-              // Redirección POST requerida por Transbank multicode_inscription.cgi
               const form = document.createElement('form');
               form.method = 'POST';
               form.action = targetUrl;

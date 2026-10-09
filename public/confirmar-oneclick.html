@@ -3,14 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmando Inscripción Oneclick — GraveCare</title>
+  <title>Confirmando Inscripción Oneclick — GraveCare Chile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
-  <!-- Firebase SDKs compat -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -19,40 +15,48 @@
 <body class="bg-[#f8faf8] text-[#191c1b] min-h-screen flex items-center justify-center p-4">
 
   <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center">
-    <!-- Spinner / Icono de Estado -->
     <div id="contenedorIcono" class="w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-emerald-100 text-[#002d1a]">
       <span id="iconoEstado" class="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
     </div>
 
-    <h1 id="tituloEstado" class="text-2xl font-bold text-[#002d1a] mb-2">Confirmando inscripción...</h1>
+    <h1 id="tituloEstado" class="text-2xl font-bold text-[#002d1a] mb-2">Confirmando pago...</h1>
     <p id="mensajeEstado" class="text-sm text-gray-600 mb-6 leading-relaxed">
-      Estamos validando tu tarjeta con Transbank de manera segura. Por favor, no cierres esta ventana.
+      Estamos validando tu pago y servicio de manera segura. Por favor, no cierres esta ventana.
     </p>
 
-    <!-- Botón de redirección manual si tarda -->
     <div id="contenedorBoton" style="display: none;">
-      <a id="btnContinuar" href="index.html" class="inline-block w-full py-3 px-6 bg-[#002d1a] hover:bg-[#1a432f] text-white font-bold rounded-xl shadow-md transition-all text-sm">
+      <a id="btnContinuar" href="dashboard.html" class="inline-block w-full py-3 px-6 bg-[#002d1a] hover:bg-[#1a432f] text-white font-bold rounded-xl shadow-md transition-all text-sm cursor-pointer">
         Continuar
       </a>
     </div>
   </div>
 
-  <script>
-    // Inicializar Firebase
-    let db = null;
-    try {
-      if (!firebase.apps.length) {
-        firebase.initializeApp({ projectId: "gravecare-2e8d2" });
-      }
-      db = firebase.firestore();
-    } catch(e) {
-      console.warn("Firestore init:", e);
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
+      authDomain: "gravecare-2e8d2.firebaseapp.com",
+      projectId: "gravecare-2e8d2",
+      storageBucket: "gravecare-2e8d2.firebasestorage.app",
+      messagingSenderId: "160012946248",
+      appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    function limpiarRut(r) {
+      return String(r || '').toLowerCase().replace(/[^0-9k]/g, '');
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('TBK_TOKEN') || urlParams.get('token');
-      const ordenId = urlParams.get('ordenId') || urlParams.get('orden');
+      const ordenIdUrl = urlParams.get('ordenId') || urlParams.get('orden');
 
       const icono = document.getElementById('iconoEstado');
       const contenedorIcono = document.getElementById('contenedorIcono');
@@ -66,16 +70,19 @@
         icono.textContent = 'error';
         contenedorIcono.className = "w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-red-100 text-red-600";
         titulo.textContent = 'Inscripción cancelada';
-        mensaje.textContent = 'No se recibió la confirmación de Transbank o el proceso fue interrumpido.';
+        mensaje.textContent = 'No se recibió la confirmación de Transbank o el proceso fue interrumpido. No se generaron registros.';
         btnContinuar.href = 'resumen-pago.html';
         btnContinuar.textContent = 'Volver al pago';
         contenedorBoton.style.display = 'block';
+
+        sessionStorage.removeItem('gravecare_orden_activa');
+        sessionStorage.removeItem('gravecare_usuario_pendiente');
+        sessionStorage.removeItem('gravecare_contrato_activo');
         return;
       }
 
       try {
-        // 1. Confirmar con la Cloud Function finish de Oneclick
-        const res = await fetch(`/confirmarInscripcionOneclick?token=${encodeURIComponent(token)}&ordenId=${encodeURIComponent(ordenId || '')}`, {
+        const res = await fetch(`/confirmarInscripcionOneclick?token=${encodeURIComponent(token)}&ordenId=${encodeURIComponent(ordenIdUrl || '')}`, {
           method: 'GET'
         });
 
@@ -85,85 +92,273 @@
           throw new Error(data.message || 'La tarjeta fue rechazada o no pudo ser inscrita.');
         }
 
-        // 2. Verificar RUT en Firestore para decidir destino (login vs registro)
-        let rutCliente = '';
-        let ordenData = null;
+        // Búsqueda profunda de datos en todos los contenedores de sesión posibles
+        const storageKeys = [
+          'gravecare_orden_activa',
+          'gravecare_pedido',
+          'gravecare_datos_completos',
+          'gravecare_registro_datos',
+          'gravecare_last_order'
+        ];
 
-        if (db && ordenId) {
-          try {
-            const ordSnap = await db.collection('ordenes').doc(ordenId).get();
-            if (ordSnap.exists) {
-              ordenData = ordSnap.data();
-              rutCliente = ordenData.titular?.rut || ordenData.rut || ordenData.rutCliente || '';
-            }
-          } catch(e) {
-            console.warn("Error leyendo orden:", e);
-          }
-        }
-
-        // Si no vino de la base de datos, buscar en localStorage
-        if (!rutCliente) {
-          const localStr = localStorage.getItem('gravecare_datos_completos') || sessionStorage.getItem('gravecare_registro_datos');
-          if (localStr) {
+        let orderData = null;
+        for (const k of storageKeys) {
+          const raw = sessionStorage.getItem(k) || localStorage.getItem(k);
+          if (raw) {
             try {
-              const parsed = JSON.parse(localStr);
-              rutCliente = parsed.titular?.rut || parsed.rut || '';
-            } catch(e) {}
+              const parsed = JSON.parse(raw);
+              if (parsed && (parsed.rut || parsed.rutTitular || parsed.titular || parsed.numeroOrden)) {
+                orderData = parsed;
+                break;
+              }
+            } catch (e) {}
           }
         }
 
-        let usuarioExiste = false;
+        const usuarioStr = sessionStorage.getItem('gravecare_usuario_pendiente');
+        let userData = null;
+        if (usuarioStr) {
+          try { userData = JSON.parse(usuarioStr); } catch (e) {}
+        }
 
-        if (db && rutCliente) {
-          const rutLimpio = String(rutCliente).replace(/[^0-9kK]/g, '').toUpperCase();
+        const contratoStr = sessionStorage.getItem('gravecare_contrato_activo');
+        let contratoData = null;
+        if (contratoStr) {
+          try { contratoData = JSON.parse(contratoStr); } catch (e) {}
+        }
+
+        const numOrden = orderData?.numeroOrden || ordenIdUrl || ('ORD-' + Date.now());
+        const titularObj = orderData?.titular || userData?.titular || {};
+        
+        // Extracción exhaustiva de RUT y Email
+        const rutOriginal = titularObj.rut || orderData?.rut || orderData?.rutTitular || orderData?.rutCliente || userData?.rut || urlParams.get('rut') || '';
+        const rutLimpio = limpiarRut(rutOriginal);
+        const emailTitular = String(titularObj.email || orderData?.email || orderData?.emailTitular || orderData?.emailCliente || userData?.email || '').toLowerCase().trim();
+
+        // =====================================================================
+        // 1. VERIFICACIÓN OBLIGATORIA: ¿TIENE CUENTA CON CLAVE EN EL SISTEMA?
+        // =====================================================================
+        let tieneCuentaConClavePrevia = false;
+        let uidExistenteReal = null;
+
+        if (rutLimpio) {
           try {
-            // Verificar en coleccion usuarios
-            const userSnap = await db.collection('usuarios').where('rut', '==', rutCliente).limit(1).get();
-            if (!userSnap.empty) {
-              usuarioExiste = true;
-            } else {
-              // Verificar en rut_lookup si existe
-              const lookupSnap = await db.collection('rut_lookup').doc(rutLimpio).get();
-              if (lookupSnap.exists) usuarioExiste = true;
+            // Chequeo A: rut_lookup
+            const snapLookup = await getDoc(doc(db, 'rut_lookup', rutLimpio));
+            if (snapLookup.exists()) {
+              const dL = snapLookup.data();
+              if (dL.estadoCuenta === 'activada' || (dL.uid && !dL.uid.startsWith('cliente_'))) {
+                tieneCuentaConClavePrevia = true;
+                uidExistenteReal = dL.uid;
+              }
             }
-          } catch(e) {
-            console.warn("Verificando existencia usuario:", e);
+
+            // Chequeo B: usuarios por ID cliente_RUT
+            if (!tieneCuentaConClavePrevia) {
+              const snapUserRut = await getDoc(doc(db, 'usuarios', `cliente_${rutLimpio}`));
+              if (snapUserRut.exists()) {
+                const du = snapUserRut.data();
+                if (du.estadoCuenta === 'activada' || du.fechaNacimiento) {
+                  tieneCuentaConClavePrevia = true;
+                  uidExistenteReal = `cliente_${rutLimpio}`;
+                }
+              }
+            }
+
+            // Chequeo C: usuarios por RUT guardado en el documento
+            if (!tieneCuentaConClavePrevia) {
+              const qRut = query(collection(db, 'usuarios'), where('rut', '==', rutOriginal));
+              const snapRut = await getDocs(qRut);
+              snapRut.forEach(d => {
+                const du = d.data();
+                if (du.estadoCuenta === 'activada' || du.fechaNacimiento) {
+                  tieneCuentaConClavePrevia = true;
+                  uidExistenteReal = d.id;
+                }
+              });
+            }
+
+            // Chequeo D: usuarios por email
+            if (!tieneCuentaConClavePrevia && emailTitular) {
+              const qMail = query(collection(db, 'usuarios'), where('email', '==', emailTitular));
+              const snapMail = await getDocs(qMail);
+              snapMail.forEach(d => {
+                const du = d.data();
+                if (du.estadoCuenta === 'activada' || du.fechaNacimiento) {
+                  tieneCuentaConClavePrevia = true;
+                  uidExistenteReal = d.id;
+                }
+              });
+            }
+          } catch (e) {
+            console.warn("Error en verificación de cuenta previa Oneclick:", e);
           }
         }
 
-        // 3. Éxito y Redirección
+        const uidCliente = uidExistenteReal || (rutLimpio ? `cliente_${rutLimpio}` : (orderData?.usuarioId || userData?.uid || 'cliente_temp'));
+
+        // =====================================================================
+        // 2. PERSISTENCIA EN FIRESTORE
+        // =====================================================================
+        if (orderData) {
+          orderData.numeroOrden = numOrden;
+          orderData.estado = 'Confirmado';
+          orderData.pagoConfirmado = true;
+          orderData.metodoPago = 'Oneclick';
+          orderData.fechaPago = serverTimestamp();
+          orderData.usuarioId = uidCliente;
+          orderData.clienteUid = uidCliente;
+          if (data.tbkUser) orderData.oneclickTbkUser = data.tbkUser;
+
+          await setDoc(doc(db, 'ordenes', numOrden), orderData, { merge: true });
+        }
+
+        if (userData || titularObj.nombreCompleto || emailTitular || rutOriginal) {
+          const docUsuario = {
+            uid: uidCliente,
+            email: emailTitular,
+            authEmail: `${rutLimpio}@gravecare.cl`,
+            nombreCompleto: titularObj.nombreCompleto || orderData?.nombreCliente || '',
+            nombres: titularObj.nombres || '',
+            apellidoPaterno: titularObj.apellidoPaterno || '',
+            apellidoMaterno: titularObj.apellidoMaterno || '',
+            rut: rutOriginal,
+            telefono: titularObj.telefono || orderData?.telefono || '',
+            direccion: titularObj.direccion || orderData?.direccion || '',
+            comuna: titularObj.comuna || orderData?.comuna || '',
+            region: titularObj.region || orderData?.region || 'Metropolitana de Santiago',
+            pais: titularObj.pais || 'Chile',
+            rol: 'cliente',
+            estadoSuscripcion: 'Activo',
+            metodoPagoPreferido: 'Oneclick',
+            estadoCuenta: tieneCuentaConClavePrevia ? 'activada' : 'pendiente',
+            actualizadoEn: serverTimestamp()
+          };
+
+          await setDoc(doc(db, 'usuarios', uidCliente), docUsuario, { merge: true });
+
+          const difunto = orderData?.difunto || {};
+          const sepultura = orderData?.ubicacionSepultura || {};
+
+          const cem = sepultura.cementerio || orderData?.cementerio || '';
+          const sec = sepultura.sector || orderData?.sector || '';
+          const pat = sepultura.patio || orderData?.patio || '';
+          const num = sepultura.numeroSepultura || sepultura.numero || orderData?.numeroSepultura || '';
+
+          const normalizarClave = (txt) => String(txt || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+          const idSepultura = (cem && num)
+            ? `sep_${normalizarClave(cem)}_${normalizarClave(sec)}_${normalizarClave(pat)}_${normalizarClave(num)}`
+            : `sep_${numOrden}`;
+
+          await setDoc(doc(db, 'usuarios', uidCliente, 'sepulturas', idSepultura), {
+            id: idSepultura,
+            ultimaOrden: numOrden,
+            numeroOrden: numOrden,
+            nombreDifunto: difunto.nombre || orderData?.nombreDifunto || 'Ser Querido',
+            difunto: difunto,
+            cementerio: cem,
+            sector: sec,
+            patio: pat,
+            numeroSepultura: num,
+            referencias: sepultura.referencias || orderData?.referencias || '',
+            estado: 'Activa',
+            planActivo: orderData?.planNombre || 'Servicio Spot',
+            actualizadoEn: serverTimestamp()
+          }, { merge: true });
+        }
+
+        if (contratoData) {
+          const idContrato = contratoData.idContrato || `CTR-${numOrden}`;
+          contratoData.estado = 'vigente';
+          contratoData.usuarioId = uidCliente;
+          contratoData.clienteUid = uidCliente;
+          contratoData.fechaAprobacion = serverTimestamp();
+          await setDoc(doc(db, 'contratos', idContrato), contratoData, { merge: true });
+        }
+
+        if (rutLimpio) {
+          await setDoc(doc(db, 'rut_lookup', rutLimpio), {
+            rut: rutLimpio,
+            email: emailTitular,
+            authEmail: `${rutLimpio}@gravecare.cl`,
+            uid: uidCliente,
+            estadoCuenta: tieneCuentaConClavePrevia ? 'activada' : 'pendiente'
+          }, { merge: true });
+        }
+
+        sessionStorage.removeItem('gravecare_orden_activa');
+        sessionStorage.removeItem('gravecare_usuario_pendiente');
+        sessionStorage.removeItem('gravecare_contrato_activo');
+
+        // =====================================================================
+        // 3. RESOLUCIÓN SÍNCRONA DE SESIÓN Y REDIRECCIÓN
+        // =====================================================================
+        const usuarioActual = await new Promise((resolve) => {
+          const unsub = onAuthStateChanged(auth, (user) => {
+            unsub();
+            resolve(user);
+          });
+        });
+
+        const userAuthEmail = (usuarioActual?.email || '').toLowerCase();
+        const userAuthRut = userAuthEmail.includes('@gravecare.cl') ? userAuthEmail.split('@')[0] : '';
+        const esMismoEmail = usuarioActual && emailTitular && userAuthEmail === emailTitular;
+        const esMismoRut = usuarioActual && rutLimpio && (userAuthRut === rutLimpio || userAuthEmail.startsWith(rutLimpio));
+        const esMismoUsuario = esMismoEmail || esMismoRut;
+
         icono.classList.remove('animate-spin');
         icono.textContent = 'check_circle';
         contenedorIcono.className = "w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600";
-        titulo.textContent = '¡Inscripción Exitosa!';
-        
+        titulo.textContent = '¡Pago Exitoso!';
+
         let destino = '';
-        if (usuarioExiste) {
-          mensaje.textContent = 'Tu tarjeta quedó inscrita y tu cuenta ya existe. Redirigiéndote al inicio de sesión...';
-          destino = `login.html?ordenId=${encodeURIComponent(ordenId || '')}&oneclick=1`;
-        } else {
-          mensaje.textContent = 'Tarjeta inscrita con éxito. Redirigiéndote para crear tu contraseña...';
-          destino = `registro.html?ordenId=${encodeURIComponent(ordenId || '')}&rut=${encodeURIComponent(rutCliente)}&oneclick=1`;
+
+        // CASO 1: Sesión abierta en este navegador con la misma cuenta -> Directo a Dashboard
+        if (usuarioActual && esMismoUsuario) {
+          mensaje.textContent = 'Tu servicio Spot ha sido añadido a tu cuenta. Redirigiéndote a tu panel...';
+          destino = 'dashboard.html';
+          btnContinuar.textContent = 'Ir a Mi Panel';
+        } 
+        // CASO 2 (Opción B): Cliente ya inscrito pero desconectado en esta pestaña -> A Login
+        else if (tieneCuentaConClavePrevia) {
+          if (usuarioActual && !esMismoUsuario) {
+            try { await signOut(auth); } catch (e) {}
+          }
+          mensaje.textContent = 'Tu compra ha sido asociada a tu cuenta existente. Redirigiéndote a iniciar sesión...';
+          destino = `login.html?rut=${encodeURIComponent(rutOriginal)}`;
+          btnContinuar.textContent = 'Iniciar Sesión en Mi Cuenta';
+        } 
+        // CASO 3 (Opción A): Cliente nuevo por primera vez -> A Registro
+        else {
+          if (usuarioActual) {
+            try { await signOut(auth); } catch (e) {}
+          }
+          mensaje.textContent = 'Hemos registrado tu pago. Redirigiéndote para crear tu clave de acceso...';
+          const p = new URLSearchParams();
+          if (numOrden) p.set('orden', numOrden);
+          if (rutOriginal) p.set('rut', rutOriginal);
+          if (emailTitular) p.set('email', emailTitular);
+          p.set('oneclick', '1');
+          destino = `registro.html?${p.toString()}`;
+          btnContinuar.textContent = 'Completar Registro y Crear Clave';
         }
 
         btnContinuar.href = destino;
-        btnContinuar.textContent = usuarioExiste ? 'Ir a Iniciar Sesión' : 'Completar Registro';
         contenedorBoton.style.display = 'block';
 
-        // Redirección automática tras 1.5 segundos
         setTimeout(() => {
-          window.location.href = destino;
-        }, 1500);
+          window.location.replace(destino);
+        }, 1200);
 
       } catch (err) {
-        console.error('Error en confirmación:', err);
+        console.error('Error en confirmación Oneclick:', err);
         icono.classList.remove('animate-spin');
         icono.textContent = 'cancel';
         contenedorIcono.className = "w-16 h-16 mx-auto mb-6 flex items-center justify-center rounded-full bg-red-100 text-red-600";
-        titulo.textContent = 'No se pudo completar la inscripción';
-        mensaje.textContent = err.message || 'Ocurrió un error al procesar tu tarjeta en Transbank.';
+        titulo.textContent = 'No se pudo completar el pago';
+        mensaje.textContent = err.message || 'Ocurrió un error al procesar tu tarjeta en Transbank. No se realizaron cargos.';
         btnContinuar.href = 'resumen-pago.html';
-        btnContinuar.textContent = 'Reintentar inscripción';
+        btnContinuar.textContent = 'Reintentar pago';
         contenedorBoton.style.display = 'block';
       }
     });

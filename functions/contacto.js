@@ -1,44 +1,328 @@
-const { onRequest } = require("firebase-functions/v2/https");
+/**
+ * CONTRATO — Generación server-side del PDF, registro en Firestore y aprovisionamiento de usuario/sepulturas
+ */
+
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
-const handleCors = require("./cors");
+const crypto = require("crypto");
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
-const db = admin.firestore();
 
-exports.enviarContacto = onRequest(async (req, res) => {
-  if (handleCors(req, res)) return;
+const BUCKET = "gravecare-2e8d2.firebasestorage.app";
+const MINUTOS_EN_CURSO = 5;
 
-  if (req.method !== "POST") {
-    res.status(405).json({ ok: false, error: "Método no permitido. Usa POST." });
-    return;
+// ===== Datos de Empresa =====
+const EMPRESA_RUT = "78.498.653-5";
+const EMPRESA_DIRECCION = "Av. El Carmen 1397, Of. 301, Edificio Portezuelo, Huechuraba";
+const EMPRESA_CIUDAD = "Santiago";
+const CONTRATO_VERSION = "2026-09-v1";
+
+function fechaLargaEs(fecha = new Date()) {
+  return fecha.toLocaleDateString("es-CL", {
+    day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago",
+  });
+}
+
+function formatearCLP(numero) {
+  return "$" + Number(numero || 0).toLocaleString("es-CL");
+}
+
+function limpiarRut(r) {
+  return String(r || "").replace(/[^0-9kK]/g, "").toLowerCase();
+}
+
+function generarContratoTexto(orden, fecha = new Date()) {
+  const titular = orden.titular || {};
+  const difunto = orden.difunto || {};
+  const ubicacion = orden.ubicacionSepultura || {};
+  const servicio = orden.servicio || {};
+
+  let nombreTitular = titular.nombre || orden.nombreCliente || "";
+  if (!nombreTitular && (titular.nombres || titular.apellidoPaterno)) {
+    nombreTitular = [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(" ");
   }
+  if (!nombreTitular) nombreTitular = "[nombre no registrado]";
+
+  let nombreDifunto = difunto.nombre || orden.nombreFallecido || "";
+  if (!nombreDifunto && (difunto.nombres || difunto.apellidoPaterno)) {
+    nombreDifunto = [difunto.nombres, difunto.apellidoPaterno, difunto.apellidoMaterno].filter(Boolean).join(" ");
+  }
+  if (!nombreDifunto) nombreDifunto = "[nombre no registrado]";
+
+  const esPlan = orden.tipoServicio === "PLAN" || orden.tipoSuscripcion === "PLAN" || String(orden.planNombre || "").toLowerCase().includes("plan");
+  const nombrePlan = servicio.planNombre || orden.planNombre || (esPlan ? "Plan Mensual" : "Visita Spot");
+  const frecuencia = servicio.frecuencia || orden.frecuencia || (esPlan ? "1 visita al mes" : "Visita única");
+  const nivel = servicio.nivel || orden.nivel || "Standard";
+  const descripcionPlan = `${nombrePlan} — ${frecuencia} — Nivel ${nivel}`;
+
+  const direccionCliente = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : "", titular.comuna, titular.region]
+    .filter(Boolean)
+    .join(", ");
+
+  const cementerioNombre = ubicacion.cementerio || orden.cementerio || "";
+  const sector = ubicacion.sector || orden.sector || "";
+  const patio = ubicacion.patio || orden.patio || "";
+  const numeroSep = ubicacion.numeroSepultura || ubicacion.numero || orden.numeroSepultura || "";
+
+  const ubicacionCementerio = [
+    cementerioNombre,
+    sector ? `Sector ${sector}` : "",
+    patio ? `Patio ${patio}` : "",
+    numeroSep ? `N° ${numeroSep}` : "",
+  ].filter(Boolean).join(", ");
+
+  const totalNumerico = orden.montoTotal || orden.valores?.total || orden.precioNumerico || orden.precio || 34990;
+  const monto = formatearCLP(totalNumerico);
+  const plazo = esPlan
+    ? `Suscripción con frecuencia "${frecuencia}", renovable automáticamente hasta que el Cliente la cancele o pause`
+    : "Servicio único (Visita Spot), sin renovación automática";
+
+  const hoy = fechaLargaEs(fecha);
+  const rutCliente = titular.rut || orden.rut || orden.rutCliente || "[RUT no registrado]";
+  const emailCliente = titular.email || orden.email || orden.emailCliente || "[email no registrado]";
+  const fonoCliente = titular.telefono || orden.telefono || orden.telefonoCliente || "[teléfono no registrado]";
+
+  return `TÉRMINOS Y CONDICIONES GENERALES Y MANDATO DE PRESTACIÓN DE SERVICIOS
+
+GraveCare SpA — Servicios Conmemorativos & Preservación
+
+En ${EMPRESA_CIUDAD}, a ${hoy}, entre GraveCare SpA, RUT N° ${EMPRESA_RUT}, con domicilio en ${EMPRESA_DIRECCION}, en adelante la «Empresa» o el «Prestador», por una parte; y por la otra, ${nombreTitular}, RUT N° ${rutCliente}, con domicilio en ${direccionCliente || "[dirección no registrada]"}, correo electrónico ${emailCliente} y teléfono ${fonoCliente}, en adelante el «Cliente», se ha convenido el siguiente contrato de prestación de servicios:
+
+PRIMERA: OBJETO DEL CONTRATO Y MANDATO ESPECIAL
+1.1. Objeto: Prestación de servicios conforme al plan seleccionado (${descripcionPlan}).
+1.2. Mandato Especial: El Cliente confiere a GraveCare SpA mandato especial para acceder al cementerio individualizado (${ubicacionCementerio || "[ubicación no registrada]"} — sepultura de ${nombreDifunto}) y ejecutar las labores de preservación ornamental.
+
+SEGUNDA: ALCANCE Y NATURALEZA DE LOS SERVICIOS
+Limpieza no destructiva de lápidas, desmalezado superficial, recambio de agua e instalación de flores de estación. No incluye obras de albañilería mayor ni reparaciones estructurales.
+
+TERCERA: EVIDENCIA Y REPORTE FOTOGRÁFICO
+Entrega de reporte georreferenciado (Antes y Después) dentro de las 24 horas hábiles posteriores a la intervención en terreno.
+
+CUARTA: HONORARIOS
+Suma total convenida de ${monto} IVA incluido.
+
+QUINTA: PLAZO Y VIGENCIA
+${plazo}, a contar de esta fecha.
+
+N° de Orden: ${orden.numeroOrden || orden.id || "[sin asignar]"}
+
+EL CONTRATANTE (Cliente): ${nombreTitular} (RUT: ${rutCliente})
+EL PRESTADOR: GraveCare SpA (RUT: ${EMPRESA_RUT})`;
+}
+
+function generarPdfBuffer(texto) {
+  let jsPDF;
+  try {
+    const jspdfModule = require("jspdf");
+    jsPDF = jspdfModule.jsPDF || jspdfModule;
+  } catch (e) {
+    console.warn("jsPDF no instalado en functions. Se genera contrato en texto plano.");
+    return Buffer.from(texto, "utf-8");
+  }
+
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const margen = 54;
+  const anchoUtil = doc.internal.pageSize.getWidth() - margen * 2;
+  const limiteInferior = doc.internal.pageSize.getHeight() - 54;
+  let y = margen;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  for (const parrafo of texto.split("\n")) {
+    if (parrafo.trim() === "") {
+      y += 8;
+      continue;
+    }
+    const esTitulo = parrafo === parrafo.toUpperCase() && parrafo.length > 3 && parrafo.length < 90;
+    doc.setFont("helvetica", esTitulo ? "bold" : "normal");
+    doc.setFontSize(esTitulo ? 11 : 10);
+
+    const lineas = doc.splitTextToSize(parrafo, anchoUtil);
+    for (const linea of lineas) {
+      if (y > limiteInferior) {
+        doc.addPage();
+        y = margen;
+      }
+      doc.text(linea, margen, y);
+      y += esTitulo ? 15 : 13;
+    }
+    y += esTitulo ? 5 : 3;
+  }
+
+  return Buffer.from(doc.output("arraybuffer"));
+}
+
+function necesitaContrato(orden) {
+  if (!orden) return false;
+  const estado = String(orden.estado || orden.status || "").toLowerCase();
+  const esPagado = ["pagado", "confirmado", "aprobado", "exito"].includes(estado);
+  if (!esPagado) return false;
+  if (orden.contratoPath && orden.contratoEstado === "listo") return false;
+  if (orden.contratoEstado === "generando") {
+    const desde = orden.contratoGenerandoDesde?.toMillis?.() || 0;
+    if (Date.now() - desde < MINUTOS_EN_CURSO * 60 * 1000) return false;
+  }
+  return true;
+}
+
+async function generarContratoParaOrden(ordenId) {
+  const db = admin.firestore();
+  const ref = db.doc(`ordenes/${ordenId}`);
+
+  const orden = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const d = snap.data();
+    if (!necesitaContrato(d)) return null;
+    tx.update(ref, {
+      contratoEstado: "generando",
+      contratoGenerandoDesde: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return d;
+  });
+
+  if (!orden) return { omitido: true };
 
   try {
-    const { nombre, email, telefono, mensaje } = req.body || {};
+    const titular = orden.titular || {};
+    const difunto = orden.difunto || {};
+    const ubicacion = orden.ubicacionSepultura || {};
 
-    if (!nombre || !email || !mensaje) {
-      res.status(400).json({
-        ok: false,
-        error: "Faltan campos obligatorios: nombre, email y mensaje son requeridos.",
+    const rutRaw = titular.rut || orden.rut || orden.rutCliente || "";
+    const rutLimpio = limpiarRut(rutRaw);
+    const emailTitular = String(titular.email || orden.email || orden.emailCliente || "").toLowerCase().trim();
+    const uidCliente = rutLimpio ? `cliente_${rutLimpio}` : (orden.clienteUid || orden.usuarioId || `cliente_${ordenId}`);
+
+    const numeroOrden = String(orden.numeroOrden || ordenId);
+    const texto = generarContratoTexto(orden, new Date());
+    const pdf = generarPdfBuffer(texto);
+
+    // 1. Almacenar PDF en Firebase Storage
+    const ruta = `contratos/${ordenId}/contrato.pdf`;
+    const token = crypto.randomUUID();
+    let url = "";
+
+    try {
+      await admin.storage().bucket(BUCKET).file(ruta).save(pdf, {
+        contentType: "application/pdf",
+        resumable: false,
+        metadata: {
+          contentDisposition: `attachment; filename="Contrato-GraveCare-${numeroOrden}.pdf"`,
+          metadata: { firebaseStorageDownloadTokens: token },
+        },
       });
-      return;
+      url = `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(ruta)}?alt=media&token=${token}`;
+    } catch (errStorage) {
+      console.warn(`[Storage Warning] Guardando registro sin archivo binario en Bucket:`, errStorage.message);
     }
 
-    const docRef = await db.collection("contacto_mensajes").add({
-      nombre: String(nombre).trim(),
-      email: String(email).trim(),
-      telefono: telefono ? String(telefono).trim() : "",
-      mensaje: String(mensaje).trim(),
-      estado: "nuevo",
-      origen: "cloud_function",
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    const sha256 = crypto.createHash("sha256").update(pdf).digest("hex");
+
+    // 2. Aprovisionar usuario en Firestore
+    if (rutLimpio || emailTitular) {
+      await db.collection("usuarios").doc(uidCliente).set({
+        uid: uidCliente,
+        email: emailTitular,
+        authEmail: rutLimpio ? `${rutLimpio}@gravecare.cl` : emailTitular,
+        rut: rutRaw,
+        rutLimpio: rutLimpio,
+        nombreCompleto: titular.nombreCompleto || orden.nombreCliente || titular.nombre || "Cliente Registrado",
+        telefono: titular.telefono || orden.telefono || "",
+        direccion: titular.direccion || orden.direccion || "",
+        comuna: titular.comuna || orden.comuna || "",
+        rol: "cliente",
+        estadoSuscripcion: "Activo",
+        planNombre: orden.planNombre || "Plan GraveCare",
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      // 3. Registrar sepultura en la subcolección del usuario
+      const normalizar = (txt) => String(txt || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      const cem = ubicacion.cementerio || orden.cementerio || "";
+      const sec = ubicacion.sector || orden.sector || "";
+      const pat = ubicacion.patio || orden.patio || "";
+      const num = ubicacion.numeroSepultura || orden.numeroSepultura || "";
+
+      const sepId = (cem && num)
+        ? `sep_${normalizar(cem)}_${normalizar(sec)}_${normalizar(pat)}_${normalizar(num)}`
+        : `sep_${numeroOrden}`;
+
+      await db.collection("usuarios").doc(uidCliente).collection("sepulturas").doc(sepId).set({
+        id: sepId,
+        numeroOrden: numeroOrden,
+        ultimaOrden: numeroOrden,
+        nombreDifunto: difunto.nombre || orden.nombreDifunto || "Ser Querido",
+        difunto: difunto,
+        cementerio: cem || "Cementerio Registrado",
+        sector: sec,
+        patio: pat,
+        numeroSepultura: num,
+        estado: "Activa",
+        planActivo: orden.planNombre || "Plan GraveCare",
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      // 4. Registrar en rut_lookup para resolución de inicio de sesión
+      if (rutLimpio) {
+        await db.collection("rut_lookup").doc(rutLimpio).set({
+          rut: rutLimpio,
+          email: emailTitular,
+          uid: uidCliente,
+          actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      }
+    }
+
+    // 5. Crear documento en la colección raíz 'contratos'
+    const idContrato = `CTR-${numeroOrden}`;
+    await db.collection("contratos").doc(idContrato).set({
+      id: idContrato,
+      numeroOrden: numeroOrden,
+      ordenId: ordenId,
+      clienteUid: uidCliente,
+      usuarioId: uidCliente,
+      rut: rutRaw,
+      email: emailTitular,
+      planNombre: orden.planNombre || "Plan GraveCare",
+      nombreDifunto: difunto.nombre || orden.nombreDifunto || "Ser Querido",
+      cementerio: ubicacion.cementerio || orden.cementerio || "",
+      estado: "vigente",
+      urlContrato: url,
+      sha256: sha256,
+      fechaAprobacion: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    // 6. Actualizar la orden con el resultado final
+    await ref.update({
+      clienteUid: uidCliente,
+      usuarioId: uidCliente,
+      contratoPath: ruta,
+      contratoUrl: url,
+      contratoSha256: sha256,
+      contratoEstado: "listo",
+      contratoGeneradoEn: admin.firestore.FieldValue.serverTimestamp(),
+      contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
     });
 
-    res.status(200).json({ ok: true, id: docRef.id });
-  } catch (error) {
-    console.error("Error en enviarContacto:", error);
-    res.status(500).json({ ok: false, error: "Error interno al guardar el mensaje." });
+    console.log(`[Contrato & Usuario Aprovisionados] Orden: ${ordenId} -> Usuario: ${uidCliente} -> Contrato: ${idContrato}`);
+    return { omitido: false, ruta, contratoId: idContrato };
+  } catch (err) {
+    console.error(`[Error Aprovisionamiento] Orden ${ordenId}:`, err);
+    await ref.update({
+      contratoEstado: "error",
+      contratoError: String(err && err.message ? err.message : err).slice(0, 300),
+      contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
+    });
+    return { omitido: false, error: true };
   }
+}
+
+exports.generarContratoAlPagar = onDocumentWritten("ordenes/{ordenId}", async (event) => {
+  const despues = event.data?.after?.data();
+  if (!necesitaContrato(despues)) return;
+  await generarContratoParaOrden(event.params.ordenId);
 });
+
+exports.generarContratoParaOrden = generarContratoParaOrden;

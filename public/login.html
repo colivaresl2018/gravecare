@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ingreso a Mi Perfil — GraveCare Chile</title>
   
-  <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -20,7 +19,7 @@
   <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
     <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
       <a href="index.html" class="flex items-center gap-2">
-        <img src="assets/logo.png" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <img src="assets/logo.png" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.webp';">
       </a>
       <div class="flex items-center gap-2 text-sm">
         <span class="text-gray-600 hidden sm:inline">¿No tienes cuenta?</span>
@@ -33,32 +32,20 @@
   <main class="flex-grow flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10">
       
-      <!-- Título de la tarjeta -->
       <div class="text-center mb-8">
         <h1 class="text-2xl sm:text-3xl font-extrabold text-[#002d1a]">Ingreso a Mi Perfil</h1>
-        <p class="text-gray-500 text-sm mt-2">Ingresa con tu RUT o documento de identidad registrado</p>
+        <p class="text-gray-500 text-sm mt-2">Ingresa con tu RUT único de cliente</p>
       </div>
 
-      <!-- Alerta de Notificaciones / Errores -->
       <div id="alertBox" style="display: none;" class="p-4 rounded-xl text-sm font-medium mb-6 transition-all"></div>
 
-      <!-- Formulario de Inicio de Sesión -->
       <form id="loginForm" class="space-y-5">
         <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5" id="lblRutLogin" for="rut">RUT del Titular</label>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5" for="rutTitular">RUT del Titular</label>
           <div class="relative">
             <span class="material-symbols-outlined absolute left-3.5 top-3.5 text-gray-400 text-lg">badge</span>
-            <input type="text" id="rut" required placeholder="12.345.678-9 o 12345678-K" 
-                   class="w-full pl-10 pr-4 py-3 bg-[#f2f4f2] border border-gray-300 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] focus:border-[#002d1a] outline-none transition-all">
-          </div>
-          <p id="rutErrorText" class="text-xs text-red-600 mt-1.5 hidden font-medium"></p>
-          
-          <!-- Opción para extranjeros -->
-          <div class="mt-2.5 flex items-center gap-2">
-            <input type="checkbox" id="checkLoginExtranjero" class="w-4 h-4 rounded text-[#002d1a] cursor-pointer accent-[#002d1a]">
-            <label for="checkLoginExtranjero" class="text-xs text-gray-600 cursor-pointer select-none font-medium">
-              No resido en Chile / Ingreso con Pasaporte o DNI
-            </label>
+            <input type="text" id="rutTitular" required placeholder="Ej: 12.345.678-9" maxlength="12"
+                   class="w-full pl-10 pr-4 py-3 bg-[#f2f4f2] border border-gray-300 rounded-xl text-sm font-mono focus:bg-white focus:ring-2 focus:ring-[#002d1a] focus:border-[#002d1a] outline-none transition-all">
           </div>
         </div>
 
@@ -84,362 +71,109 @@
         </button>
       </form>
 
-      <!-- Enlace inferior -->
       <div class="text-center mt-8 pt-6 border-t border-gray-100 text-xs text-gray-600">
         ¿Aún no tienes cuenta? <a href="registro.html" class="text-[#002d1a] font-bold hover:underline">Regístrate aquí</a>
       </div>
     </div>
   </main>
 
-  <!-- Modal para Recuperar Contraseña -->
-  <div id="modalRecuperar" style="display: none;" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl border border-gray-100">
-      <div class="text-center mb-6">
-        <div class="w-12 h-12 bg-green-50 text-[#002d1a] rounded-full flex items-center justify-center mx-auto mb-3">
-          <span class="material-symbols-outlined text-2xl">lock_reset</span>
-        </div>
-        <h3 class="text-xl font-bold text-[#002d1a]">Restablecer Contraseña</h3>
-        <p class="text-xs text-gray-500 mt-1">Ingresa tu identificación para enviarte el enlace de recuperación a tu casilla de correo registrada.</p>
-      </div>
-
-      <div id="modalAlert" style="display: none;" class="p-3 rounded-lg text-xs font-medium mb-4"></div>
-
-      <form id="formRecuperar" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-700 uppercase mb-1" id="lblRutRecuperar" for="rutRecuperar">RUT del Titular</label>
-          <input type="text" id="rutRecuperar" required placeholder="12.345.678-9 o 12345678-K" 
-                 class="w-full px-4 py-2.5 bg-[#f2f4f2] border border-gray-300 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-[#002d1a] outline-none">
-          <p id="rutRecuperarErrorText" class="text-xs text-red-600 mt-1.5 hidden font-medium"></p>
-        </div>
-
-        <div class="flex gap-3 pt-2">
-          <button type="button" id="btnCerrarModal" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 cursor-pointer">Cancelar</button>
-          <button type="submit" id="btnEnviarRecuperar" class="w-1/2 py-2.5 bg-[#002d1a] text-white rounded-lg text-sm font-bold hover:bg-[#1a432f] cursor-pointer">Enviar Enlace</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Footer -->
   <footer class="text-center text-xs text-gray-500 py-6 border-t border-gray-200">
     GraveCare SpA · Preservación & Memoria · contacto@gravecare.cl · 2026
   </footer>
 
-  <!-- Script Modular Firebase -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
       authDomain: "gravecare-2e8d2.firebaseapp.com",
       projectId: "gravecare-2e8d2",
-      storageBucket: "gravecare-2e8d2.appspot.com",
+      storageBucket: "gravecare-2e8d2.firebasestorage.app",
       messagingSenderId: "160012946248",
       appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    function formatearRutConPuntosYGuion(rut) {
-      const limpio = (rut || '').replace(/[^0-9kK]/g, '').toUpperCase();
-      if (limpio.length < 2) return rut;
-      const cuerpo = limpio.slice(0, -1);
-      const dv = limpio.slice(-1);
-      const cuerpoConPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      return `${cuerpoConPuntos}-${dv}`;
-    }
-
-    function validarRutChileno(rut) {
-      if (!rut) return { valido: false, mensaje: 'Por favor, ingresa tu RUT' };
-      const limpio = rut.replace(/[^0-9kK]/g, '').toUpperCase();
-      if (limpio.length < 2 || limpio.length > 9) {
-        return { valido: false, mensaje: 'Formato inválido. Usa: 12.345.678-9 o 12345678-K' };
-      }
-      const cuerpo = limpio.slice(0, -1);
-      const dv = limpio.slice(-1);
-
-      if (!/^\d+$/.test(cuerpo)) {
-        return { valido: false, mensaje: 'El cuerpo del RUT debe ser numérico' };
-      }
-
-      let suma = 0;
-      let multiplicador = 2;
-      for (let i = cuerpo.length - 1; i >= 0; i--) {
-        suma += parseInt(cuerpo[i], 10) * multiplicador;
-        multiplicador++;
-        if (multiplicador > 7) multiplicador = 2;
-      }
-      const resto = 11 - (suma % 11);
-      const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : resto.toString();
-      if (dv !== dvEsperado) {
-        return { valido: false, mensaje: `RUT inválido. Dígito verificador debe ser ${dvEsperado}` };
-      }
-      return { valido: true, mensaje: 'RUT válido' };
-    }
-
-    // Busca en Firestore en todos los formatos posibles de RUT
-    async function resolverEmailPorRut(rutTexto) {
-      const limpio = rutTexto.toLowerCase().replace(/[^0-9k]/g, ''); // ej: 137936682
-      const conPuntosYGuion = formatearRutConPuntosYGuion(rutTexto).toLowerCase(); // ej: 13.793.668-2
-      const cuerpoYGuion = limpio.length >= 2 ? `${limpio.slice(0, -1)}-${limpio.slice(-1)}` : limpio; // ej: 13793668-2
-
-      const formatos = [
-        conPuntosYGuion,
-        cuerpoYGuion,
-        limpio,
-        rutTexto.trim().toLowerCase()
-      ];
-
-      for (const fId of formatos) {
-        try {
-          const rutSnap = await getDoc(doc(db, 'rut_lookup', fId));
-          if (rutSnap.exists() && rutSnap.data().email) {
-            return rutSnap.data().email.toLowerCase().trim();
-          }
-        } catch (e) {
-          console.warn('Error consultando rut_lookup:', e);
-        }
-      }
-      return null;
-    }
-
+    const inputRut = document.getElementById('rutTitular');
+    const inputContrasena = document.getElementById('contrasena');
     const loginForm = document.getElementById('loginForm');
-    const rutInput = document.getElementById('rut');
-    const rutErrorText = document.getElementById('rutErrorText');
-    const lblRutLogin = document.getElementById('lblRutLogin');
-    const checkLoginExtranjero = document.getElementById('checkLoginExtranjero');
-    const contrasenaInput = document.getElementById('contrasena');
     const btnIngresar = document.getElementById('btnIngresar');
     const alertBox = document.getElementById('alertBox');
     const togglePassword = document.getElementById('togglePassword');
     const iconPassword = document.getElementById('iconPassword');
 
-    checkLoginExtranjero.addEventListener('change', function() {
-      if (this.checked) {
-        lblRutLogin.textContent = 'DNI / Pasaporte / Documento Extranjero';
-        rutInput.placeholder = 'Nº Pasaporte o ID Extranjero';
-        rutErrorText.classList.add('hidden');
-        rutInput.classList.remove('border-red-500');
-      } else {
-        lblRutLogin.textContent = 'RUT del Titular';
-        rutInput.placeholder = '12.345.678-9 o 12345678-K';
-      }
-    });
+    function limpiarRut(r) {
+      return String(r || '').replace(/[^0-9kK]/g, '').toLowerCase();
+    }
 
-    rutInput.addEventListener('input', () => {
-      if (rutInput.value.includes('@')) {
-        rutErrorText.textContent = 'Ingresa tu RUT o Pasaporte (el acceso con email directo no está permitido).';
-        rutErrorText.classList.remove('hidden');
-        rutInput.classList.add('border-red-500');
-        return;
-      }
-      rutErrorText.classList.add('hidden');
-      rutInput.classList.remove('border-red-500');
-    });
+    function formatearRut(rut) {
+      let valor = limpiarRut(rut).toUpperCase();
+      if (valor.length <= 1) return valor;
+      const dv = valor.slice(-1);
+      let cuerpo = valor.slice(0, -1);
+      cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return `${cuerpo}-${dv}`;
+    }
 
-    rutInput.addEventListener('blur', function() {
-      if (!checkLoginExtranjero.checked && this.value.trim()) {
-        const res = validarRutChileno(this.value);
-        if (res.valido) {
-          this.value = formatearRutConPuntosYGuion(this.value);
-        }
-      }
+    inputRut.addEventListener('input', () => {
+      inputRut.value = formatearRut(inputRut.value);
     });
 
     togglePassword.addEventListener('click', () => {
-      const isPassword = contrasenaInput.type === 'password';
-      contrasenaInput.type = isPassword ? 'text' : 'password';
-      iconPassword.textContent = isPassword ? 'visibility_off' : 'visibility';
+      const isPass = inputContrasena.type === 'password';
+      inputContrasena.type = isPass ? 'text' : 'password';
+      iconPassword.textContent = isPass ? 'visibility_off' : 'visibility';
     });
 
     function showAlert(mensaje, tipo = 'error') {
       alertBox.className = `p-4 rounded-xl text-sm font-medium mb-6 ${
-        tipo === 'error' 
-          ? 'bg-red-50 text-red-900 border border-red-200' 
-          : 'bg-green-50 text-green-900 border border-green-200'
+        tipo === 'error' ? 'bg-red-50 text-red-900 border border-red-200' : 'bg-green-50 text-green-900 border border-green-200'
       }`;
       alertBox.innerHTML = mensaje;
       alertBox.style.display = 'block';
-    }
-
-    function traducirErrorFirebase(codigo) {
-      switch (codigo) {
-        case 'auth/invalid-credential':
-        case 'auth/wrong-password':
-          return 'La identificación o la contraseña ingresada no son correctas. Verifica tus datos o restablece tu clave.';
-        case 'auth/user-not-found':
-          return 'No encontramos ninguna cuenta registrada para este documento. Por favor regístrate primero.';
-        case 'auth/too-many-requests':
-          return 'Demasiados intentos fallidos consecutivos. Tu acceso se ha bloqueado temporalmente por seguridad. Restablece tu clave o espera unos minutos.';
-        case 'auth/user-disabled':
-          return 'Esta cuenta ha sido inhabilitada. Contáctanos a contacto@gravecare.cl.';
-        case 'auth/network-request-failed':
-          return 'Error de conexión. Revisa tu acceso a internet.';
-        default:
-          return 'No se pudo iniciar sesión. Verifica tus datos.';
-      }
     }
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       alertBox.style.display = 'none';
 
-      let rutVal = rutInput.value.trim();
-      const contrasenaVal = contrasenaInput.value.trim();
+      const rutLimpio = limpiarRut(inputRut.value);
+      const contrasena = inputContrasena.value;
 
-      if (rutVal.includes('@')) {
-        showAlert('Debes ingresar tu RUT o Pasaporte, no un correo electrónico.');
-        rutInput.focus();
-        return;
-      }
-
-      if (!checkLoginExtranjero.checked) {
-        const validacion = validarRutChileno(rutVal);
-        if (!validacion.valido) {
-          showAlert(validacion.mensaje);
-          rutInput.focus();
-          return;
-        }
-        rutVal = formatearRutConPuntosYGuion(rutVal);
-        rutInput.value = rutVal;
-      } else {
-        if (rutVal.length < 4) {
-          showAlert('Por favor ingresa un número de Pasaporte o DNI válido.');
-          rutInput.focus();
-          return;
-        }
-      }
-
-      if (!contrasenaVal) {
-        showAlert('Por favor ingresa tu contraseña.');
-        contrasenaInput.focus();
+      if (!rutLimpio || !contrasena) {
+        showAlert('Por favor completa tu RUT y contraseña.');
         return;
       }
 
       btnIngresar.disabled = true;
-      btnIngresar.innerHTML = `
-        <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Verificando...</span>
-      `;
+      btnIngresar.innerHTML = `<span>Ingresando...</span>`;
+
+      // Autenticación directa por RUT sin depender del correo
+      const authEmail = `${rutLimpio}@gravecare.cl`;
 
       try {
-        const emailAsociado = await resolverEmailPorRut(rutVal);
-        if (!emailAsociado) {
-          throw { code: 'auth/user-not-found' };
-        }
+        await signInWithEmailAndPassword(auth, authEmail, contrasena);
 
-        await signInWithEmailAndPassword(auth, emailAsociado, contrasenaVal);
-
-        showAlert('✓ Acceso concedido con éxito. Redirigiendo...', 'success');
+        showAlert('✓ Acceso correcto. Redirigiendo a tu portal...', 'success');
         setTimeout(() => {
           window.location.href = 'dashboard.html';
-        }, 600);
+        }, 800);
 
       } catch (err) {
         console.error('Error de acceso:', err);
-        showAlert(traducirErrorFirebase(err.code), 'error');
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+          showAlert('Contraseña incorrecta.');
+        } else if (err.code === 'auth/user-not-found') {
+          showAlert('No encontramos ninguna cuenta registrada para este RUT. Por favor regístrate.');
+        } else {
+          showAlert('No se pudo iniciar sesión. Verifica tu contraseña.');
+        }
       } finally {
         btnIngresar.disabled = false;
-        btnIngresar.innerHTML = `
-          <span>Ingresar</span>
-          <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
-        `;
-      }
-    });
-
-    // ================= MODAL RECUPERAR CONTRASEÑA =================
-    const modalRecuperar = document.getElementById('modalRecuperar');
-    const btnOlvidoClave = document.getElementById('btnOlvidoClave');
-    const btnCerrarModal = document.getElementById('btnCerrarModal');
-    const formRecuperar = document.getElementById('formRecuperar');
-    const modalAlert = document.getElementById('modalAlert');
-    const btnEnviarRecuperar = document.getElementById('btnEnviarRecuperar');
-    const rutRecuperarInput = document.getElementById('rutRecuperar');
-    const rutRecuperarErrorText = document.getElementById('rutRecuperarErrorText');
-    const lblRutRecuperar = document.getElementById('lblRutRecuperar');
-
-    btnOlvidoClave.addEventListener('click', () => {
-      modalAlert.style.display = 'none';
-      rutRecuperarErrorText.classList.add('hidden');
-      const actualRut = rutInput.value.trim();
-      rutRecuperarInput.value = actualRut && !actualRut.includes('@') ? actualRut : '';
-      
-      if (checkLoginExtranjero.checked) {
-        lblRutRecuperar.textContent = 'DNI / Pasaporte del Titular';
-        rutRecuperarInput.placeholder = 'Nº Pasaporte o ID Extranjero';
-      } else {
-        lblRutRecuperar.textContent = 'RUT del Titular';
-        rutRecuperarInput.placeholder = '12.345.678-9 o 12345678-K';
-      }
-
-      modalRecuperar.style.display = 'flex';
-    });
-
-    btnCerrarModal.addEventListener('click', () => {
-      modalRecuperar.style.display = 'none';
-    });
-
-    formRecuperar.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      modalAlert.style.display = 'none';
-
-      let docVal = rutRecuperarInput.value.trim();
-      if (docVal.includes('@')) {
-        rutRecuperarErrorText.textContent = 'Ingresa tu RUT o documento, no un correo.';
-        rutRecuperarErrorText.classList.remove('hidden');
-        return;
-      }
-
-      if (!checkLoginExtranjero.checked) {
-        const validacion = validarRutChileno(docVal);
-        if (!validacion.valido) {
-          rutRecuperarErrorText.textContent = validacion.mensaje;
-          rutRecuperarErrorText.classList.remove('hidden');
-          return;
-        }
-        docVal = formatearRutConPuntosYGuion(docVal);
-        rutRecuperarInput.value = docVal;
-      }
-      rutRecuperarErrorText.classList.add('hidden');
-
-      btnEnviarRecuperar.disabled = true;
-      btnEnviarRecuperar.textContent = 'Enviando...';
-
-      try {
-        const emailDestino = await resolverEmailPorRut(docVal);
-        if (!emailDestino) {
-          throw { code: 'auth/user-not-found' };
-        }
-
-        await sendPasswordResetEmail(auth, emailDestino);
-
-        modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-green-50 text-green-900 border border-green-200';
-        modalAlert.innerHTML = `✓ Hemos enviado el enlace para restablecer tu clave al correo registrado para el documento <strong>${docVal}</strong>.`;
-        modalAlert.style.display = 'block';
-
-        setTimeout(() => {
-          modalRecuperar.style.display = 'none';
-          btnEnviarRecuperar.disabled = false;
-          btnEnviarRecuperar.textContent = 'Enviar Enlace';
-        }, 4000);
-
-      } catch (err) {
-        modalAlert.className = 'p-3 rounded-lg text-xs font-medium mb-4 bg-red-50 text-red-900 border border-red-200';
-        if (err.code === 'auth/user-not-found') {
-          modalAlert.textContent = '❌ No encontramos ninguna cuenta vinculada a este documento.';
-        } else {
-          modalAlert.textContent = '❌ Error al tramitar la recuperación: ' + err.message;
-        }
-        modalAlert.style.display = 'block';
-        btnEnviarRecuperar.disabled = false;
-        btnEnviarRecuperar.textContent = 'Enviar Enlace';
+        btnIngresar.innerHTML = `<span>Ingresar</span><span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>`;
       }
     });
   </script>

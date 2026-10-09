@@ -1,92 +1,71 @@
 {
-  "hosting": [
-    {
-      "site": "gravecare-2e8d2",
-      "public": "public",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "/confirmar-oneclick",
-          "destination": "/confirmar-oneclick.html"
-        },
-        {
-          "source": "/confirmar-oneclick.html",
-          "destination": "/confirmar-oneclick.html"
-        },
-        {
-          "source": "/crearTransaccionWebpay",
-          "function": "crearTransaccionWebpay"
-        },
-        {
-          "source": "/crear-transaccion-webpay",
-          "function": "crearTransaccionWebpay"
-        },
-        {
-          "source": "/confirmarTransaccionWebpay",
-          "function": "confirmarTransaccionWebpay"
-        },
-        {
-          "source": "/confirmar-transaccion-webpay",
-          "function": "confirmarTransaccionWebpay"
-        },
-        {
-          "source": "/iniciarInscripcionOneclick",
-          "function": "iniciarInscripcionOneclick"
-        },
-        {
-          "source": "/iniciar-inscripcion-oneclick",
-          "function": "iniciarInscripcionOneclick"
-        },
-        {
-          "source": "/confirmarInscripcionOneclick",
-          "function": "confirmarInscripcionOneclick"
-        },
-        {
-          "source": "/confirmar-inscripcion-oneclick",
-          "function": "confirmarInscripcionOneclick"
-        },
-        {
-          "source": "/enviarContacto",
-          "function": "enviarContacto"
-        },
-        {
-          "source": "/confirmacion.html",
-          "destination": "/confirmar-pago.html"
-        },
-        {
-          "source": "/confirmar-pago.html",
-          "destination": "/confirmar-pago.html"
-        },
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
-    {
-      "site": "gravecare-ops",
-      "public": "public",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "/login.html",
-          "destination": "/login-ops.html"
-        },
-        {
-          "source": "/",
-          "destination": "/login-ops.html"
-        }
-      ]
-    }
-  ],
+  "hosting": {
+    "site": "gravecare-2e8d2",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/confirmar-oneclick",
+        "destination": "/confirmar-oneclick.html"
+      },
+      {
+        "source": "/confirmar-oneclick.html",
+        "destination": "/confirmar-oneclick.html"
+      },
+      {
+        "source": "/crearTransaccionWebpay",
+        "function": "crearTransaccionWebpay"
+      },
+      {
+        "source": "/crear-transaccion-webpay",
+        "function": "crearTransaccionWebpay"
+      },
+      {
+        "source": "/confirmarTransaccionWebpay",
+        "function": "confirmarTransaccionWebpay"
+      },
+      {
+        "source": "/confirmar-transaccion-webpay",
+        "function": "confirmarTransaccionWebpay"
+      },
+      {
+        "source": "/iniciarInscripcionOneclick",
+        "function": "iniciarInscripcionOneclick"
+      },
+      {
+        "source": "/iniciar-inscripcion-oneclick",
+        "function": "iniciarInscripcionOneclick"
+      },
+      {
+        "source": "/confirmarInscripcionOneclick",
+        "function": "confirmarInscripcionOneclick"
+      },
+      {
+        "source": "/confirmar-inscripcion-oneclick",
+        "function": "confirmarInscripcionOneclick"
+      },
+      {
+        "source": "/enviarContacto",
+        "function": "enviarContacto"
+      },
+      {
+        "source": "/confirmacion.html",
+        "destination": "/confirmar-pago.html"
+      },
+      {
+        "source": "/confirmar-pago.html",
+        "destination": "/confirmar-pago.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
   "functions": [
     {
       "source": "functions",

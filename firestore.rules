@@ -10,7 +10,7 @@ service cloud.firestore {
       return estaAutenticado() && 
         (request.auth.token.staff == true || 
          request.auth.token.admin == true ||
-         request.auth.token.email in ['contacto@gravecare.cl', 'admin@gravecare.cl', 'colivaresl@hotmail.com']);
+         request.auth.token.email in ['contacto@gravecare.cl', 'admin@gravecare.cl', 'rravellos@gmail.com', 'colivaresl@hotmail.com']);
     }
 
     function esDueno(userId) {
@@ -31,11 +31,24 @@ service cloud.firestore {
       allow delete: if estaAutenticado() || esStaff();
     }
 
-    // --- USUARIOS ---
+    // --- USUARIOS Y TODAS SUS SUBCOLECCIONES (INCLUYENDO SEPULTURAS) ---
     match /usuarios/{userId} {
-      allow read: if esDueno(userId) || esStaff() || true;
-      allow create: if estaAutenticado() && request.auth.uid == userId;
-      allow update: if esDueno(userId) || esStaff();
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if esStaff();
+
+      // Regla recursiva para sepulturas u otras subcolecciones del cliente
+      match /{allSubcollections=**} {
+        allow read: if true;
+        allow create, update: if true;
+        allow delete: if esStaff();
+      }
+    }
+
+    // --- CONTRATOS ---
+    match /contratos/{contratoId} {
+      allow read: if true;
+      allow create, update: if true;
       allow delete: if esStaff();
     }
 
@@ -76,6 +89,13 @@ service cloud.firestore {
     match /trabajos/{trabajoId} {
       allow read: if true;
       allow write: if estaAutenticado() || esStaff();
+    }
+
+    // --- COLECCIÓN GLOBAL SEPULTURAS (SI SE CONSULTA EN RAÍZ) ---
+    match /sepulturas/{sepId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if esStaff();
     }
 
   }

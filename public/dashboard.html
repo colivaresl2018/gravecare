@@ -1,400 +1,884 @@
 <!DOCTYPE html>
-<html class="light" lang="es">
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <link rel="icon" href="data:,">
-  <title>GraveCare - Dashboard</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Cliente | GraveCare Chile</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
-  <script id="tailwind-config">
+  <script>
     tailwind.config = {
-      darkMode: "class",
       theme: {
         extend: {
           colors: {
-            "primary-fixed-dim": "#a4d1b5",
-            "tertiary": "#1d2821",
-            "surface-tint": "#3e6750",
-            "tertiary-container": "#333e36",
-            "primary": "#002d1a",
-            "secondary": "#4e6451",
-            "primary-container": "#1a432f",
-            "on-primary-container": "#84b096",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-low": "#f2f4f2",
-            "surface-container": "#eceeec",
-            "secondary-container": "#d1e9d2",
-            "on-secondary-container": "#546a57",
-            "background": "#f8faf8",
-            "on-background": "#191c1b",
-            "on-surface-variant": "#414943",
-            "outline-variant": "#c1c8c1",
-            "error": "#ba1a1a"
+            primary: "#1a3636",
+            "primary-dark": "#122525",
+            secondary: "#40534c",
+            "accent-gold": "#c19a5b",
+            "bg-light": "#f7f9f8"
           },
           fontFamily: {
-            body: ["Plus Jakarta Sans", "sans-serif"]
+            sans: ['Plus Jakarta Sans', 'sans-serif']
           }
         }
       }
-    };
+    }
   </script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
-    .sidebar-item { transition: all 0.2s ease; }
-  </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row font-body">
+<body class="bg-[#f4f7f5] text-gray-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
 
-  <!-- Sidebar Desktop -->
-  <aside class="hidden md:flex flex-col w-64 bg-surface-container-lowest border-r border-outline-variant/30 sticky top-0 h-screen py-8 px-6">
-    <div class="mb-10 flex items-center justify-center">
-      <a href="dashboard.html">
-        <img alt="GraveCare Logo" class="h-16 w-auto object-contain" src="assets/logo.png" onerror="this.onerror=null; this.src='assets/logo.png';">
-      </a>
+  <!-- Barra Superior Móvil (Solo visible en pantallas < md) -->
+  <header class="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+    <a href="index.html" class="flex items-center gap-2">
+      <img src="assets/logo.png" alt="GraveCare" class="h-9 w-auto" onerror="this.src='Logo.jpg'">
+    </a>
+    <button type="button" id="btnToggleMenu" onclick="toggleMenuMovil()" class="p-2 text-primary hover:bg-gray-100 rounded-xl transition flex items-center justify-center">
+      <span class="material-symbols-outlined text-2xl" id="iconoMenuMovil">menu</span>
+    </button>
+  </header>
+
+  <!-- Fondo oscuro para cerrar menú en móvil al hacer clic afuera -->
+  <div id="backdropMenu" onclick="cerrarMenuMovil()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
+  <!-- Sidebar Lateral (Drawer deslizante en móvil, fijo en escritorio) -->
+  <aside id="sidebarMenu" class="fixed md:sticky top-0 left-0 bottom-0 z-50 md:z-30 w-72 md:w-64 bg-white border-r border-gray-200 flex flex-col justify-between min-h-screen shrink-0 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl md:shadow-none">
+    <div>
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2">
+          <img src="assets/logo.png" alt="GraveCare" class="h-10 w-auto" onerror="this.src='Logo.jpg'">
+        </a>
+        <button type="button" onclick="cerrarMenuMovil()" class="md:hidden text-gray-400 hover:text-gray-700 p-1 rounded-lg">
+          <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+
+      <nav class="p-4 space-y-1.5 text-sm font-semibold" id="menu-navegacion">
+        <button type="button" onclick="cambiarTab('resumen')" id="btn-tab-resumen" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white transition shadow-sm">
+          <span class="material-symbols-outlined text-xl">dashboard</span>
+          <span>Resumen</span>
+        </button>
+
+        <button type="button" onclick="cambiarTab('sepulturas')" id="btn-tab-sepulturas" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition">
+          <span class="material-symbols-outlined text-xl">account_balance</span>
+          <span>Mis Sepulturas</span>
+        </button>
+
+        <button type="button" onclick="cambiarTab('contratos')" id="btn-tab-contratos" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition">
+          <span class="material-symbols-outlined text-xl">description</span>
+          <span>Contratos</span>
+        </button>
+
+        <button type="button" onclick="cambiarTab('pagos')" id="btn-tab-pagos" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition">
+          <span class="material-symbols-outlined text-xl">receipt_long</span>
+          <span>Pagos & Suscripción</span>
+        </button>
+
+        <button type="button" onclick="cambiarTab('fotos')" id="btn-tab-fotos" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition">
+          <span class="material-symbols-outlined text-xl">photo_library</span>
+          <span>Visitas & Fotos</span>
+        </button>
+
+        <button type="button" onclick="cambiarTab('perfil')" id="btn-tab-perfil" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition">
+          <span class="material-symbols-outlined text-xl">person</span>
+          <span>Perfil</span>
+        </button>
+      </nav>
     </div>
-    <nav class="flex flex-col space-y-2 flex-grow">
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-container text-on-primary-container font-bold" href="dashboard.html">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span class="text-sm font-semibold">Resumen</span>
-      </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="sepulturas.html">
-        <span class="material-symbols-outlined">account_balance</span>
-        <span class="text-sm font-semibold">Mis Sepulturas</span>
-      </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="contratos.html">
-        <span class="material-symbols-outlined">description</span>
-        <span class="text-sm font-semibold">Contratos</span>
-      </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="pagos.html">
-        <span class="material-symbols-outlined">receipt_long</span>
-        <span class="text-sm font-semibold">Pagos &amp; Suscripción</span>
-      </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="fotos.html">
-        <span class="material-symbols-outlined">photo_library</span>
-        <span class="text-sm font-semibold">Fotos</span>
-      </a>
-      <a class="sidebar-item flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors" href="perfil.html">
-        <span class="material-symbols-outlined">person</span>
-        <span class="text-sm font-semibold">Perfil</span>
-      </a>
-    </nav>
-    <div class="mt-auto pt-6 border-t border-outline-variant/30">
-      <button id="btn-logout-sidebar" class="flex items-center space-x-3 px-4 py-2 text-on-surface-variant hover:text-error transition-colors w-full text-left cursor-pointer">
-        <span class="material-symbols-outlined">logout</span>
-        <span class="text-sm font-semibold">Cerrar Sesión</span>
+
+    <div class="p-4 border-t border-gray-100">
+      <button type="button" id="btnCerrarSesion" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition cursor-pointer">
+        <span class="material-symbols-outlined text-lg">logout</span>
+        <span>Cerrar Sesión</span>
       </button>
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto px-4 py-6 md:px-12 md:py-10 pb-24 md:pb-10">
-    <header class="mb-10">
-      <h1 class="text-2xl md:text-3xl font-bold text-primary" id="greeting">Hola, Bienvenido a GraveCare</h1>
-      <p class="text-sm text-on-surface-variant mt-1">Resumen del cuidado y estado de sus sepulturas.</p>
-    </header>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <!-- Quick Stats -->
-      <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4">
-          <div class="bg-secondary-container p-3 rounded-full text-on-secondary-container">
-            <span class="material-symbols-outlined text-3xl">event_upcoming</span>
-          </div>
-          <div>
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Próxima Visita</p>
-            <p class="text-xl font-bold text-primary mt-0.5" id="proximaVisita">--</p>
-            <p class="text-xs text-secondary" id="proximaVisitaSub">Programada</p>
-          </div>
-        </div>
-
-        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4">
-          <div class="bg-secondary-container p-3 rounded-full text-on-secondary-container">
-            <span class="material-symbols-outlined text-3xl">spa</span>
-          </div>
-          <div>
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Servicios Realizados</p>
-            <p class="text-xl font-bold text-primary mt-0.5" id="serviciosCount">0</p>
-            <p class="text-xs text-secondary">Total acumulado</p>
-          </div>
-        </div>
-
-        <div class="bg-surface-container-lowest p-6 rounded-xl border border-secondary/20 shadow-sm flex items-center space-x-4 relative overflow-hidden">
-          <div class="absolute right-0 top-0 w-16 h-16 bg-primary-fixed-dim/20 rounded-bl-full"></div>
-          <div class="bg-primary-container p-3 rounded-full text-on-primary-container z-10">
-            <span class="material-symbols-outlined text-3xl">verified</span>
-          </div>
-          <div class="z-10">
-            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Estado de Suscripción</p>
-            <p class="text-xl font-bold text-primary mt-0.5" id="estadoSuscripcion">Activo</p>
-            <p class="text-xs text-secondary" id="tipoPlan">Plan Base</p>
-          </div>
-        </div>
+  <!-- Contenido Central -->
+  <main class="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl mx-auto w-full">
+    
+    <!-- Topbar & Saludo Dinámico -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 pb-4 border-b border-gray-200">
+      <div>
+        <h1 class="text-xl md:text-2xl font-extrabold text-primary" id="txt-saludo-usuario">Hola...</h1>
+        <p class="text-xs text-gray-500 mt-0.5" id="txt-correo-usuario">Cargando datos...</p>
       </div>
-
-      <!-- Historial de Mantenimiento -->
-      <div class="lg:col-span-8 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-lg font-bold text-primary">Historial de Mantenimiento</h2>
-          <a class="text-xs font-bold text-primary hover:underline" href="fotos.html">Ver todas las fotos</a>
-        </div>
-        <div class="space-y-4" id="contenedor-mantenimientos">
-          <div class="p-6 text-center text-sm text-on-surface-variant">Cargando reportes de mantenimiento...</div>
-        </div>
-      </div>
-
-      <!-- Galería Preview -->
-      <div class="lg:col-span-4 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm flex flex-col">
-        <h2 class="text-lg font-bold text-primary mb-1">Últimas Fotografías</h2>
-        <p class="text-xs text-on-surface-variant mb-4">Registro en terreno</p>
-        
-        <div class="grid grid-cols-2 gap-3 mb-4 flex-grow" id="contenedor-fotos-dashboard">
-          <div class="w-full h-32 bg-surface-container-low rounded-lg flex items-center justify-center text-xs text-on-surface-variant">Sin fotos aún</div>
-          <div class="w-full h-32 bg-surface-container-low rounded-lg flex items-center justify-center text-xs text-on-surface-variant">Sin fotos aún</div>
-        </div>
-
-        <a href="fotos.html" class="w-full py-2.5 bg-surface-container-low text-primary text-xs font-bold rounded-full hover:bg-secondary-container transition-colors border border-primary/10 text-center block">
-          Ver Galería Completa
+      <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <a href="planes.html" class="flex-1 sm:flex-initial text-center px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-xl shadow transition">
+          + Nuevo Plan
+        </a>
+        <a href="suscribirme-Spot.html" class="flex-1 sm:flex-initial text-center px-4 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow transition">
+          + Servicio Spot
         </a>
       </div>
+    </header>
 
-      <!-- Facturación Reciente -->
-      <div class="lg:col-span-12 bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-secondary/20 shadow-sm">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-bold text-primary">Facturación Reciente</h2>
-          <a href="pagos.html" class="text-xs font-bold text-primary hover:underline">Ver detalle de pagos</a>
+    <!-- SECCIÓN 1: RESUMEN -->
+    <section id="seccion-resumen" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:border-primary transition" onclick="cambiarTab('sepulturas')">
+          <p class="text-xs text-gray-500 font-semibold">Sepulturas Registradas</p>
+          <p class="text-2xl font-extrabold text-primary mt-1" id="stat-sepulturas">0</p>
         </div>
-        <ul class="divide-y divide-outline-variant/20" id="contenedor-facturas">
-          <li class="py-4 text-center text-sm text-on-surface-variant">Cargando pagos...</li>
-        </ul>
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:border-primary transition" onclick="cambiarTab('fotos')">
+          <p class="text-xs text-gray-500 font-semibold">Visitas Realizadas</p>
+          <p class="text-2xl font-extrabold text-primary mt-1" id="stat-visitas">0</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+          <p class="text-xs text-gray-500 font-semibold">Estado de Cuenta</p>
+          <p class="text-sm font-bold text-emerald-700 mt-2">✓ Al Día</p>
+        </div>
       </div>
-    </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <h2 class="text-base font-bold text-gray-900 mb-2">Bienvenido a tu Portal de Clientes</h2>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Desde aquí puedes monitorear el estado de mantenimiento de tus sepulturas, revisar el registro fotográfico de cada visita completada, acceder a las copias de tus contratos y visualizar tus pagos formalizados.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: MIS SEPULTURAS -->
+    <section id="seccion-sepulturas" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-900">Mis Sepulturas Registradas</h2>
+          <span class="text-xs text-gray-500 font-medium hidden sm:inline">Ubicaciones asociadas a tu cuenta</span>
+        </div>
+        <div id="contenedor-sepulturas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p class="text-xs text-gray-400 col-span-2 py-4">Buscando sepulturas vinculadas...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: CONTRATOS -->
+    <section id="seccion-contratos" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-2">Mis Contratos Activos</h2>
+        <p class="text-xs text-gray-500 mb-4">Descarga tus contratos de prestación de servicios formalizados con GraveCare SpA.</p>
+        <div id="contenedor-contratos" class="space-y-3">
+          <p class="text-xs text-gray-400 py-3">No tienes contratos disponibles aún.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: PAGOS & SUSCRIPCIÓN -->
+    <section id="seccion-pagos" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+        <div class="flex items-center gap-2 mb-6">
+          <span class="material-symbols-outlined text-primary text-2xl">history</span>
+          <h2 class="text-lg font-bold text-gray-900">Historial de Pagos & Servicios</h2>
+        </div>
+
+        <div class="overflow-x-auto -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse min-w-[550px]">
+            <thead>
+              <tr class="border-b border-gray-200 text-[11px] font-extrabold uppercase tracking-wider text-gray-400 bg-gray-50/70">
+                <th class="py-3 px-4 rounded-l-xl">FECHA</th>
+                <th class="py-3 px-4">CONCEPTO / PLAN</th>
+                <th class="py-3 px-4">N° ORDEN</th>
+                <th class="py-3 px-4">MONTO</th>
+                <th class="py-3 px-4">ESTADO</th>
+                <th class="py-3 px-4 rounded-r-xl">DETALLE</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-historial-pagos" class="divide-y divide-gray-100">
+              <tr>
+                <td colspan="6" class="text-center py-8 text-gray-400 text-xs">Cargando información...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 5: VISITAS & FOTOS -->
+    <section id="seccion-fotos" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-3">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Registro Fotográfico e Informes de Visita</h2>
+            <p class="text-xs text-gray-500">Certificación georreferenciada con fotos del antes, después e informe descargable.</p>
+          </div>
+        </div>
+        <div id="galeria-fotos-cliente" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="col-span-2 text-center py-10">
+            <span class="material-symbols-outlined text-4xl text-gray-300">photo_library</span>
+            <p class="text-xs text-gray-400 mt-2">No hay informes ni fotografías cargadas aún para tus visitas.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 6: PERFIL -->
+    <section id="seccion-perfil" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Información del Titular</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <p class="text-gray-500 font-semibold">Nombre Titular</p>
+            <p class="text-sm font-bold text-primary mt-1" id="perfil-nombre">—</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <p class="text-gray-500 font-semibold">Correo Electrónico</p>
+            <p class="text-sm font-bold text-primary mt-1" id="perfil-email">—</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <p class="text-gray-500 font-semibold">RUT Titular</p>
+            <p class="text-sm font-bold text-primary mt-1" id="perfil-rut">—</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <p class="text-gray-500 font-semibold">Teléfono</p>
+            <p class="text-sm font-bold text-primary mt-1" id="perfil-telefono">—</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Mobile Bottom Nav -->
-  <nav class="md:hidden fixed bottom-0 w-full bg-surface-container-lowest border-t border-outline-variant/30 flex justify-around items-center h-16 px-1 z-50">
-    <a class="flex flex-col items-center justify-center w-full h-full text-primary font-bold" href="dashboard.html">
-      <span class="material-symbols-outlined text-xl">dashboard</span>
-      <span class="text-[9px] mt-1">Resumen</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="sepulturas.html">
-      <span class="material-symbols-outlined text-xl">account_balance</span>
-      <span class="text-[9px] mt-1">Sepulturas</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="contratos.html">
-      <span class="material-symbols-outlined text-xl">description</span>
-      <span class="text-[9px] mt-1">Contratos</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="pagos.html">
-      <span class="material-symbols-outlined text-xl">receipt_long</span>
-      <span class="text-[9px] mt-1">Pagos</span>
-    </a>
-    <a class="flex flex-col items-center justify-center w-full h-full text-on-surface-variant hover:text-primary" href="perfil.html">
-      <span class="material-symbols-outlined text-xl">person</span>
-      <span class="text-[9px] mt-1">Perfil</span>
-    </a>
-  </nav>
+  <script>
+    // Control del Menú Móvil
+    function toggleMenuMovil() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const backdrop = document.getElementById('backdropMenu');
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+      
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
 
-  <!-- Script Firebase -->
+    function cerrarMenuMovil() {
+      const sidebar = document.getElementById('sidebarMenu');
+      const backdrop = document.getElementById('backdropMenu');
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+
+    window.toggleMenuMovil = toggleMenuMovil;
+    window.cerrarMenuMovil = cerrarMenuMovil;
+
+    function cambiarTab(tabName) {
+      const tabs = ['resumen', 'sepulturas', 'contratos', 'pagos', 'fotos', 'perfil'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('seccion-' + t);
+        const btn = document.getElementById('btn-tab-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabName);
+        if (btn) {
+          btn.className = (t === tabName)
+            ? "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white transition shadow-sm font-semibold"
+            : "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 transition font-semibold";
+        }
+      });
+
+      // Cerrar drawer en pantallas móviles tras hacer clic
+      cerrarMenuMovil();
+    }
+    window.cambiarTab = cambiarTab;
+
+    // Generador Oficial idéntico al documento legal vigente de GraveCare SpA
+    window.descargarContratoOficial = function(contratoJsonEncoded) {
+      const c = JSON.parse(decodeURIComponent(contratoJsonEncoded));
+      const win = window.open('', '_blank');
+      
+      const hoy = new Date().toLocaleDateString("es-CL", { 
+        day: "numeric", 
+        month: "long", 
+        year: "numeric" 
+      });
+
+      const montoFormateado = "$" + Number(c.montoTotal || 371940).toLocaleString("es-CL");
+      
+      const ubicacionDetallada = [
+        c.patio && c.patio !== "-" ? `Patio: ${c.patio}` : "",
+        c.numeroSepultura && c.numeroSepultura !== "-" ? `N°: ${c.numeroSepultura}` : ""
+      ].filter(Boolean).join(", ");
+
+      const ubicacionConParentesis = ubicacionDetallada ? ` (${ubicacionDetallada})` : "";
+      const direccionCompleta = c.direccion || "Evaristo Lillo 111, Depto 602, Las Condes, Metropolitana de Santiago";
+
+      win.document.write(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <title>Contrato_${c.numeroOrden}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              padding: 40px 20px;
+              background-color: #525659;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #111;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+            .barra-herramientas {
+              width: 100%;
+              max-width: 820px;
+              display: flex;
+              justify-content: flex-end;
+              margin-bottom: 20px;
+            }
+            .btn-imprimir {
+              background-color: #1a3636;
+              color: #ffffff;
+              border: none;
+              padding: 12px 28px;
+              font-size: 13px;
+              font-weight: bold;
+              border-radius: 6px;
+              cursor: pointer;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+              transition: background 0.2s;
+            }
+            .btn-imprimir:hover {
+              background-color: #122525;
+            }
+            
+            .hoja-contrato {
+              background: #ffffff;
+              width: 100%;
+              max-width: 820px;
+              padding: 48px 52px;
+              box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+              border-radius: 3px;
+              font-size: 11pt;
+              line-height: 1.45;
+            }
+
+            .header-top {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              border-bottom: 2px solid #1a3636;
+              padding-bottom: 8px;
+              margin-bottom: 16px;
+            }
+            .title-corp {
+              font-size: 16pt;
+              font-weight: 900;
+              color: #1a3636;
+              letter-spacing: 0.5px;
+              margin: 0 0 4px 0;
+            }
+            .sub-corp {
+              font-size: 9pt;
+              color: #444;
+              margin: 0;
+            }
+            .box-legal {
+              text-align: right;
+            }
+            .badge-vigente {
+              font-size: 8.5pt;
+              font-weight: 800;
+              color: #1b5e20;
+              letter-spacing: 0.5px;
+            }
+            .orden-txt {
+              font-size: 10pt;
+              font-weight: 700;
+              color: #222;
+              margin-top: 3px;
+            }
+
+            .main-title {
+              text-align: center;
+              font-size: 12.5pt;
+              font-weight: 800;
+              color: #1a3636;
+              letter-spacing: 0.3px;
+              margin: 16px 0 20px 0;
+            }
+
+            .clausula {
+              text-align: justify;
+              margin-bottom: 12px;
+            }
+            .clausula strong {
+              font-weight: 800;
+              color: #000;
+            }
+
+            .firmas-container {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-top: 36px;
+              padding-top: 14px;
+              border-top: 1px dashed #999;
+            }
+            .firma-box {
+              width: 48%;
+              font-size: 10.5pt;
+              line-height: 1.35;
+            }
+            .cert-stamp {
+              color: #1b5e20;
+              font-size: 9pt;
+              font-weight: bold;
+              margin-top: 4px;
+              display: block;
+            }
+
+            @media print {
+              @page {
+                size: letter portrait;
+                margin: 15mm 18mm 15mm 18mm;
+              }
+              body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                display: block !important;
+              }
+              .barra-herramientas {
+                display: none !important;
+              }
+              .hoja-contrato {
+                max-width: 100% !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                font-size: 10.5pt !important;
+                line-height: 1.4 !important;
+              }
+              .header-top {
+                border-bottom: 2px solid #1a3636 !important;
+                padding-bottom: 6px !important;
+                margin-bottom: 14px !important;
+              }
+              .title-corp { font-size: 15pt !important; }
+              .sub-corp { font-size: 8.5pt !important; }
+              .badge-vigente { font-size: 8pt !important; }
+              .orden-txt { font-size: 9.5pt !important; }
+              .main-title { font-size: 12pt !important; margin: 14px 0 16px 0 !important; }
+              .clausula { margin-bottom: 10px !important; }
+              .firmas-container { margin-top: 28px !important; padding-top: 12px !important; }
+              .firma-box { font-size: 10pt !important; }
+              .cert-stamp { font-size: 8.5pt !important; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="barra-herramientas">
+            <button class="btn-imprimir" onclick="window.print()">📥 Imprimir / Guardar en PDF</button>
+          </div>
+
+          <div class="hoja-contrato">
+            <div class="header-top">
+              <div>
+                <div class="title-corp">GRAVECARE CHILE</div>
+                <div class="sub-corp">Preservación Ornamental & Cuidado de Sepulturas - SpA RUT: 78.498.653-5</div>
+              </div>
+              <div class="box-legal">
+                <div class="badge-vigente">DOCUMENTO LEGAL VIGENTE</div>
+                <div class="orden-txt">Orden: ${c.numeroOrden}</div>
+              </div>
+            </div>
+
+            <div class="main-title">
+              CONTRATO DE PRESTACIÓN DE SERVICIOS & MANDATO ESPECIAL DE ACCESO
+            </div>
+
+            <div class="clausula">
+              En Santiago de Chile, a ${hoy}, entre GraveCare SpA, RUT N° 78.498.653-5, domiciliada en Av. El Carmen 1397, Huechuraba, Santiago, en adelante la «Empresa»; y por la otra parte, don(ña) ${c.titular || 'Christian Olivares Lizama'}, RUT N° ${c.rut || '12.722.847-7'}, con domicilio en ${direccionCompleta}, correo ${c.email || 'colivaresl@hotmail.com'} y teléfono ${c.telefono || '+56991788588'}, en adelante el «Cliente», se ha convenido lo siguiente:
+            </div>
+
+            <div class="clausula">
+              <strong>PRIMERO (Objeto y Mandato Especial):</strong> La Empresa prestará el servicio de mantención, ornamento floral y preservación conforme al plan ${c.planNombre || 'Plan 6'}. El Cliente declara ser titular o facultado legal respecto de la sepultura ubicada en ${c.cementerio || 'Parque del Recuerdo Américo Vespucio'}${ubicacionConParentesis}, correspondiente al descanso de don(ña) ${c.nombreDifunto || 'Arturo Prat Chacon'}, y confiere a GraveCare SpA mandato especial suficiente para ingresar y ejecutar exclusivamente las labores pactadas.
+            </div>
+
+            <div class="clausula">
+              <strong>SEGUNDO (Alcance y Exclusiones):</strong> Limpieza no destructiva de lápidas, cruces y accesorios, retiro de elementos marchitos, desmalezado y floristería fresca de temporada. Quedan excluidas intervenciones mayores de albañilería, restauración estructural profunda o alteración de restos.
+            </div>
+
+            <div class="clausula">
+              <strong>TERCERO (Verificación Digital):</strong> Cada servicio emitirá un reporte fotográfico comparativo («Antes» y «Después»), remitido formalmente dentro de las 24 horas hábiles posteriores.
+            </div>
+
+            <div class="clausula">
+              <strong>CUARTO (Honorarios y Pago):</strong> El valor pactado corresponde a ${montoFormateado} (IVA incluido), cancelado por adelantado a través de los sistemas electrónicos de pago de Transbank.
+            </div>
+
+            <div class="clausula">
+              <strong>QUINTO (Plazo y Vigencia):</strong> El presente contrato rige a contar de la confirmación del pago y mantendrá su vigencia durante el período correspondiente al plan contratado.
+            </div>
+
+            <div class="clausula">
+              <strong>SEXTO (Responsabilidad):</strong> La Empresa responde por la correcta prestación del servicio conforme a los estándares acordados, no respondiendo por desgaste previo de materiales, actos vandálicos de terceros en el recinto ni restricciones externas imprevistas del cementerio.
+            </div>
+
+            <div class="clausula">
+              <strong>SÉPTIMO (Protección de Datos):</strong> El tratamiento de datos personales se rige bajo la Ley N° 19.628 para fines exclusivos de la ejecución del servicio y emisión de comprobantes tributarios.
+            </div>
+
+            <div class="clausula">
+              <strong>OCTAVO (Naturaleza del Vínculo):</strong> Convenio de naturaleza civil y comercial, sin que genere relación laboral o de dependencia.
+            </div>
+
+            <div class="clausula">
+              <strong>NOVENO (Jurisdicción):</strong> Las partes se someten a la competencia de los Tribunales Ordinarios de Justicia de la ciudad de Santiago de Chile.
+            </div>
+
+            <div class="firmas-container">
+              <div class="firma-box">
+                <strong>CLIENTE/MANDANTE:</strong> ${c.titular || 'Christian Olivares Lizama'} (RUT: ${c.rut || '12.722.847-7'})<br>
+                <span class="cert-stamp">✔ Aceptación electrónica certificada en portal gravecare.cl</span>
+              </div>
+              <div class="firma-box" style="text-align: right;">
+                <strong>GRAVECARE SPA</strong><br>
+                RUT N° 78.498.653-5
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    };
+  </script>
+
+  <!-- Lógica Firebase 100% Dinámica -->
   <script type="module">
-    import { observeAuthState, logoutUser } from "./js/auth.js";
-    import { db } from "./js/firebaseConfig.js";
-    import { 
-      doc, 
-      getDoc, 
-      collection, 
-      query, 
-      where, 
-      getDocs 
-    } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import { auth, db } from "./js/firebaseConfig.js";
 
-    async function cerrarSesion() {
-      await logoutUser();
-      sessionStorage.clear();
-      window.location.href = "login.html";
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text ?? "—";
     }
 
-    document.getElementById("btn-logout-sidebar")?.addEventListener("click", cerrarSesion);
-
-    function formatearFechaChile(f) {
-      if (!f) return "Reciente";
-      const d = f?.toDate ? f.toDate() : new Date(f);
-      if (isNaN(d.getTime())) return f;
-      return d.toLocaleDateString("es-CL", { year: "numeric", month: "long", day: "numeric" });
+    function limpiarRut(r) {
+      return String(r || "").replace(/[^0-9kK]/g, "").toUpperCase();
     }
 
-    observeAuthState(async (user) => {
+    function formatearRut(r) {
+      const limpio = limpiarRut(r);
+      if (limpio.length <= 1) return limpio;
+      const dv = limpio.slice(-1);
+      const cuerpo = limpio.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return `${cuerpo}-${dv}`;
+    }
+
+    function generarClaveSepultura(cem, sec, pat, num, ordenId) {
+      const norm = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cem && num && num !== '-') {
+        return `sep_${norm(cem)}_${norm(sec)}_${norm(pat)}_${norm(num)}`;
+      }
+      return `sep_orden_${norm(ordenId)}`;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
         return;
       }
 
+      const uid = user.uid;
+      const authEmail = (user.email || "").toLowerCase().trim();
+      
+      let rutLimpio = "";
+      if (authEmail.includes("@gravecare.cl")) {
+        rutLimpio = limpiarRut(authEmail.split("@")[0]);
+      }
+
+      let nombreMostrar = user.displayName || "";
+      let telefono = "";
+      let direccionTitular = "";
+      let emailContactoReal = "";
+
       try {
-        const emailCliente = (user.email || "").toLowerCase().trim();
+        const uSnap = await getDoc(doc(db, "usuarios", uid));
+        if (uSnap.exists()) {
+          const u = uSnap.data();
+          const tit = u.titular || u;
+          if (tit.rut || u.rut) rutLimpio = limpiarRut(tit.rut || u.rut);
+          telefono = u.telefono || tit.telefono || "";
+          direccionTitular = u.direccion || tit.direccion || "";
 
-        // 1. Datos del Perfil
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (userDoc.exists()) {
-          const profile = userDoc.data();
-          const nombre = profile.nombres || profile.nombreCompleto || profile.displayName || user.email.split("@")[0];
-          document.getElementById("greeting").textContent = `Hola, Bienvenido(a) ${nombre}`;
-          document.getElementById("estadoSuscripcion").textContent = (profile.estadoSuscripcion || "Activo").toUpperCase();
-          document.getElementById("tipoPlan").textContent = profile.planNombre || profile.plan || "Plan Base";
+          const mailDoc = u.email || tit.email || "";
+          if (mailDoc && !mailDoc.endsWith("@gravecare.cl")) {
+            emailContactoReal = mailDoc;
+          }
+
+          const nom = u.nombreCompleto || tit.nombreCompleto || `${u.nombres || tit.nombres || ''} ${u.apellidoPaterno || tit.apellidoPaterno || ''}`.trim();
+          if (nom) nombreMostrar = nom;
         }
+      } catch (e) {}
 
-        // 2. Órdenes del Cliente (para datos y pagos)
-        let fechaProxima = null;
-        let countServicios = 0;
-        const fotosList = [];
-        const ordenesIds = new Set();
-        const listaOrdenesCliente = [];
-
-        const ordenesRef = collection(db, "ordenes");
-        const snapUid = await getDocs(query(ordenesRef, where("usuarioId", "==", user.uid)));
-        snapUid.forEach(docSnap => ordenesIds.add(docSnap.id));
-
-        if (emailCliente) {
-          const snapTitular = await getDocs(query(ordenesRef, where("titular.email", "==", emailCliente)));
-          snapTitular.forEach(docSnap => ordenesIds.add(docSnap.id));
-
-          const snapCliente = await getDocs(query(ordenesRef, where("emailCliente", "==", emailCliente)));
-          snapCliente.forEach(docSnap => ordenesIds.add(docSnap.id));
-        }
-
-        for (const ordenId of ordenesIds) {
-          const ordenSnap = await getDoc(doc(db, "ordenes", ordenId));
-          if (!ordenSnap.exists()) continue;
-          const o = { id: ordenSnap.id, ...ordenSnap.data() };
-          listaOrdenesCliente.push(o);
-          if (o.proximaVisita) fechaProxima = o.proximaVisita;
-          if (o.serviciosRealizados) countServicios += Number(o.serviciosRealizados);
-          if (Array.isArray(o.fotosUrl)) fotosList.push(...o.fotosUrl);
-        }
-
-        document.getElementById("proximaVisita").textContent = formatearFechaChile(fechaProxima);
-
-        // 3. Informes Aprobados
-        const contenedorMant = document.getElementById("contenedor-mantenimientos");
-        const misInformes = [];
-
-        if (emailCliente) {
-          const snapInformes = await getDocs(query(collection(db, "informes"), where("clienteEmail", "==", emailCliente)));
-          snapInformes.forEach(docSnap => {
-            const inf = { id: docSnap.id, ...docSnap.data() };
-            const estado = (inf.estado || "").toLowerCase().trim();
-            if (estado === "aprobado" || estado === "completada" || estado === "aprobada") {
-              misInformes.push(inf);
-              const fotos = inf.fotos || {};
-              if (fotos.despues?.url) fotosList.unshift(fotos.despues.url);
-              if (fotos.flores?.url) fotosList.unshift(fotos.flores.url);
-              if (fotos.antes?.url) fotosList.unshift(fotos.antes.url);
-              if (fotos.general?.url) fotosList.unshift(fotos.general.url);
+      if (rutLimpio) {
+        try {
+          const uAltSnap = await getDoc(doc(db, "usuarios", `cliente_${rutLimpio.toLowerCase()}`));
+          if (uAltSnap.exists()) {
+            const uAlt = uAltSnap.data();
+            const titAlt = uAlt.titular || uAlt;
+            if (!telefono) telefono = uAlt.telefono || titAlt.telefono || "";
+            if (!direccionTitular) direccionTitular = uAlt.direccion || titAlt.direccion || "";
+            
+            const mailAlt = uAlt.email || titAlt.email || "";
+            if (mailAlt && !mailAlt.endsWith("@gravecare.cl") && !emailContactoReal) {
+              emailContactoReal = mailAlt;
             }
+
+            const nomAlt = uAlt.nombreCompleto || titAlt.nombreCompleto || `${uAlt.nombres || ''} ${uAlt.apellidoPaterno || ''}`.trim();
+            if (nomAlt && !nombreMostrar) nombreMostrar = nomAlt;
+          }
+        } catch (e) {}
+
+        if (!emailContactoReal || !nombreMostrar) {
+          try {
+            const lkpSnap = await getDoc(doc(db, "rut_lookup", rutLimpio));
+            if (lkpSnap.exists()) {
+              const lkp = lkpSnap.data();
+              if (lkp.email && !lkp.email.endsWith("@gravecare.cl") && !emailContactoReal) {
+                emailContactoReal = lkp.email;
+              }
+              if (lkp.nombre && !nombreMostrar) nombreMostrar = lkp.nombre;
+            }
+          } catch (e) {}
+        }
+      }
+
+      const targets = [uid];
+      if (rutLimpio) {
+        targets.push(`cliente_${rutLimpio.toLowerCase()}`);
+        targets.push(`cliente_${rutLimpio.toUpperCase()}`);
+      }
+
+      const sepulturasMap = new Map();
+      const contratosMap = new Map();
+      const ordenesMap = new Map();
+
+      for (const t of targets) {
+        try {
+          const snapO = await getDocs(query(collection(db, "ordenes"), where("clienteUid", "==", t)));
+          snapO.forEach(d => ordenesMap.set(d.id, { id: d.id, ...d.data() }));
+        } catch(e) {}
+
+        try {
+          const snapO2 = await getDocs(query(collection(db, "ordenes"), where("usuarioId", "==", t)));
+          snapO2.forEach(d => ordenesMap.set(d.id, { id: d.id, ...d.data() }));
+        } catch(e) {}
+      }
+
+      ordenesMap.forEach(ord => {
+        const tit = ord.titular || {};
+        const mailO = tit.email || ord.email || ord.emailCliente || "";
+        if (mailO && !mailO.endsWith("@gravecare.cl") && !emailContactoReal) {
+          emailContactoReal = mailO;
+        }
+        const nomO = tit.nombreCompleto || ord.nombreCliente || tit.nombre || "";
+        if (nomO && !nombreMostrar) {
+          nombreMostrar = nomO;
+        }
+        if (!telefono) telefono = tit.telefono || ord.telefono || "";
+        if (!direccionTitular) direccionTitular = tit.direccion || ord.direccion || "";
+      });
+
+      const rutFormateado = rutLimpio ? formatearRut(rutLimpio) : "—";
+      const nombreFinal = nombreMostrar || (rutFormateado !== "—" ? `Cliente RUT ${rutFormateado}` : "Estimado(a) Cliente");
+      const correoVisible = emailContactoReal || (!authEmail.endsWith("@gravecare.cl") ? authEmail : "No registrado");
+
+      setText("txt-saludo-usuario", `Hola, ${nombreFinal}`);
+      setText("txt-correo-usuario", rutFormateado !== "—" ? `RUT: ${rutFormateado}` : correoVisible);
+      setText("perfil-nombre", nombreFinal);
+      setText("perfil-email", correoVisible);
+      setText("perfil-rut", rutFormateado);
+      setText("perfil-telefono", telefono || "—");
+
+      for (const t of targets) {
+        try {
+          const snapSep = await getDocs(collection(db, "usuarios", t, "sepulturas"));
+          snapSep.forEach(d => {
+            const data = d.data();
+            const dif = data.nombreDifunto || data.difunto?.nombre || data.difuntoNombre || "";
+            if (!dif || dif === "undefined") return;
+
+            const cem = data.cementerio || data.ubicacionSepultura?.cementerio || "";
+            const sec = data.sector || data.ubicacionSepultura?.sector || "-";
+            const pat = data.patio || data.ubicacionSepultura?.patio || "-";
+            const num = data.numeroSepultura || data.ubicacionSepultura?.numeroSepultura || data.numero || "-";
+            const ordId = data.numeroOrden || data.ultimaOrden || d.id;
+
+            const claveUnica = generarClaveSepultura(cem, sec, pat, num, ordId);
+            sepulturasMap.set(claveUnica, {
+              id: claveUnica,
+              numeroOrden: ordId,
+              nombreDifunto: dif,
+              cementerio: cem || "Cementerio Registrado",
+              sector: sec,
+              patio: pat,
+              numeroSepultura: num,
+              planActivo: data.planActivo || data.planNombre || "Plan GraveCare"
+            });
+          });
+        } catch(e) {}
+      }
+
+      ordenesMap.forEach((ord, oId) => {
+        const ub = ord.ubicacionSepultura || {};
+        const dif = ord.difunto || {};
+        const difNombre = dif.nombre || ord.nombreDifunto || ord.difuntoNombre || "";
+
+        if (!difNombre || difNombre === "undefined") return;
+
+        const cem = ub.cementerio || ord.cementerio || "";
+        const sec = ub.sector || ord.sector || "-";
+        const pat = ub.patio || ord.patio || "-";
+        const num = ub.numeroSepultura || ord.numeroSepultura || ub.numero || "-";
+        const ordId = ord.numeroOrden || oId;
+
+        const claveUnica = generarClaveSepultura(cem, sec, pat, num, ordId);
+
+        if (!sepulturasMap.has(claveUnica)) {
+          sepulturasMap.set(claveUnica, {
+            id: claveUnica,
+            numeroOrden: ordId,
+            nombreDifunto: difNombre,
+            cementerio: cem || "Cementerio Registrado",
+            sector: sec,
+            patio: pat,
+            numeroSepultura: num,
+            planActivo: ord.planNombre || ord.servicio?.planNombre || "Plan GraveCare"
           });
         }
 
-        misInformes.sort((a, b) => new Date(b.fechaCaptura || b.fechaAprobacion || 0) - new Date(a.fechaCaptura || a.fechaAprobacion || 0));
-        document.getElementById("serviciosCount").textContent = misInformes.length || countServicios;
+        const cKey = `CTR-${ordId}`;
+        if (!contratosMap.has(cKey)) {
+          const titOrd = ord.titular || {};
+          contratosMap.set(cKey, {
+            id: cKey,
+            numeroOrden: ordId,
+            planNombre: ord.planNombre || ord.servicio?.planNombre || "Plan GraveCare",
+            nombreDifunto: difNombre,
+            cementerio: cem || "Cementerio Registrado",
+            sector: sec,
+            patio: pat,
+            numeroSepultura: num,
+            montoTotal: ord.montoTotal || ord.total || ord.precioNumerico || 0,
+            email: correoVisible,
+            telefono: titOrd.telefono || ord.telefono || telefono,
+            direccion: direccionTitular
+          });
+        }
+      });
 
-        if (misInformes.length === 0) {
-          contenedorMant.innerHTML = `
-            <div class="text-center py-6 text-on-surface-variant">
-              <span class="material-symbols-outlined text-4xl text-outline-variant block mb-1">cleaning_services</span>
-              <p class="text-sm">Aún no registras informes de mantenimientos aprobados.</p>
+      const listaSepulturas = Array.from(sepulturasMap.values());
+      const listaContratos = Array.from(contratosMap.values());
+      const listaOrdenes = Array.from(ordenesMap.values());
+
+      setText("stat-sepulturas", String(listaSepulturas.length));
+
+      const sepCont = document.getElementById("contenedor-sepulturas");
+      if (sepCont) {
+        if (listaSepulturas.length === 0) {
+          sepCont.innerHTML = `
+            <div class="col-span-2 text-center py-8">
+              <span class="material-symbols-outlined text-3xl text-gray-300">inventory_2</span>
+              <p class="text-xs text-gray-400 mt-2">No tienes sepulturas registradas aún.</p>
             </div>`;
         } else {
-          contenedorMant.innerHTML = misInformes.slice(0, 3).map(inf => {
-            const fechaTxt = formatearFechaChile(inf.fechaCaptura || inf.fechaAprobacion);
-            return `
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant/30 hover:bg-surface-container transition gap-3">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container flex-shrink-0">
-                    <span class="material-symbols-outlined">verified</span>
-                  </div>
-                  <div>
-                    <h3 class="text-sm font-bold text-on-surface">${inf.difunto || "Mantenimiento General"}</h3>
-                    <p class="text-xs text-on-surface-variant">${inf.cementerio || "Cementerio"} — ${fechaTxt}</p>
-                  </div>
+          sepCont.innerHTML = listaSepulturas.map(s => `
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50 flex flex-col justify-between shadow-sm">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">${s.planActivo}</span>
+                  <span class="text-[11px] text-gray-400 font-mono">#${s.numeroOrden}</span>
                 </div>
-                <a href="informe.html?informeId=${inf.id}&ordenId=${inf.ordenId || ''}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-container transition shadow-sm self-end sm:self-auto">
-                  <span class="material-symbols-outlined text-sm">picture_as_pdf</span> Ver Informe
-                </a>
-              </div>`;
-          }).join("");
-        }
-
-        // 4. Galería Preview
-        const contenedorFotos = document.getElementById("contenedor-fotos-dashboard");
-        const fotosUnicas = [...new Set(fotosList)].filter(Boolean);
-        if (fotosUnicas.length > 0) {
-          contenedorFotos.innerHTML = fotosUnicas.slice(0, 2).map(url => `
-            <div class="w-full h-32 rounded-lg overflow-hidden border border-outline-variant/30 bg-surface-container">
-              <img class="w-full h-full object-cover hover:scale-105 transition duration-300" src="${url}" alt="Foto de Mantención">
+                <p class="font-bold text-sm text-primary">${s.nombreDifunto}</p>
+                <p class="text-xs font-semibold text-gray-700 mt-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                  ${s.cementerio}
+                </p>
+                <p class="text-[11px] text-gray-500 mt-1 pl-4">Sector: <strong>${s.sector}</strong> | Patio: <strong>${s.patio}</strong> | Nº: <strong>${s.numeroSepultura}</strong></p>
+              </div>
             </div>
           `).join("");
         }
+      }
 
-        // 5. Facturación Reciente: Respaldo cruzado entre 'pagos' y 'ordenes'
-        const contenedorFact = document.getElementById("contenedor-facturas");
-        const listaPagosDashboard = [];
-        const idsPagosDashboard = new Set();
-
-        try {
-          const snapPagos = await getDocs(query(collection(db, "pagos"), where("usuarioId", "==", user.uid)));
-          snapPagos.forEach(d => {
-            idsPagosDashboard.add(d.id);
-            listaPagosDashboard.push({ id: d.id, ...d.data() });
-          });
-        } catch (e) {
-          console.warn("Aviso al consultar pagos:", e);
-        }
-
-        listaOrdenesCliente.forEach(o => {
-          if (!idsPagosDashboard.has(o.id)) {
-            const dif = o.difunto?.nombre || [o.difunto?.nombres, o.difunto?.apellidoPaterno].filter(Boolean).join(" ") || o.nombreFallecido || "";
-            const plan = o.servicio?.planNombre || o.planNombre || "Plan 6 (Premium)";
-            const montoVal = Number(o.precioNumerico || o.montoTotal || o.valores?.total || 371940);
-
-            listaPagosDashboard.push({
-              id: o.id,
-              concepto: dif ? `${plan} — ${dif}` : plan,
-              monto: montoVal,
-              fecha: o.creadoEl || o.createdAt || o.fechaCreacion || new Date()
-            });
-            idsPagosDashboard.add(o.id);
-          }
-        });
-
-        listaPagosDashboard.sort((a, b) => {
-          const fA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha || 0);
-          const fB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha || 0);
-          return fB - fA;
-        });
-
-        if (listaPagosDashboard.length === 0) {
-          contenedorFact.innerHTML = `<li class="py-4 text-center text-sm text-on-surface-variant">Sin comprobantes de pago registrados aún.</li>`;
+      const contContratos = document.getElementById("contenedor-contratos");
+      if (contContratos) {
+        if (listaContratos.length === 0) {
+          contContratos.innerHTML = `<p class="text-xs text-gray-400 py-3">No tienes contratos disponibles aún.</p>`;
         } else {
-          contenedorFact.innerHTML = listaPagosDashboard.slice(0, 3).map(p => {
-            const monto = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP" }).format(p.monto || 371940);
+          contContratos.innerHTML = listaContratos.map(c => {
+            const cData = {
+              numeroOrden: c.numeroOrden,
+              planNombre: c.planNombre,
+              nombreDifunto: c.nombreDifunto,
+              cementerio: c.cementerio,
+              sector: c.sector,
+              patio: c.patio,
+              numeroSepultura: c.numeroSepultura,
+              montoTotal: c.montoTotal,
+              titular: nombreFinal,
+              rut: rutFormateado,
+              email: correoVisible,
+              telefono: c.telefono || telefono,
+              direccion: c.direccion || direccionTitular
+            };
+            const jsonParam = encodeURIComponent(JSON.stringify(cData));
+
             return `
-              <li class="flex items-center justify-between py-3">
-                <div>
-                  <p class="text-xs font-bold text-on-surface">${p.concepto || "Servicio GraveCare"}</p>
-                  <p class="text-[11px] text-on-surface-variant">${formatearFechaChile(p.fecha)} — <span class="font-bold text-emerald-800">${monto}</span></p>
+              <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+                  <div>
+                    <p class="text-xs font-bold text-gray-900">Contrato de Prestación de Servicios - ${c.planNombre}</p>
+                    <p class="text-[11px] text-gray-500">Orden: #${c.numeroOrden} | Titular: ${nombreFinal} | Sepultura: ${c.nombreDifunto}</p>
+                  </div>
                 </div>
-                <a href="pagos.html" class="p-2 text-primary hover:bg-secondary-container rounded-full transition-colors" title="Ver en Pagos">
-                  <span class="material-symbols-outlined text-base">visibility</span>
-                </a>
-              </li>`;
+                <button type="button" onclick="window.descargarContratoOficial('${jsonParam}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded-lg transition shadow-sm cursor-pointer">
+                  <span class="material-symbols-outlined text-sm">download</span>
+                  Descargar PDF
+                </button>
+              </div>`;
           }).join("");
         }
-
-      } catch (err) {
-        console.error("Error al cargar dashboard:", err);
       }
+
+      const tbody = document.getElementById("tabla-historial-pagos");
+      if (tbody) {
+        if (listaOrdenes.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400 text-xs">No hay registros aún.</td></tr>`;
+        } else {
+          tbody.innerHTML = listaOrdenes.map(ord => {
+            let fTxt = "-";
+            if (ord.fechaPago?.toDate) fTxt = ord.fechaPago.toDate().toLocaleDateString("es-CL");
+            else if (ord.creadoEl?.toDate) fTxt = ord.creadoEl.toDate().toLocaleDateString("es-CL");
+            else fTxt = new Date().toLocaleDateString("es-CL");
+
+            const monto = Number(ord.montoTotal || ord.total || ord.precioNumerico || 0);
+
+            return `
+              <tr class="border-b border-gray-100 text-xs">
+                <td class="py-3.5 px-4 text-gray-600">${fTxt}</td>
+                <td class="py-3.5 px-4 font-bold text-gray-800">${ord.planNombre || ord.servicio?.planNombre || 'Servicio'}</td>
+                <td class="py-3.5 px-4 font-mono text-gray-400">${ord.numeroOrden || ord.id}</td>
+                <td class="py-3.5 px-4 font-bold text-gray-900">$${monto ? monto.toLocaleString("es-CL") : '-'}</td>
+                <td class="py-3.5 px-4"><span class="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">✓ Pagado</span></td>
+                <td class="py-3.5 px-4 text-gray-500 text-[11px]">${ord.difunto?.nombre || ord.nombreDifunto || '-'}</td>
+              </tr>`;
+          }).join("");
+        }
+      }
+    });
+
+    document.getElementById("btnCerrarSesion")?.addEventListener("click", async () => {
+      sessionStorage.clear();
+      localStorage.clear();
+      await signOut(auth).catch(() => {});
+      window.location.href = "login.html";
     });
   </script>
 </body>

@@ -1,8 +1,8 @@
 /**
- * CONTRATO — generación server-side del PDF del contrato de cada cliente
+ * CONTRATO — Generación server-side del PDF, registro en Firestore y aprovisionamiento
  */
 
-const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 const crypto = require("crypto");
 
@@ -18,8 +18,6 @@ const EMPRESA_RUT = "78.498.653-5";
 const EMPRESA_DIRECCION = "Av. El Carmen 1397, Of. 301, Edificio Portezuelo, Huechuraba";
 const EMPRESA_CIUDAD = "Santiago";
 
-const CONTRATO_VERSION = "2026-09-v1";
-
 function fechaLargaEs(fecha = new Date()) {
   return fecha.toLocaleDateString("es-CL", {
     day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago",
@@ -30,157 +28,193 @@ function formatearCLP(numero) {
   return "$" + Number(numero || 0).toLocaleString("es-CL");
 }
 
-/** Arma el texto plano del contrato, resolviendo cualquier variación en la estructura de la orden */
-function generarContratoTexto(orden, fecha = new Date()) {
-  const titular = orden.titular || {};
-  const difunto = orden.difunto || {};
-  const ubicacion = orden.ubicacionSepultura || {};
-  const servicio = orden.servicio || {};
+function limpiarRut(r) {
+  return String(r || "").replace(/[^0-9kK]/g, "").toLowerCase();
+}
 
-  // 1. Nombre completo del Cliente / Titular garantizado
-  let nombreTitular = titular.nombre || orden.nombreCliente || "";
+function construirDetalleExactoServicio(orden) {
+  const servicio = orden?.servicio || {};
+  const nombrePlanRaw = String(servicio.planNombre || orden?.planNombre || orden?.plan || "").trim();
+
+  let nombrePlan = "Plan 6";
+  let frecuencia = "6 visitas anuales, 1 cada 2 meses";
+  let visitasTotales = 6;
+  let esSpot = false;
+
+  const planLower = nombrePlanRaw.toLowerCase();
+  if (planLower.includes("12")) {
+    nombrePlan = "Plan 12";
+    frecuencia = "12 visitas anuales (1 cada mes)";
+    visitasTotales = 12;
+  } else if (planLower.includes("4")) {
+    nombrePlan = "Plan 4";
+    frecuencia = "4 visitas anuales (1 cada 3 meses)";
+    visitasTotales = 4;
+  } else if (planLower.includes("spot") || planLower.includes("única") || planLower.includes("unica")) {
+    nombrePlan = "Visita Spot";
+    frecuencia = "Fecha única / Conmemorativa";
+    visitasTotales = 1;
+    esSpot = true;
+  } else if (planLower.includes("6")) {
+    nombrePlan = "Plan 6";
+    frecuencia = "6 visitas anuales, 1 cada 2 meses";
+    visitasTotales = 6;
+  } else if (nombrePlanRaw) {
+    nombrePlan = nombrePlanRaw;
+    frecuencia = servicio.frecuencia || orden?.frecuencia || "Programación según plan";
+  }
+
+  const nivel = servicio.nivel || orden?.nivel || orden?.nivelServicio || "Standard";
+
+  // Detección sanitizada de ramos por visita unitaria
+  let ramosPorVisita = Number(
+    orden?.ramosPorVisita || 
+    servicio?.ramosPorVisita || 
+    orden?.ramosAdicionalesPorVisita ||
+    0
+  );
+
+  if (ramosPorVisita === 0) {
+    let candidato = Number(orden?.ramosAdicionales || orden?.cantidadRamosAdicionales || servicio?.ramosAdicionales || orden?.ramosExtra || 0);
+    if (candidato === visitasTotales && candidato > 2) {
+      ramosPorVisita = 1;
+    } else if (candidato > visitasTotales && candidato % visitasTotales === 0) {
+      ramosPorVisita = candidato / visitasTotales;
+    } else {
+      ramosPorVisita = candidato;
+    }
+  }
+
+  if (ramosPorVisita === 0 && Array.isArray(orden?.adicionales)) {
+    const itemRamo = orden.adicionales.find(a => 
+      typeof a === "object" && (a.id === "ramo_adicional" || String(a.nombre).toLowerCase().includes("ramo"))
+    );
+    if (itemRamo) ramosPorVisita = Number(itemRamo.cantidad || 1);
+  }
+
+  let textoRamos = "Sin ramos adicionales (incluye arreglo floral de temporada por visita)";
+  if (ramosPorVisita > 0) {
+    if (esSpot) {
+      textoRamos = `${ramosPorVisita} ramo(s) adicional(es) para la visita`;
+    } else {
+      const totalAnual = ramosPorVisita * visitasTotales;
+      textoRamos = `${ramosPorVisita} por visita (${totalAnual} al año en total)`;
+    }
+  }
+
+  return {
+    nombrePlan,
+    frecuencia,
+    nivel,
+    ramosPorVisita,
+    textoRamos,
+    esSpot
+  };
+}
+
+function generarContratoTexto(orden, fecha = new Date()) {
+  const titular = orden?.titular || {};
+  const difunto = orden?.difunto || {};
+  const ubicacion = orden?.ubicacionSepultura || {};
+
+  let nombreTitular = titular.nombreCompleto || titular.nombre || orden?.nombreCliente || "";
   if (!nombreTitular && (titular.nombres || titular.apellidoPaterno)) {
     nombreTitular = [titular.nombres, titular.apellidoPaterno, titular.apellidoMaterno].filter(Boolean).join(" ");
   }
   if (!nombreTitular) nombreTitular = "[nombre no registrado]";
 
-  // 2. Nombre del Ser Querido / Difunto garantizado
-  let nombreDifunto = difunto.nombre || orden.nombreFallecido || "";
+  let nombreDifunto = difunto.nombre || orden?.nombreFallecido || orden?.nombreDifunto || "";
   if (!nombreDifunto && (difunto.nombres || difunto.apellidoPaterno)) {
     nombreDifunto = [difunto.nombres, difunto.apellidoPaterno, difunto.apellidoMaterno].filter(Boolean).join(" ");
   }
-  if (!nombreDifunto) nombreDifunto = "[nombre no registrado]";
+  if (!nombreDifunto) nombreDifunto = "Ser Querido";
 
-  // 3. Plan y descripción
-  const esPlan = orden.tipoServicio === "PLAN" || orden.tipoSuscripcion === "PLAN";
-  const nombrePlan = servicio.planNombre || orden.planNombre || (esPlan ? "Plan Mensual" : "Visita Spot");
-  const frecuencia = servicio.frecuencia || orden.frecuencia || (esPlan ? "1 visita al mes" : "Visita única");
-  const nivel = servicio.nivel || orden.nivel || "Standard";
-  const descripcionPlan = `${nombrePlan} — ${frecuencia} — Nivel ${nivel}`;
+  const det = construirDetalleExactoServicio(orden);
 
-  // 4. Dirección del Cliente
   const direccionCliente = [titular.direccion, titular.numero, titular.departamento ? `Depto ${titular.departamento}` : "", titular.comuna, titular.region]
     .filter(Boolean)
     .join(", ");
 
-  // 5. Ubicación en cementerio
-  const cementerioNombre = ubicacion.cementerio || orden.cementerio || "";
-  const sector = ubicacion.sector || orden.sector || "";
-  const patio = ubicacion.patio || orden.patio || "";
-  const numeroSep = ubicacion.numeroSepultura || ubicacion.numero || orden.numeroSepultura || "";
+  const cementerioNombre = ubicacion.cementerio || orden?.cementerio || "Cementerio Registrado";
+  const sector = ubicacion.sector || orden?.sector || "";
+  const patio = ubicacion.patio || orden?.patio || "";
+  const numeroSep = ubicacion.numeroSepultura || ubicacion.numero || orden?.numeroSepultura || "";
 
-  const ubicacionCementerio = [
-    cementerioNombre,
-    sector ? `Sector ${sector}` : "",
-    patio ? `Patio ${patio}` : "",
-    numeroSep ? `N° ${numeroSep}` : "",
-  ]
-    .filter(Boolean)
-    .join(", ");
+  let ubicacionPartes = [];
+  if (sector) ubicacionPartes.push(`Sector: ${sector}`);
+  if (patio) ubicacionPartes.push(`Patio: ${patio}`);
+  if (numeroSep) ubicacionPartes.push(`N°: ${numeroSep}`);
+  const ubicacionDetallada = ubicacionPartes.length > 0 ? ubicacionPartes.join(" | ") : "Ubicación por coordinar en terreno";
 
-  // 6. Monto total garantizado
-  const totalNumerico = orden.montoTotal || orden.valores?.total || orden.precioNumerico || orden.precio || 34990;
+  const totalNumerico = orden?.montoTotal || orden?.valores?.total || orden?.precioNumerico || orden?.precio || 34990;
   const monto = formatearCLP(totalNumerico);
-
-  const plazo = esPlan
-    ? `Suscripción con frecuencia "${frecuencia}", renovable automáticamente hasta que el Cliente la cancele o pause`
-    : "Servicio único (Visita Spot), sin renovación automática";
+  const plazo = det.esSpot
+    ? "Servicio único (Visita Spot), sin renovación automática"
+    : `Suscripción con periodicidad "${det.frecuencia}", renovable automáticamente hasta que el Cliente la pause o cancele formalmente`;
 
   const hoy = fechaLargaEs(fecha);
-  const rutCliente = titular.rut || orden.rut || orden.rutCliente || "[RUT no registrado]";
-  const emailCliente = titular.email || orden.email || orden.emailCliente || "[email no registrado]";
-  const fonoCliente = titular.telefono || orden.telefono || orden.telefonoCliente || "[teléfono no registrado]";
+  const rutCliente = titular.rut || orden?.rut || orden?.rutCliente || "[RUT no registrado]";
+  const emailCliente = titular.email || orden?.email || orden?.emailCliente || "[email no registrado]";
+  const fonoCliente = titular.telefono || orden?.telefono || orden?.telefonoCliente || "[teléfono no registrado]";
 
   return `TÉRMINOS Y CONDICIONES GENERALES Y MANDATO DE PRESTACIÓN DE SERVICIOS
 
-GraveCare SpA — Servicios Conmemorativos & Preservación
+GraveCare SpA — Servicios Conmemorativos & Preservación Ornamental
 
-En ${EMPRESA_CIUDAD}, a ${hoy}, entre GraveCare SpA, RUT N° ${EMPRESA_RUT}, con domicilio en ${EMPRESA_DIRECCION}, en adelante la «Empresa» o el «Prestador», por una parte; y por la otra, ${nombreTitular}, RUT N° ${rutCliente}, con domicilio en ${direccionCliente || "[dirección no registrada]"}, correo electrónico ${emailCliente} y teléfono ${fonoCliente}, en adelante el «Cliente», se ha convenido el siguiente contrato de prestación de servicios, el cual se regirá por las cláusulas siguientes:
+En ${EMPRESA_CIUDAD}, a ${hoy}, entre GraveCare SpA, RUT N° ${EMPRESA_RUT}, con domicilio en ${EMPRESA_DIRECCION}, en adelante la «Empresa» o el «Prestador», por una parte; y por la otra, don(ña) ${nombreTitular}, RUT N° ${rutCliente}, con domicilio en ${direccionCliente || "[dirección no registrada]"}, correo electrónico ${emailCliente} y teléfono ${fonoCliente}, en adelante el «Cliente», se ha convenido el siguiente contrato de prestación de servicios:
 
-PRIMERA: OBJETO DEL CONTRATO Y MANDATO ESPECIAL
+PRIMERO: OBJETO DEL SERVICIO Y MANDATO ESPECIAL
+La Empresa se compromete a prestar las labores de aseo, mantención y preservación ornamental de sepulturas conforme a los términos contratados:
+• Plan: ${det.nombrePlan}
+• Frecuencia: ${det.frecuencia}
+• Nivel de Servicio: ${det.nivel}
+• Ramos Adicionales: ${det.textoRamos}
 
-1.1. Objeto: La Empresa se obliga a realizar para el Cliente los servicios de limpieza, ornamentación floral, mantención de nichos, mausoleos y sepulturas, de forma independiente y sin relación de subordinación ni dependencia, conforme al plan seleccionado en el sitio web gravecare.cl (${descripcionPlan}).
+El Cliente declara bajo su exclusiva responsabilidad ser titular o contar con las facultades legales pertinentes sobre la sepultura individualizada (${cementerioNombre}, ${ubicacionDetallada}, sepultura de ${nombreDifunto}) y confiere a GraveCare SpA y a su personal operativo mandato especial y suficiente para ingresar al cementerio y ejecutar exclusivamente las labores contratadas.
 
-1.2. Otorgamiento de Mandato Especial de Servicio:
+SEGUNDO: ALCANCE Y EXCLUSIONES
+Limpieza no destructiva de lápidas, cruces y accesorios ornamentales, retiro de flores secas, desmalezado y provisión de flores frescas acorde al nivel y adicionales acordados en la Cláusula Primera. Quedan expresamente excluidas intervenciones mayores de albañilería, restauración estructural profunda o movimiento de restos.
 
-Facultad de Acceso y Representación: Al contratar el servicio, el Cliente declara bajo su responsabilidad ser titular de los derechos sobre la sepultura individualizada, o bien contar con la expresa autorización familiar y legal para contratar su cuidado.
+TERCERO: REPORTE Y VERIFICACIÓN DIGITAL
+Cada visita en terreno generará un reporte fotográfico comparativo georreferenciado («Antes» y «Después»), remitido formalmente dentro de las 24 horas hábiles posteriores al correo electrónico del Cliente y publicado en su Portal de Cliente.
 
-Mandato Expreso: El Cliente confiere a GraveCare SpA y a su personal dependiente o contratado mandato especial y suficiente para ingresar al recinto del cementerio individualizado (${ubicacionCementerio || "[ubicación no registrada]"} — sepultura de ${nombreDifunto}), acceder a la sepultura, nicho o mausoleo y ejecutar exclusivamente las labores contratadas (limpieza manual, retiro de residuos vegetales, recambio de agua, postura de flores y registro audiovisual).
+CUARTO: HONORARIOS Y FORMA DE PAGO
+El valor convenido corresponde a la suma de ${monto} (IVA incluido), cancelado mediante pasarela electrónica autorizada.
 
-Exhibición de Mandato: La Empresa queda facultada para exhibir copia digital de la orden de trabajo ante la administración o guardias del cementerio si fuese requerida.
+QUINTO: PLAZO Y VIGENCIA
+${plazo}, a contar de la confirmación electrónica de la orden.
 
-SEGUNDA: ALCANCE Y NATURALEZA DE LOS SERVICIOS
+SEXTO: LIMITACIÓN DE RESPONSABILIDAD
+La Empresa responde por la correcta prestación del servicio conforme a los estándares acordados, no respondiendo por desgaste previo de materiales, actos vandálicos de terceros en el recinto ni restricciones imprevistas del cementerio.
 
-Labores Incluidas: Limpieza superficial y profunda no destructiva de placas, lápidas y cruces; retiro de flores secas anteriores; desmalezado perimetral manual; limpieza de jarrones/floreros; e instalación de arreglos florales frescos de estación según el plan contratado.
+SÉPTIMO: PROTECCIÓN DE DATOS
+Tratamiento confidencial de antecedentes bajo la Ley N° 19.628 para fines exclusivos del servicio y facturación.
 
-Exclusiones Explícitas: Salvo contratación de un servicio de restauración cotizado por separado, el servicio no incluye obras mayores de albañilería, traslados de restos, modificaciones estructurales, repintado total de mausoleos ni intervención de áreas comunes pertenecientes al parque cementerio.
+OCTAVO: NATURALEZA DEL VÍNCULO
+Convenio de naturaleza estrictamente civil y comercial, sin que genere relación de dependencia ni subordinación laboral.
 
-Productos Utilizados: La Empresa se compromete a no emplear ácidos corrosivos ni químicos nocivos que dañen mármol, granito, bronce o el césped colindante.
+NOVENO: JURISDICCIÓN
+Las partes se someten a la competencia de los Tribunales Ordinarios de Justicia de la ciudad de Santiago de Chile.
 
-TERCERA: EVIDENCIA Y REPORTE FOTOGRÁFICO
+N° de Orden: ${orden?.numeroOrden || orden?.id || "[sin asignar]"}
 
-Cada intervención efectuada por la Empresa será respaldada mediante un reporte fotográfico y/o de video con tomas del estado inicial (Antes) y del estado terminado con las flores instaladas (Después). El reporte será remitido al Cliente dentro de las 24 horas hábiles siguientes a la ejecución de la visita, a través de WhatsApp o correo electrónico registrado. La entrega del reporte fotográfico constituye la prueba formal y definitiva de la ejecución conforme del servicio.
-
-CUARTA: HONORARIOS Y FORMA DE PAGO
-
-El Cliente pagará a la Empresa la suma de ${monto}, con IVA incluido, por concepto de honorarios por los servicios prestados. Los pagos se debitarán de manera periódica (según el plan de suscripción seleccionado) a través de pasarelas de pago automatizadas (Webpay Plus, Webpay One Click u otras habilitadas). Cualquier modificación en las tarifas de suscripción será notificada al Cliente con al menos 30 días corridos de anticipación.
-
-QUINTA: PLAZO y VIGENCIA
-
-5.1. Plazo: El presente contrato tendrá una duración de: ${plazo}, comenzando el día ${hoy}.
-
-SEXTA: LIMITACIÓN DE RESPONSABILIDAD Y CASOS FORTUITOS
-
-Acceso y Fuerza Mayor: La Empresa no será responsable por demoras o imposibilidad temporal de ejecutar la visita debidas a cierres imprevistos del cementerio, manifestaciones, duelo oficial del recinto, temporales climáticos o restricciones sanitarias. En tales casos, la visita será reprogramada dentro de los 7 días hábiles siguientes.
-
-Daños Preexistentes: La Empresa no asume responsabilidad por fracturas, trizaduras, desgaste por intemperie u oxidación preexistente en mármoles, cerámicas o metales antiguos. Si el operario detecta un daño previo, tomará registro fotográfico inmediato antes de iniciar la limpieza.
-
-Sustracción por Terceros: La Empresa no responde por hurtos o pérdidas de arreglos florales, placas o accesorios sustraídos por terceras personas ajenas a la Empresa con posterioridad a la entrega del servicio en el cementerio.
-
-SÉPTIMA: PROTECCIÓN DE DATOS Y PRIVACIDAD
-
-Los datos personales proporcionados por el Cliente (nombres, RUT, teléfonos, correos y ubicación de sepulturas) serán tratados de forma confidencial conforme a la Ley N° 19.628 sobre Protección de la Vida Privada y utilizados exclusivamente para la coordinación, ejecución del servicio, emisión de comprobantes tributarios y envío de reportes fotográficos.
-
-OCTAVA: NATURALEZA DE LA RELACIÓN CONTRACTUAL Y CONFIDENCIALIDAD
-
-Las partes declaran expresamente que entre ellas no existe relación laboral alguna, sino un vínculo civil de prestación de servicios y mandato. Asimismo, la Empresa guardará estricta reserva sobre cualquier información sensible a la que tenga acceso.
-
-NOVENA: DOMICILIO Y JURISDICCIÓN
-
-El presente contrato se rige íntegramente por las leyes de la República de Chile. Para todos los efectos legales derivados de este instrumento, las partes fijan su domicilio en la ciudad y comuna de Santiago de Chile, sometiéndose a la competencia de sus Tribunales Ordinarios de Justicia.
-
-N° de Orden: ${orden.numeroOrden || orden.id || "[sin asignar]"}
-
-EL CONTRATANTE (Cliente)
-Nombre: ${nombreTitular}
-RUT: ${rutCliente}
-Aceptado electrónicamente el ${hoy} vía gravecare.cl
-
-EL PRESTADOR (GraveCare SpA)
-Nombre: GraveCare SpA
-RUT: ${EMPRESA_RUT}`;
+EL CONTRATANTE (Cliente): ${nombreTitular} (RUT: ${rutCliente}) — Aceptado electrónicamente vía gravecare.cl
+EL PRESTADOR: GraveCare SpA (RUT: ${EMPRESA_RUT})`;
 }
-
-function fechaDelContrato(orden) {
-  if (orden.terminosAceptadosEn) {
-    const d = new Date(orden.terminosAceptadosEn);
-    if (!Number.isNaN(d.getTime())) return d;
-  }
-  const c = orden.createdAt || orden.creadoEl;
-  if (c && typeof c.toDate === "function") return c.toDate();
-  return new Date();
-}
-
-// En functions/contrato.js:
 
 function generarPdfBuffer(texto) {
-  const { jsPDF } = require("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  let jsPDF;
+  try {
+    const jspdfModule = require("jspdf");
+    jsPDF = jspdfModule.jsPDF || jspdfModule;
+  } catch (e) {
+    return Buffer.from(texto, "utf-8");
+  }
 
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
   const margen = 54;
   const anchoUtil = doc.internal.pageSize.getWidth() - margen * 2;
-  const altoPagina = doc.internal.pageSize.getHeight();
-  const limiteInferior = altoPagina - 54;
+  const limiteInferior = doc.internal.pageSize.getHeight() - 54;
   let y = margen;
 
   doc.setFont("helvetica", "normal");
@@ -209,10 +243,13 @@ function generarPdfBuffer(texto) {
 
   return Buffer.from(doc.output("arraybuffer"));
 }
+
 function necesitaContrato(orden) {
-  if (!orden || orden.estado !== "pagado") return false;
-  if (orden.contratoPath) return false;
-  if (orden.contratoEstado === "error") return false;
+  if (!orden) return false;
+  const estado = String(orden.estado || orden.status || "").toLowerCase();
+  const esPagado = ["pagado", "confirmado", "aprobado", "exito"].includes(estado);
+  if (!esPagado) return false;
+  if (orden.contratoPath && orden.contratoEstado === "listo") return false;
   if (orden.contratoEstado === "generando") {
     const desde = orden.contratoGenerandoDesde?.toMillis?.() || 0;
     if (Date.now() - desde < MINUTOS_EN_CURSO * 60 * 1000) return false;
@@ -234,56 +271,143 @@ async function generarContratoParaOrden(ordenId) {
     });
     return d;
   });
-  if (!orden) return {omitido: true};
+
+  if (!orden) return { omitido: true };
 
   try {
-    const numero = String(orden.numeroOrden || ordenId).replace(/[^A-Za-z0-9_-]/g, "");
-    const texto = generarContratoTexto(orden, fechaDelContrato(orden));
+    const titular = orden.titular || {};
+    const difunto = orden.difunto || {};
+    const ubicacion = orden.ubicacionSepultura || {};
+
+    const rutRaw = titular.rut || orden.rut || orden.rutCliente || "";
+    const rutLimpio = limpiarRut(rutRaw);
+    const emailTitular = String(titular.email || orden.email || orden.emailCliente || "").toLowerCase().trim();
+    const uidCliente = rutLimpio ? `cliente_${rutLimpio}` : (orden.clienteUid || orden.usuarioId || `cliente_${ordenId}`);
+
+    const numeroOrden = String(orden.numeroOrden || ordenId);
+    const texto = generarContratoTexto(orden, new Date());
     const pdf = generarPdfBuffer(texto);
 
     const ruta = `contratos/${ordenId}/contrato.pdf`;
     const token = crypto.randomUUID();
-    await admin.storage().bucket(BUCKET).file(ruta).save(pdf, {
-      contentType: "application/pdf",
-      resumable: false,
-      metadata: {
-        contentDisposition: `attachment; filename="Contrato-GraveCare-${numero}.pdf"`,
-        metadata: {firebaseStorageDownloadTokens: token},
-      },
-    });
+    let url = "";
 
-    const url = `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(ruta)}?alt=media&token=${token}`;
+    try {
+      await admin.storage().bucket(BUCKET).file(ruta).save(pdf, {
+        contentType: "application/pdf",
+        resumable: false,
+        metadata: {
+          contentDisposition: `attachment; filename="Contrato-GraveCare-${numeroOrden}.pdf"`,
+          metadata: { firebaseStorageDownloadTokens: token },
+        },
+      });
+      url = `https://firebasestorage.googleapis.com/v0/b/${BUCKET}/o/${encodeURIComponent(ruta)}?alt=media&token=${token}`;
+    } catch (errStorage) {
+      console.warn(`[Storage Warning] Error al guardar PDF:`, errStorage.message);
+    }
+
+    const sha256 = crypto.createHash("sha256").update(pdf).digest("hex");
+
+    if (rutLimpio || emailTitular) {
+      await db.collection("usuarios").doc(uidCliente).set({
+        uid: uidCliente,
+        email: emailTitular,
+        authEmail: rutLimpio ? `${rutLimpio}@gravecare.cl` : emailTitular,
+        rut: rutRaw,
+        rutLimpio: rutLimpio,
+        nombreCompleto: titular.nombreCompleto || orden.nombreCliente || titular.nombre || "Cliente Registrado",
+        telefono: titular.telefono || orden.telefono || "",
+        direccion: titular.direccion || orden.direccion || "",
+        comuna: titular.comuna || orden.comuna || "",
+        rol: "cliente",
+        estadoSuscripcion: "Activo",
+        planNombre: orden.planNombre || "Plan GraveCare",
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      const normalizar = (txt) => String(txt || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+      const cem = ubicacion.cementerio || orden.cementerio || "";
+      const sec = ubicacion.sector || orden.sector || "";
+      const pat = ubicacion.patio || orden.patio || "";
+      const num = ubicacion.numeroSepultura || orden.numeroSepultura || "";
+
+      const sepId = (cem && num)
+        ? `sep_${normalizar(cem)}_${normalizar(sec)}_${normalizar(pat)}_${normalizar(num)}`
+        : `sep_${numeroOrden}`;
+
+      await db.collection("usuarios").doc(uidCliente).collection("sepulturas").doc(sepId).set({
+        id: sepId,
+        numeroOrden: numeroOrden,
+        ultimaOrden: numeroOrden,
+        nombreDifunto: difunto.nombre || orden.nombreDifunto || "Ser Querido",
+        difunto: difunto,
+        cementerio: cem || "Cementerio Registrado",
+        sector: sec,
+        patio: pat,
+        numeroSepultura: num,
+        estado: "Activa",
+        planActivo: orden.planNombre || "Plan GraveCare",
+        actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      if (rutLimpio) {
+        await db.collection("rut_lookup").doc(rutLimpio).set({
+          rut: rutLimpio,
+          email: emailTitular,
+          uid: uidCliente,
+          actualizadoEn: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      }
+    }
+
+    const idContrato = `CTR-${numeroOrden}`;
+    await db.collection("contratos").doc(idContrato).set({
+      id: idContrato,
+      numeroOrden: numeroOrden,
+      ordenId: ordenId,
+      clienteUid: uidCliente,
+      usuarioId: uidCliente,
+      rut: rutRaw,
+      email: emailTitular,
+      planNombre: orden.planNombre || "Plan GraveCare",
+      nombreDifunto: difunto.nombre || orden.nombreDifunto || "Ser Querido",
+      cementerio: ubicacion.cementerio || orden.cementerio || "",
+      estado: "vigente",
+      urlContrato: url,
+      sha256: sha256,
+      fechaAprobacion: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+
     await ref.update({
+      clienteUid: uidCliente,
+      usuarioId: uidCliente,
       contratoPath: ruta,
       contratoUrl: url,
-      contratoPdfVersion: CONTRATO_VERSION,
-      contratoSha256: crypto.createHash("sha256").update(pdf).digest("hex"),
+      contratoSha256: sha256,
       contratoEstado: "listo",
       contratoGeneradoEn: admin.firestore.FieldValue.serverTimestamp(),
       contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
     });
 
-    console.log(`[generarContratoAlPagar] OK ${ordenId} (${pdf.length} bytes)`);
-    return {omitido: false, ruta};
+    return { omitido: false, ruta, contratoId: idContrato };
   } catch (err) {
-    console.error(`[generarContratoAlPagar] Error en ${ordenId}:`, err);
+    console.error(`[Error] en orden ${ordenId}:`, err);
     await ref.update({
       contratoEstado: "error",
       contratoError: String(err && err.message ? err.message : err).slice(0, 300),
       contratoGenerandoDesde: admin.firestore.FieldValue.delete(),
     });
-    return {omitido: false, error: true};
+    return { omitido: false, error: true };
   }
 }
 
-exports.generarContratoAlPagar = onDocumentWritten("ordenes/{ordenId}", async (event) => {
+const generarContratoAlPagar = onDocumentWritten("ordenes/{ordenId}", async (event) => {
   const despues = event.data?.after?.data();
   if (!necesitaContrato(despues)) return;
   await generarContratoParaOrden(event.params.ordenId);
 });
 
-exports._generarContratoTexto = generarContratoTexto;
-exports._generarPdfBuffer = generarPdfBuffer;
-exports._necesitaContrato = necesitaContrato;
-exports._generarContratoParaOrden = generarContratoParaOrden;
-exports._CONTRATO_VERSION = CONTRATO_VERSION;
+module.exports = {
+  generarContratoAlPagar,
+  generarContratoParaOrden
+};

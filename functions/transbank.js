@@ -11,13 +11,24 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Credenciales de Transbank (Ambiente Integración)
-const COMMERCE_CODE = process.env.TRANSBANK_COMMERCE_CODE || IntegrationCommerceCodes.WEBPAY_PLUS;
-const API_KEY = process.env.TRANSBANK_API_KEY || IntegrationApiKeys.WEBPAY;
-const ENVIRONMENT = Environment.Integration;
+// Helper para obtener cliente Transbank garantizando credenciales de integración válidas
+function getWebpayClient() {
+  const esProduccion = process.env.NODE_ENV === 'production' && process.env.TRANSBANK_COMMERCE_CODE;
 
-// Instanciar cliente de transacciones
-const tx = new WebpayPlus.Transaction(new Options(COMMERCE_CODE, API_KEY, ENVIRONMENT));
+  const commerceCode = esProduccion 
+    ? process.env.TRANSBANK_COMMERCE_CODE 
+    : IntegrationCommerceCodes.WEBPAY_PLUS; // '597055555532'
+
+  const apiKey = esProduccion 
+    ? process.env.TRANSBANK_API_KEY 
+    : IntegrationApiKeys.WEBPAY; // Llave oficial de pruebas
+
+  const environment = esProduccion 
+    ? Environment.Production 
+    : Environment.Integration;
+
+  return new WebpayPlus.Transaction(new Options(commerceCode, apiKey, environment));
+}
 
 // ============================================================================
 // 1. CREAR TRANSACCIÓN WEBPAY
@@ -55,11 +66,12 @@ exports.crearTransaccionWebpay = functions.https.onRequest(async (req, res) => {
         // Session ID (máx 61 caracteres)
         const sessionId = `SES-${idLimpio}-${Date.now()}`.slice(0, 60);
 
-        // URL de retorno desde variable de entorno o fallback a Cloud Run
+        // URL de retorno hacia la Cloud Function de confirmación
         const returnUrl = process.env.CONFIRMATION_URL || 'https://confirmartransaccionwebpay-f4mre7bfoa-uc.a.run.app';
 
         console.log(`Iniciando Webpay: buyOrder=${buyOrder}, session=${sessionId}, monto=${montoTotal}`);
 
+        const tx = getWebpayClient();
         const response = await tx.create(
             buyOrder,
             sessionId,
@@ -101,17 +113,19 @@ exports.crearTransaccionWebpay = functions.https.onRequest(async (req, res) => {
 // 2. CONFIRMAR TRANSACCIÓN WEBPAY (Retorno bancario)
 // ============================================================================
 exports.confirmarTransaccionWebpay = functions.https.onRequest(async (req, res) => {
-    // Al ser un redirect bancario (GET/POST desde Transbank), no requiere bloqueo CORS estricto
+    // Captura token ya sea por GET (query) o POST (body)
     const token = req.query.token_ws || req.body?.token_ws;
     const tbkToken = req.query.TBK_TOKEN || req.body?.TBK_TOKEN;
 
     if (tbkToken || !token) {
+        console.warn('Transacción anulada o sin token:', { token, tbkToken });
         return res.redirect('https://www.gravecare.cl/confirmacion.html?resultado=anulado');
     }
 
     try {
         console.log('Confirmando transacción con token:', token);
 
+        const tx = getWebpayClient();
         const response = await tx.commit(token);
         console.log('Respuesta de Transbank commit:', response);
 
@@ -126,17 +140,20 @@ exports.confirmarTransaccionWebpay = functions.https.onRequest(async (req, res) 
             const docRef = snapshot.docs[0].ref;
             ordenDocId = snapshot.docs[0].id;
 
+            const fueAprobado = response.response_code === 0 && response.status === 'AUTHORIZED';
+
             await docRef.update({
-                'transaccionWebpay.estado': response.response_code === 0 ? 'aprobada' : 'rechazada',
+                'transaccionWebpay.estado': fueAprobado ? 'aprobada' : 'rechazada',
                 'transaccionWebpay.codigoAutorizacion': response.authorization_code,
                 'transaccionWebpay.detalles': response,
-                estado: response.response_code === 0 ? 'pagado' : 'pago_fallido',
+                pagoConfirmado: fueAprobado,
+                estado: fueAprobado ? 'pagado' : 'pago_fallido',
                 fechaPago: admin.firestore.FieldValue.serverTimestamp()
             });
         }
 
-        if (response.response_code === 0) {
-            return res.redirect(`https://www.gravecare.cl/confirmacion.html?resultado=exito&orden=${ordenDocId}`);
+        if (response.response_code === 0 && response.status === 'AUTHORIZED') {
+            return res.redirect(`https://www.gravecare.cl/confirmar-pago.html?resultado=exito&orden=${ordenDocId}`);
         } else {
             return res.redirect(`https://www.gravecare.cl/confirmacion.html?resultado=rechazado&orden=${ordenDocId}`);
         }

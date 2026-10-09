@@ -9,10 +9,28 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-const COMMERCE_CODE = IntegrationCommerceCodes.ONECLICK_MALL || "597055555541";
-const API_KEY = IntegrationApiKeys.WEBPAY || "579B532A7440BB0C9079DED94D31EA1615BACEB7";
-const ENVIRONMENT = Environment.Integration;
+// Helper para cliente Oneclick Mall (soporta pruebas y producción)
+function getOneclickClient() {
+  const esProduccion = process.env.NODE_ENV === 'production' && process.env.TRANSBANK_ONECLICK_COMMERCE_CODE;
 
+  const commerceCode = esProduccion 
+    ? process.env.TRANSBANK_ONECLICK_COMMERCE_CODE 
+    : (IntegrationCommerceCodes.ONECLICK_MALL || "597055555541");
+
+  const apiKey = esProduccion 
+    ? process.env.TRANSBANK_API_KEY 
+    : (IntegrationApiKeys.WEBPAY || "579B532A7440BB0C9079DED94D31EA1615BACEB7");
+
+  const environment = esProduccion 
+    ? Environment.Production 
+    : Environment.Integration;
+
+  return new Oneclick.MallInscription(new Options(commerceCode, apiKey, environment));
+}
+
+// ============================================================================
+// 1. INICIAR INSCRIPCIÓN ONECLICK
+// ============================================================================
 exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
     if (handleCors(req, res)) return;
 
@@ -40,10 +58,7 @@ exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) 
 
         console.log(`[Oneclick Mall] Iniciando inscripción: username=${username}, email=${email}, returnUrl=${responseUrl}`);
 
-        const inscription = new Oneclick.MallInscription(
-          new Options(COMMERCE_CODE, API_KEY, ENVIRONMENT)
-        );
-
+        const inscription = getOneclickClient();
         const response = await inscription.start(username, email, responseUrl);
         console.log('[Oneclick Mall] Start exitoso:', response);
 
@@ -74,6 +89,9 @@ exports.iniciarInscripcionOneclick = functions.https.onRequest(async (req, res) 
     }
 });
 
+// ============================================================================
+// 2. CONFIRMAR INSCRIPCIÓN ONECLICK
+// ============================================================================
 exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res) => {
     if (handleCors(req, res)) return;
 
@@ -87,10 +105,7 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
 
         console.log(`[Oneclick Mall] Confirmando inscripción con token: ${token}`);
 
-        const inscription = new Oneclick.MallInscription(
-          new Options(COMMERCE_CODE, API_KEY, ENVIRONMENT)
-        );
-
+        const inscription = getOneclickClient();
         const response = await inscription.finish(token);
         console.log('[Oneclick Mall] Finish exitoso:', response);
 
@@ -98,6 +113,8 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
 
         if (ordenId) {
             const ordenRef = db.collection('ordenes').doc(ordenId);
+            
+            // Actualización integral de la orden para activar disparadores de Firestore
             await ordenRef.update({
                 oneclickInscripcion: {
                     estado: inscripcionExitosa ? 'inscripcion_completada' : 'inscripcion_rechazada',
@@ -108,7 +125,11 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
                     cardType: response.card_type || null,
                     fechaConfirmacion: admin.firestore.FieldValue.serverTimestamp()
                 },
-                estado: inscripcionExitosa ? 'oneclick_inscrito' : 'error_inscripcion'
+                // Al marcar 'pagado' y 'pagoConfirmado: true', se dispara generarContratoAlPagar
+                estado: inscripcionExitosa ? 'pagado' : 'error_inscripcion',
+                pagoConfirmado: inscripcionExitosa,
+                metodoPago: 'Oneclick',
+                fechaPago: admin.firestore.FieldValue.serverTimestamp()
             });
         }
 
@@ -117,7 +138,7 @@ exports.confirmarInscripcionOneclick = functions.https.onRequest(async (req, res
             response_code: response.response_code,
             tbk_user: response.tbk_user,
             card_number: response.card_number,
-            message: inscripcionExitosa ? 'Inscripción completada' : 'Inscripción rechazada'
+            message: inscripcionExitosa ? 'Inscripción y suscripción completada con éxito' : 'Inscripción rechazada'
         });
 
     } catch (error) {

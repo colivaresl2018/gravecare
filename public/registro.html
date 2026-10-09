@@ -12,10 +12,10 @@
 </head>
 <body class="bg-[#f7f9f8] min-h-screen py-10 px-4 text-[#191c1b]">
 
-  <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+  <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100">
     <div class="bg-[#002d1a] text-white p-6 sm:p-8 text-center">
       <div class="flex justify-center mb-3">
-        <img src="assets/logo.png" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.webp';">
+        <img src="assets/logo.webp" alt="GraveCare Logo" class="h-14 w-auto object-contain" onerror="this.onerror=null; this.src='assets/logo.webp';">
       </div>
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Crea tu Cuenta en GraveCare</h1>
       <p class="text-gray-300 text-sm mt-2">Completa tu clave de acceso para activar tu plan y gestionar tus sepulturas.</p>
@@ -53,7 +53,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico *</label>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico (Contacto) *</label>
             <input type="email" id="email" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none bg-gray-50">
           </div>
           <div>
@@ -80,16 +80,35 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Comuna *</label>
-            <input type="text" id="comuna" required placeholder="Ej: Las Condes" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">País *</label>
+            <select id="pais" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none bg-white">
+              <option value="Chile" selected>Chile</option>
+              <option value="Argentina">Argentina</option>
+              <option value="Estados Unidos">Estados Unidos</option>
+              <option value="España">España</option>
+              <option value="Suecia">Suecia</option>
+              <option value="Canadá">Canadá</option>
+              <option value="Australia">Australia</option>
+              <option value="Francia">Francia</option>
+              <option value="Alemania">Alemania</option>
+              <option value="Venezuela">Venezuela</option>
+              <option value="Brasil">Brasil</option>
+              <option value="Otro">Otro</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Región *</label>
-            <input type="text" id="region" required placeholder="Ej: Metropolitana" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
+            <select id="region" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none bg-white">
+              <option value="" disabled selected>Selecciona región</option>
+            </select>
+            <input type="text" id="regionText" placeholder="Región/Provincia" class="hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">País *</label>
-            <input type="text" id="pais" value="Chile" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Comuna *</label>
+            <select id="comuna" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none bg-white">
+              <option value="" disabled selected>Selecciona comuna</option>
+            </select>
+            <input type="text" id="comunaText" placeholder="Ciudad/Localidad" class="hidden w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#002d1a] outline-none">
           </div>
         </div>
 
@@ -124,8 +143,24 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-    import { getFirestore, getDoc, setDoc, doc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      updateProfile, 
+      onAuthStateChanged,
+      fetchSignInMethodsForEmail 
+    } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    import { 
+      getFirestore, 
+      getDoc, 
+      setDoc, 
+      doc, 
+      collection, 
+      query, 
+      where, 
+      getDocs, 
+      serverTimestamp 
+    } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAthgIWiVPDuscljVjQRAX-vIeUYLbrSC0",
@@ -135,6 +170,66 @@
       messagingSenderId: "160012946248",
       appId: "1:160012946248:web:8c3e73100f1e92c485c17d"
     };
+
+    const regionesComunas = {
+      "Arica y Parinacota": ["Arica", "Camarones", "Putre", "General Lagos"],
+      "Tarapacá": ["Iquique", "Alto Hospicio", "Camiña", "Colchane", "Huara", "Pica", "Pozo Almonte"],
+      "Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama", "San Pedro de Atacama", "Tocopilla"],
+      "Atacama": ["Copiapó", "Caldera", "Tierra Amarilla", "La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña"],
+      "Coquimbo": ["La Serena", "Coquimbo", "La Higuera", "Paiguano", "Vicuña", "Ovalle", "Andacollo", "Coquimbo"],
+      "Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví", "Quintero", "Santo Domingo", "Viña del Mar", "Los Andes", "San Felipe", "Santa María", "Putaendo"],
+      "Metropolitana de Santiago": ["Alhué", "Buin", "Calera de Tango", "Cerrillos", "Cerro Navia", "Colina", "Conchalí", "Curacaví", "El Bosque", "El Monte", "Estación Central", "Huechuraba", "Independencia", "Isla de Maipo", "La Cisterna", "La Florida", "La Granja", "Lampa", "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", "María Pinto", "Melipilla", "Ñuñoa", "Padre Hurtado", "Paine", "Pedro Aguirre Cerda", "Peñaflor", "Peñalolén", "Pirque", "Providencia", "Pudahuel", "Puente Alto", "Quilicura", "Quinta Normal", "Recoleta", "Renca", "San Bernardo", "San Joaquín", "San José de Maipo", "San Miguel", "San Pedro", "San Ramón", "Santiago", "Talagante", "Tiltil", "Vitacura"],
+      "Libertador General Bernardo O'Higgins": ["Rancagua", "Machalí", "Mostazal", "Graneros", "Doñihue", "Requínoa", "Olivar", "Peumo", "Pichidegua"],
+      "Maule": ["Talca", "Constitución", "San Javier", "Parral", "Linares", "Curicó", "Teno", "Rauco", "Romeral", "Curepto", "Pencahue"],
+      "Ñuble": ["Chillán", "Chillán Viejo", "Pemuco", "Bulnes", "Quillón", "San Ignacio", "Yungay", "Ránquil", "Treguaco", "El Carmen"],
+      "Biobío": ["Concepción", "Talcahuano", "Huachipato", "Penco", "Tomé", "Lota", "Santa Juana", "Arauco"],
+      "La Araucanía": ["Temuco", "Padre Las Casas", "Nueva Imperial", "Traiguén", "Villarrica", "Pucón", "Curarrehue"],
+      "Los Ríos": ["Valdivia", "Corral", "Lanco", "Panguipulli", "La Unión", "Río Bueno"],
+      "Los Lagos": ["Puerto Montt", "Puerto Varas", "Frutillar", "Llanquihue", "Ancud", "Castro", "Dalcahue", "Quellón"],
+      "Aysén del General Carlos Ibáñez del Campo": ["Coyhaique", "Puyuhuapi", "Cisnes", "Guaitecas"],
+      "Magallanes y la Antártica Chilena": ["Punta Arenas", "Puerto Natales", "Río Verde", "Laguna Blanca"]
+    };
+
+    const paisEl = document.getElementById("pais");
+    const regEl = document.getElementById("region");
+    const regTxtEl = document.getElementById("regionText");
+    const comEl = document.getElementById("comuna");
+    const comTxtEl = document.getElementById("comunaText");
+
+    function inicializarRegiones() {
+      if (regEl) {
+        regEl.innerHTML = '<option value="" disabled selected>Selecciona región</option>';
+        Object.keys(regionesComunas).forEach(reg => {
+          const opt = document.createElement("option");
+          opt.value = reg;
+          opt.textContent = reg;
+          regEl.appendChild(opt);
+        });
+      }
+    }
+    inicializarRegiones();
+
+    paisEl?.addEventListener("change", function() {
+      const isChile = this.value === "Chile";
+      if (regEl) { regEl.classList.toggle("hidden", !isChile); regEl.required = isChile; }
+      if (regTxtEl) { regTxtEl.classList.toggle("hidden", isChile); regTxtEl.required = !isChile; }
+      if (comEl) { comEl.classList.toggle("hidden", !isChile); comEl.required = isChile; }
+      if (comTxtEl) { comTxtEl.classList.toggle("hidden", isChile); comTxtEl.required = !isChile; }
+    });
+
+    regEl?.addEventListener("change", function() {
+      if (!comEl) return;
+      comEl.innerHTML = '<option value="" disabled selected>Selecciona comuna</option>';
+      const comunas = regionesComunas[this.value];
+      if (comunas) {
+        comunas.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c;
+          opt.textContent = c;
+          comEl.appendChild(opt);
+        });
+      }
+    });
 
     const logs = [];
     function addLog(msg) {
@@ -147,6 +242,22 @@
       }
     }
 
+    function showAlert(message, type) {
+      const alertBox = document.getElementById("alertBox");
+      if (!alertBox) return;
+      alertBox.className = `p-4 rounded-lg mb-4 text-sm font-medium ${
+        type === "error" ? "bg-red-100 text-red-800 border border-red-200" :
+        type === "warning" ? "bg-amber-100 text-amber-900 border border-amber-300" :
+        "bg-green-100 text-green-800 border border-green-200"
+      }`;
+      alertBox.innerHTML = message;
+      alertBox.style.display = "block";
+    }
+
+    function limpiarRut(r) {
+      return String(r || '').toLowerCase().replace(/[^0-9k]/g, '');
+    }
+
     try {
       addLog('🔥 Inicializando Firebase...');
       const app = initializeApp(firebaseConfig);
@@ -156,9 +267,46 @@
 
       let ordenIdDetectada = null;
 
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          addLog(`✅ Sesión activa detectada para: ${user.email}. Redirigiendo a Dashboard...`);
+          window.location.replace("dashboard.html");
+        }
+      });
+
+      // REGLA ESTRICTA: SOLO SE VERIFICA EL RUT EN FIREBASE AUTH
+      async function verificarCuentaPreexistentePorRut(rutRaw) {
+        const cleanRut = limpiarRut(rutRaw);
+        if (!cleanRut) return false;
+
+        const authEmail = `${cleanRut}@gravecare.cl`;
+        addLog(`🔍 Consultando Firebase Auth exclusivamente para: ${authEmail}...`);
+
+        try {
+          const metodos = await fetchSignInMethodsForEmail(auth, authEmail);
+          if (metodos && metodos.length > 0) {
+            addLog(`🔑 El RUT ${cleanRut} YA TIENE contraseña configurada en Auth.`);
+            return true;
+          }
+        } catch (e) {
+          console.warn("Aviso Auth por RUT:", e.message);
+        }
+
+        addLog(`🆕 El RUT ${cleanRut} NO TIENE clave en Auth. Permanece en registro.`);
+        return false;
+      }
+
       async function rescatarDatosFirebase() {
-        // 1. Revisar de forma exhaustiva los almacenamientos locales
+        const urlParams = new URLSearchParams(window.location.search);
+        const idParam = urlParams.get('id') || urlParams.get('orden') || urlParams.get('ordenId');
+
+        if (idParam) ordenIdDetectada = idParam;
+
         const storageKeys = [
+          'gravecare_usuario_pendiente',
+          'gravecare_orden_activa',
+          'gravecare_pedido',
+          'gravecare_contrato_activo',
           'gravecare_datos_completos',
           'gravecare_last_order',
           'gravecare_registro_datos',
@@ -171,8 +319,7 @@
           if (raw) {
             try {
               const p = JSON.parse(raw);
-              if (p && (p.titular || p.email || p.emailCliente || p.nombres || p.nombreCompleto)) {
-                addLog(`✅ Datos encontrados en storage clave: ${k}`);
+              if (p && (p.titular || p.rut || p.nombres || p.nombreCompleto)) {
                 if (p.numeroOrden || p.id) ordenIdDetectada = p.numeroOrden || p.id;
                 return p;
               }
@@ -180,55 +327,19 @@
           }
         }
 
-        // 2. Revisar parámetros de la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const idParam = urlParams.get('id') || urlParams.get('orden') || urlParams.get('ordenId');
-        const emailParam = urlParams.get('email');
-
         if (idParam) {
-          ordenIdDetectada = idParam;
           try {
-            // Consulta directa por ID de documento
             let snap = await getDoc(doc(db, 'ordenes', idParam));
-            if (snap.exists()) {
-              addLog(`✅ Orden encontrada por Document ID: ${idParam}`);
-              return snap.data();
-            }
+            if (snap.exists()) return snap.data();
 
-            // Consulta por campo numeroOrden
             const qNum = query(collection(db, 'ordenes'), where('numeroOrden', '==', idParam));
             const snapNum = await getDocs(qNum);
-            if (!snapNum.empty) {
-              addLog(`✅ Orden encontrada por campo numeroOrden: ${idParam}`);
-              return snapNum.docs[0].data();
-            }
+            if (!snapNum.empty) return snapNum.docs[0].data();
           } catch (e) {
-            addLog(`⚠️ Error búsqueda ID: ${e.message}`);
+            addLog(`⚠️ Error búsqueda ID orden: ${e.message}`);
           }
         }
 
-        if (emailParam) {
-          try {
-            const cleanEmail = decodeURIComponent(emailParam).trim().toLowerCase();
-            let q = query(collection(db, 'ordenes'), where('titular.email', '==', cleanEmail));
-            let snapEmail = await getDocs(q);
-
-            if (snapEmail.empty) {
-              q = query(collection(db, 'ordenes'), where('emailCliente', '==', cleanEmail));
-              snapEmail = await getDocs(q);
-            }
-
-            if (!snapEmail.empty) {
-              addLog(`✅ Datos encontrados por Email en Firestore`);
-              ordenIdDetectada = snapEmail.docs[0].id;
-              return snapEmail.docs[0].data();
-            }
-          } catch (e) {
-            addLog(`⚠️ Error búsqueda Email: ${e.message}`);
-          }
-        }
-
-        addLog('ℹ️ Sin registros previos vinculados');
         return null;
       }
 
@@ -238,7 +349,6 @@
         const titular = datos.titular || {};
         const dir = datos.direccionTitular || {};
 
-        // Manejo inteligente de nombres y apellidos si venían concatenados
         let nombresVal = datos.nombres || titular.nombres || '';
         let apPatVal = datos.apellidoPaterno || titular.apellidoPaterno || '';
         let apMatVal = datos.apellidoMaterno || titular.apellidoMaterno || '';
@@ -264,7 +374,6 @@
           }
         }
 
-        // Manejo de dirección
         let direccionFormateada = datos.direccion || dir.direccion || titular.direccion || '';
         const numCalle = dir.numero || titular.numero || '';
         const deptoCalle = dir.departamento || titular.departamento || '';
@@ -277,10 +386,10 @@
         }
 
         const correoRescatado = titular.email || datos.emailCliente || datos.email || titular.emailCliente || '';
-        const rutRescatado = datos.rut || titular.rut || titular.rutDni || datos.rutDni || '';
+        const rutRescatado = datos.rut || titular.rut || titular.rutDni || datos.rutDni || datos.rutTitular || '';
         const telefonoRescatado = datos.telefono || titular.telefono || '';
         const comunaRescatada = datos.comuna || dir.comuna || titular.comuna || '';
-        const regionRescatada = datos.region || dir.region || titular.region || 'Metropolitana';
+        const regionRescatada = datos.region || dir.region || titular.region || 'Metropolitana de Santiago';
         const paisRescatado = datos.pais || dir.pais || titular.pais || 'Chile';
 
         const valores = {
@@ -291,9 +400,6 @@
           telefono: telefonoRescatado,
           rut: rutRescatado,
           direccion: direccionFormateada.trim(),
-          comuna: comunaRescatada,
-          region: regionRescatada,
-          pais: paisRescatado,
           fechaNacimiento: datos.fechaNacimiento || titular.fechaNacimiento || ''
         };
 
@@ -301,16 +407,28 @@
           const elem = document.getElementById(id);
           if (elem && valores[id]) {
             elem.value = valores[id];
-            addLog(`  ✓ ${id}: ${valores[id]}`);
-            
-            // Si el dato ya fue completado en el proceso de compra, dejarlo listo
             if (typeof valores[id] === 'string' && valores[id].trim() !== '') {
               elem.classList.add('bg-gray-50');
             }
           }
         });
 
-        // Foco automático en el campo que falta
+        if (paisEl) {
+          paisEl.value = paisRescatado;
+          paisEl.dispatchEvent(new Event("change"));
+        }
+
+        if (paisRescatado !== "Chile") {
+          if (regTxtEl) regTxtEl.value = regionRescatada;
+          if (comTxtEl) comTxtEl.value = comunaRescatada;
+        } else {
+          if (regEl) {
+            regEl.value = regionRescatada;
+            regEl.dispatchEvent(new Event("change"));
+          }
+          if (comEl) comEl.value = comunaRescatada;
+        }
+
         const fechaEl = document.getElementById('fechaNacimiento');
         if (fechaEl && !fechaEl.value) {
           fechaEl.focus();
@@ -319,22 +437,53 @@
         }
       }
 
-      function showAlert(message, type) {
-        const alertBox = document.getElementById("alertBox");
-        if (!alertBox) return;
-        alertBox.className = `p-4 rounded-lg mb-4 text-sm font-medium ${
-          type === "error" ? "bg-red-100 text-red-800 border border-red-200" :
-          type === "warning" ? "bg-amber-100 text-amber-900 border border-amber-300" :
-          "bg-green-100 text-green-800 border border-green-200"
-        }`;
-        alertBox.innerHTML = message;
-        alertBox.style.display = "block";
-      }
-
       async function iniciarRegistro() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // 1. Rescatar la orden y poblar campos
         const datosEncontrados = await rescatarDatosFirebase();
         poblarFormulario(datosEncontrados);
 
+        // 2. Extraer el RUT directamente
+        const titularObj = datosEncontrados?.titular || {};
+        const inputRutVal = document.getElementById("rut") ? document.getElementById("rut").value.trim() : "";
+
+        const rutFinal = urlParams.get('rut') || 
+                         inputRutVal || 
+                         datosEncontrados?.rut || 
+                         titularObj.rut || 
+                         titularObj.rutDni || 
+                         datosEncontrados?.rutTitular || '';
+
+        addLog(`📋 Evaluando exclusivamente RUT: "${rutFinal}"`);
+
+        // 3. Comprobar si el RUT ya tiene contraseña en Firebase Auth
+        if (rutFinal) {
+          const yaTieneClave = await verificarCuentaPreexistentePorRut(rutFinal);
+          if (yaTieneClave) {
+            const formContainer = document.getElementById("registroForm");
+            if (formContainer) formContainer.style.display = "none";
+
+            showAlert(`
+              <div class="space-y-2 text-center py-4">
+                <p class="font-bold text-base text-[#002d1a]">✓ Tu servicio fue asociado a tu cuenta activa (RUT: ${rutFinal}).</p>
+                <p class="text-xs text-gray-600">Ya posees una contraseña registrada. Redirigiéndote para iniciar sesión...</p>
+                <div class="pt-2">
+                  <a href="login.html?rut=${encodeURIComponent(rutFinal)}" class="inline-block px-5 py-2.5 bg-[#002d1a] text-white text-xs font-bold rounded-xl shadow">
+                    Ingresar con mi Contraseña
+                  </a>
+                </div>
+              </div>
+            `, "warning");
+
+            setTimeout(() => {
+              window.location.replace(`login.html?rut=${encodeURIComponent(rutFinal)}`);
+            }, 1200);
+            return;
+          }
+        }
+
+        // 4. Si el RUT NO tiene clave, el formulario queda 100% activo y jamás redirige
         const form = document.getElementById("registroForm");
         const submitBtn = document.getElementById("submitBtn");
         const loading = document.getElementById("loading");
@@ -342,11 +491,17 @@
         form.addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const email = document.getElementById("email").value.trim().toLowerCase();
+          const emailContacto = document.getElementById("email").value.trim().toLowerCase();
           const contrasena = document.getElementById("contrasena").value;
           const confirmarContrasena = document.getElementById("confirmarContrasena").value;
           const fechaNacimiento = document.getElementById("fechaNacimiento").value;
+          const rutFormateado = document.getElementById("rut").value.trim();
+          const cleanRut = limpiarRut(rutFormateado);
 
+          if (!cleanRut) {
+            showAlert("❌ Debes ingresar un RUT válido", "error");
+            return;
+          }
           if (!fechaNacimiento) {
             showAlert("❌ Debes ingresar tu fecha de nacimiento", "error");
             return;
@@ -364,92 +519,146 @@
           if (loading) loading.style.display = "flex";
 
           try {
-            addLog(`👤 Creando usuario Auth para: ${email}...`);
-            const userCredential = await createUserWithEmailAndPassword(auth, email, contrasena);
+            const authEmail = `${cleanRut}@gravecare.cl`;
+            addLog(`👤 Creando cuenta en Firebase Auth: ${authEmail}...`);
+
+            const userCredential = await createUserWithEmailAndPassword(auth, authEmail, contrasena);
             const user = userCredential.user;
             const uid = user.uid;
 
             const nombres = document.getElementById("nombres").value.trim();
             const apPaterno = document.getElementById("apellidoPaterno").value.trim();
             const apMaterno = document.getElementById("apellidoMaterno").value.trim();
-            const nombreCompleto = `${nombres} ${apPaterno} ${apMaterno}`.trim();
+            const nombreCompleto = [nombres, apPaterno, apMaterno].filter(Boolean).join(' ');
 
             await updateProfile(user, { displayName: nombreCompleto });
 
-            const sesionDatos = JSON.parse(localStorage.getItem('gravecare_last_order') || '{}');
-            const nombrePlanFinal = sesionDatos.planNombre || sesionDatos.servicio?.planNombre || 'Servicio Contratado';
+            const paisVal = paisEl.value;
+            const regionVal = (paisVal === "Chile") ? regEl.value : regTxtEl.value.trim();
+            const comunaVal = (paisVal === "Chile") ? comEl.value : comTxtEl.value.trim();
+
+            const sesionDatos = JSON.parse(sessionStorage.getItem('gravecare_orden_activa') || localStorage.getItem('gravecare_last_order') || '{}');
+            const nombrePlanFinal = sesionDatos.planNombre || sesionDatos.servicio?.planNombre || 'Servicio Spot';
 
             const userData = {
-              uid,
-              email,
-              nombres,
-              apellidoPaterno: apPaterno,
               apellidoMaterno: apMaterno,
-              nombreCompleto,
-              rut: document.getElementById("rut").value.trim(),
-              telefono: document.getElementById("telefono").value.trim(),
-              fechaNacimiento,
-              direccion: document.getElementById("direccion").value.trim(),
-              comuna: document.getElementById("comuna").value.trim(),
-              region: document.getElementById("region").value.trim(),
-              pais: document.getElementById("pais").value.trim(),
-              rol: 'cliente',
-              planNombre: nombrePlanFinal,
-              estadoSuscripcion: 'Activo',
+              apellidoPaterno: apPaterno,
+              comuna: comunaVal,
               createdAt: serverTimestamp(),
-              lastLogin: serverTimestamp()
+              direccion: document.getElementById("direccion").value.trim(),
+              displayName: nombreCompleto,
+              email: emailContacto,
+              authEmail: authEmail,
+              estadoCuenta: 'activada',
+              estadoSuscripcion: 'Activo',
+              fechaNacimiento: fechaNacimiento,
+              lastLogin: serverTimestamp(),
+              nombreCompleto: nombreCompleto,
+              nombres: nombres,
+              pais: paisVal,
+              photoURL: "",
+              planNombre: nombrePlanFinal,
+              region: regionVal,
+              rol: 'cliente',
+              rut: rutFormateado,
+              telefono: document.getElementById("telefono").value.trim(),
+              uid: uid
             };
 
-            addLog('💾 Guardando perfil en Firestore (/usuarios)...');
+            addLog(`💾 Creando perfil /usuarios/${uid}...`);
             await setDoc(doc(db, 'usuarios', uid), userData, { merge: true });
+
+            await setDoc(doc(db, 'rut_lookup', cleanRut), {
+              rut: cleanRut,
+              email: emailContacto,
+              authEmail: authEmail,
+              uid: uid,
+              estadoCuenta: 'activada'
+            }, { merge: true });
+
+            const rawContrato = sessionStorage.getItem('gravecare_contrato_activo');
+            if (rawContrato) {
+              const contratoDoc = JSON.parse(rawContrato);
+              contratoDoc.usuarioId = uid;
+              contratoDoc.clienteUid = uid;
+              contratoDoc.estado = 'vigente';
+              await setDoc(doc(db, 'contratos', contratoDoc.idContrato), contratoDoc, { merge: true });
+            }
 
             if (ordenIdDetectada) {
               addLog(`🔗 Vinculando orden ${ordenIdDetectada}...`);
               await setDoc(doc(db, 'ordenes', ordenIdDetectada), {
                 usuarioId: uid,
-                emailCliente: email,
-                estado: 'Confirmado'
+                clienteUid: uid,
+                emailCliente: emailContacto,
+                estado: 'Confirmado',
+                pagoConfirmado: true
               }, { merge: true });
             }
 
-            const cleanRut = userData.rut.toLowerCase().replace(/\./g, '').replace(/\s/g, '');
-            if (cleanRut) {
-              await setDoc(doc(db, 'rut_lookup', cleanRut), {
-                rut: cleanRut,
-                email,
-                uid
-              });
+            const sesionOrden = JSON.parse(
+              sessionStorage.getItem('gravecare_orden_activa') || 
+              localStorage.getItem('gravecare_last_order') || 
+              '{}'
+            );
+
+            const difunto = sesionOrden.difunto || {};
+            const sepultura = sesionOrden.ubicacionSepultura || {};
+
+            const cem = sepultura.cementerio || sesionOrden.cementerio || '';
+            const sec = sepultura.sector || sesionOrden.sector || '';
+            const pat = sesionOrden.patio || sepultura.patio || '';
+            const num = sepultura.numeroSepultura || sepultura.numero || sesionOrden.numeroSepultura || '';
+
+            const normalizar = (txt) => String(txt || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+            const idSepultura = (cem && num)
+              ? `sep_${normalizar(cem)}_${normalizar(sec)}_${normalizar(pat)}_${normalizar(num)}`
+              : `sep_${Date.now()}`;
+
+            if (cem || num || difunto.nombre || sesionOrden.nombreDifunto) {
+              addLog(`🪦 Guardando sepultura en /usuarios/${uid}/sepulturas/${idSepultura}...`);
+              await setDoc(doc(db, 'usuarios', uid, 'sepulturas', idSepultura), {
+                id: idSepultura,
+                ultimaOrden: ordenIdDetectada || ('ORD-' + Date.now()),
+                numeroOrden: ordenIdDetectada || '',
+                nombreDifunto: difunto.nombre || sesionOrden.nombreDifunto || [nombres, apPaterno, apMaterno].filter(Boolean).join(' ') || 'Ser Querido',
+                difunto: difunto,
+                cementerio: cem,
+                sector: sec,
+                patio: pat,
+                numeroSepultura: num,
+                referencias: sepultura.referencias || sesionOrden.referencias || '',
+                estado: 'Activa',
+                planActivo: nombrePlanFinal,
+                creadoEn: serverTimestamp()
+              }, { merge: true });
             }
 
+            sessionStorage.removeItem('gravecare_usuario_pendiente');
+            sessionStorage.removeItem('gravecare_orden_activa');
+            sessionStorage.removeItem('gravecare_contrato_activo');
             sessionStorage.removeItem('gravecare_registro_datos');
             localStorage.removeItem('gravecare_datos_completos');
 
             showAlert("✅ Cuenta creada y activada exitosamente. Redirigiendo...", "success");
 
             setTimeout(() => {
-              window.location.href = "dashboard.html";
+              window.location.replace("dashboard.html");
             }, 1500);
 
           } catch (error) {
             addLog(`❌ Error: ${error.message}`);
             if (error.code === 'auth/email-already-in-use') {
-              let segundos = 3;
               showAlert(`
-                <div class="flex items-center gap-2">
-                  <span>⚠️ <strong>Este correo ya tiene una cuenta activa.</strong> Redirigiendo a iniciar sesión en <span id="cuentaRegresiva" class="font-bold underline">${segundos}</span> segundos...</span>
+                <div class="space-y-2 text-center">
+                  <p class="font-bold text-[#002d1a]">⚠️ Ya tienes una cuenta registrada en GraveCare con este RUT.</p>
+                  <p class="text-xs text-gray-600">Redirigiéndote para iniciar sesión...</p>
                 </div>
               `, "warning");
 
-              const interval = setInterval(() => {
-                segundos--;
-                const cuentaSpan = document.getElementById("cuentaRegresiva");
-                if (cuentaSpan) cuentaSpan.textContent = segundos;
-
-                if (segundos <= 0) {
-                  clearInterval(interval);
-                  window.location.href = `login.html?email=${encodeURIComponent(email)}`;
-                }
-              }, 1000);
+              setTimeout(() => {
+                window.location.replace(`login.html?rut=${encodeURIComponent(rutFormateado)}`);
+              }, 1200);
             } else {
               showAlert(`❌ Error: ${error.message}`, "error");
               submitBtn.disabled = false;
